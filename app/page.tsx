@@ -1,10 +1,12 @@
-import Image from 'next/image'
-import { Sidebar } from '@/components'
-
-export default function Home() {
+import React from 'react'
+import Headers from '@/components/Headers'
+const page = () => {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-     <Sidebar/>
-    </main>
+    <div>
+      <Headers />
+    </div>
+   
+   
   )
 }
+export default page

@@ -1,4 +1,11 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {}
+const nextConfig = {
+    images: {
+        domains: ['https://merakiui.com/images/full-logo.svg'],
+},
+experimental: {
+    serverActions: true,
+}, 
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
