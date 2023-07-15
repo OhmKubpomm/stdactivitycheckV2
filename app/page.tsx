@@ -3,7 +3,7 @@ import Headers from '@/components/Headers'
 const page = () => {
   return (
     <div>
-      <Headers />
+ 
     </div>
    
    
