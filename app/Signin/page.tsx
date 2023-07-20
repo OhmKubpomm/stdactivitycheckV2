@@ -1,12 +1,14 @@
-
-
 import SignIn from '@/components/auth/SignIn'
 import React from 'react'
 
-const Signinpage = () => {
-  return (
-  <SignIn/>
-  )
+interface SigninpageProps {
+  searchParams: {
+    callbackUrl?: string;
+  };
 }
+
+const Signinpage = ({ searchParams: { callbackUrl } }: SigninpageProps) => {
+  return <SignIn callbackUrl={callbackUrl || '/'} />;
+};
 
 export default Signinpage

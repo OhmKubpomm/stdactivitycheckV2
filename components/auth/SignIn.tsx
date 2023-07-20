@@ -39,7 +39,7 @@ const schema = yup.object().shape({
 });
 
 
- const SignIn = () => {
+ const SignIn = ({callbackUrl}: {callbackUrl: string}) => {
   const { register, handleSubmit } = useForm();
 
   const onSubmit = (values: SignInOptions | undefined) => {
@@ -98,7 +98,7 @@ const schema = yup.object().shape({
       <Box sx={{ width: '100%' }} className="mt-4">
           <motion.button 
             className="w-full py-2 px-4 bg-red-500 hover:bg-red-700 text-white font-bold rounded"
-            onClick={() => signIn('google')}
+            onClick={() => signIn('google',{callbackUrl})}
             variants={buttonVariants}
             whileHover="hover"
             whileTap="pressed"
