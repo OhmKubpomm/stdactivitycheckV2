@@ -1,9 +1,13 @@
 'use server'
-import React from 'react'
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getServerSession } from "next-auth"
 
-const Protectpageserver = () => {
+const Protectpageserver = async () => {
+  const session = await getServerSession(authOptions);
   return (
-    <div>Protectpageserver</div>
+    <div>Protectpageserver
+      <p>{session?.user?.name}</p>
+    </div>
   )
 }
 export default Protectpageserver
