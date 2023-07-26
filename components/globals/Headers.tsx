@@ -5,9 +5,9 @@ import * as React from 'react';
 import { authOptions} from '@/app/api/auth/[...nextauth]/route'
 
 
-import SignIn from './auth/SignIn';
+import SignIn from '../auth/SignIn';
 import Link from 'next/link';
-import SignOut from './auth/SignOut';
+import SignOut from '../auth/SignOut';
 
 
 

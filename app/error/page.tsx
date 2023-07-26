@@ -2,17 +2,17 @@
 
 import { Button as MuiButton } from '@mui/material';
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
+import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Errorpage from '@/components/Image/Pagenotfound.svg'
 
 
+const page = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const errMsg = searchParams.get('error');
 
 
-const page: React.FC = () => {
-  
-
-  useEffect(() => {
-    document.title = "404 Error";
-  }, [])
 
   // Define animation variants
   const variants = {
@@ -20,39 +20,27 @@ const page: React.FC = () => {
     visible: { opacity: 1, transition: { delay: 0.5 } }
   }
   return (
-    <motion.div
-    className="flex flex-col items-center justify-center min-h-screen text-center bg-gray-100"
-    variants={variants} // apply the variants
-    initial="hidden" // initial state
-    animate="visible" // animate to this state
-  >
-       <motion.h1
-        className="text-6xl font-bold text-red-600 cursor-pointer" // add cursor-pointer for hover effect
-        initial={{ y: -200 }}
-        animate={{ y: 0 }}
-        transition={{ delay: 0.2, type: 'spring', stiffness: 120 }}
-        whileHover={{ scale: 1.1 }} // add whileHover prop for hover animation
-      >
-        404
-      </motion.h1>
-
-      <motion.h2
-        className="mt-4 text-xl text-gray-700"
-        initial={{ y: 200 }}
-        animate={{ y: 0 }}
-        transition={{ delay: 0.3, type: 'spring', stiffness: 120 }}
-      >
-        มีข้อผิดพลาดเกี่ยวกับเว็บไซต์ กรุณาทำรายการใหม่
-      </motion.h2>
-   
-      <MuiButton
+    <div className="bg-white py-6 sm:py-0">
+    <div className="mx-auto max-w-screen-xl px-4 md:px-8">
+    <div className="flex flex-col items-center justify-center gap-8 sm:gap-12">
+        <div className="flex flex-col items-center justify-center sm:items-start md:py-24 lg:py-32 ">
+          <p className="mb-4 text-sm font-semibold uppercase text-indigo-500 md:text-base">Error {errMsg}</p>
+          <h1 className="mb-2 text-center text-2xl font-bold text-gray-800 sm:text-left md:text-3xl">หน้านี้ไม่พร้อมใช้งาน</h1>
+  
+          <p className="mb-8 text-center text-gray-500 sm:text-left md:text-lg">หน้าที่คุณหาไม่พร้อมใช้งานในขณะนี้ กรุณาลองใหม่อีกครั้งในภายหลัง</p>
+          <Image src={Errorpage} loading="lazy" alt="Photo by Jeremy Cai" className="h-full w-full object-cover object-center" />
+          <MuiButton
         className="mt-8 custom-button"
         variant="contained"
-        onClick={() => window.history.back()}
+        onClick={() => router.back()}
       >
         Go Back
       </MuiButton>
-    </motion.div>
+        </div>
+
+      </div>
+    </div>
+  </div>
   )
 }
 

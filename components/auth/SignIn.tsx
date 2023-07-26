@@ -106,6 +106,20 @@ const schema = yup.object().shape({
             Sign In with Google
           </motion.button>
         </Box>
+        <Box sx={{ width: '100%' }} className="mt-4">
+          
+          <motion.button 
+            className="w-full py-2 px-4 bg-red-500 hover:bg-red-700 text-white font-bold rounded"
+          
+            variants={buttonVariants}
+            whileHover="hover"
+            whileTap="pressed"
+          >
+            <Link href="/signup">
+            Sign up
+            </Link>
+          </motion.button>
+        </Box>
     </Paper>
   </Container> 
      

@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['https://merakiui.com/images/full-logo.svg'],
+        domains: ['https://icons8.com/'],
 },
 experimental: {
     serverActions: true,

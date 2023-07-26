@@ -1,12 +1,12 @@
+
+import SignUp from '@/components/auth/SignUp'
 import React from 'react'
-import Headers from '@/components/globals/Headers'
+
+
 const page = () => {
   return (
-    <div>
- 
-    </div>
-   
-   
+    <SignUp />
   )
 }
+
 export default page
