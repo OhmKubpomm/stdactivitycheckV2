@@ -23,6 +23,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/layout.js", "context/provider.js", "app/layout.jsx", "models/Usermodel.js", "components/globals/Form.js", "components/auth/SignUp.js", "utils/token.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/layout.js", "context/provider.js", "app/layout.jsx", "models/Usermodel.js", "components/globals/Form.js", "components/auth/SignUp.js", "utils/token.js", "components/auth/Resetpassword.js", "app/resetpassword/page.js"],
   "exclude": ["node_modules"]
 }

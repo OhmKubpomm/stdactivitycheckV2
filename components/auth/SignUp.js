@@ -4,14 +4,51 @@ import React, { useState } from "react";
 import Image from "next/image";
 import profilePic from "@/components/Image/undraw_sign_up.svg";
 import { motion } from "framer-motion";
-import { Typography, Input } from 'antd';
-import { MailOutlined, UserOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import { Typography, Input,List,Tooltip,Progress } from 'antd';
+import { MailOutlined, UserOutlined, LockOutlined, GoogleOutlined ,CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+
 import Link from "next/link";
 import Form from "@/components/globals/Form";
 import Button from "@/components/globals/Button";
 
 const SignUp = () => {
- 
+  const { Text } = Typography;
+
+  const requirements = [
+    { re: /[0-9]/, label: 'Includes number' },
+    { re: /[a-z]/, label: 'Includes lowercase letter' },
+    { re: /[A-Z]/, label: 'Includes uppercase letter' },
+    { re: /[$&+,:;=?@#|'<>.^*()%!-]/, label: 'Includes special symbol' },
+  ];
+  
+  function getStrength(password) {
+    let multiplier = password.length > 5 ? 0 : 1;
+  
+    requirements.forEach((requirement) => {
+      if (!requirement.re.test(password)) {
+        multiplier += 1;
+      }
+    });
+  
+    return Math.max(100 - (100 / (requirements.length + 1)) * multiplier, 0);
+  }
+  const [value, setValue] = useState('');
+
+  const strength = getStrength(value);
+  const checks = requirements.map((requirement, index) => (
+    <List.Item key={index}>
+      {requirement.re.test(value) ? 
+        <CheckCircleOutlined style={{ color: 'green' }}/> : 
+        <CloseCircleOutlined style={{ color: 'red' }}/>}
+      <Text className="ml-2">{requirement.label}</Text>
+    </List.Item>
+  ));
+
+  const progressStatus = value.length > 0 ? 'active' : 'normal';
+
+
+
+
 
   async function handleSignupcredential(formData) {
     const name = formData.get('name')
@@ -91,13 +128,38 @@ const SignUp = () => {
                   <label className="block mb-1 text-sm text-gray-600 dark:text-gray-200">
                     รหัสผ่าน
                   </label>
-                  <Input
-                    size="large"
-                    placeholder=" กรุณาใส่รหัสผ่าน"
-                    prefix={<EyeInvisibleOutlined className="site-form-item-icon" />}
-                    name="password"
-                    type="password"
-                  />
+                  <Tooltip title="Use a mix of letters, numbers and symbols to create a hard-to-crack password.">
+      <Input.Password
+        size="large"
+        placeholder="Enter your password"
+        prefix={<LockOutlined className="site-form-item-icon" />}
+        name="password"
+        type="password"
+        required
+        value={value}
+        onChange={e => setValue(e.target.value)}
+      />
+    </Tooltip>
+    <Progress 
+      percent={strength} 
+      status={progressStatus} 
+      showInfo={false}
+      strokeColor={{
+        '0%': '#108ee9',
+        '100%': '#87d068',
+      }}
+      className="my-3"
+    />
+    <List split={false}>
+      <List.Item>
+        {value.length > 5 ? 
+          <CheckCircleOutlined style={{ color: 'green' }}/> : 
+          <CloseCircleOutlined style={{ color: 'red' }}/>}
+        <Text className="ml-2">Has at least 6 characters</Text>
+      </List.Item>
+      {checks}
+    </List>
+              
                 </div>
                 <motion.div
                   whileHover={{ scale: 1.05 }}

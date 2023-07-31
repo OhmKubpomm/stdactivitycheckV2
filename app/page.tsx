@@ -1,9 +1,11 @@
 import React from 'react'
-import Headers from '@/components/globals/Headers'
+import Homepage from '@/components/globals/home'
+
 const page = () => {
   return (
     <div>
- 
+      
+      <Homepage/>
     </div>
    
    
