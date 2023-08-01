@@ -12,8 +12,8 @@ export function html({url, text}: {url: string, text: string}) {
                 </tr>
                 <tr>
                     <td style="padding: 20px; text-align: center;">
-                        <h2>Congratulations on signing up!</h2>
-                        <p>Please click the button below to complete your signup.</p>
+                        <h2>This is a message to send in this email please ${text}!</h2>
+                        <p>Please click the button below to complete your ${text}.</p>
                     </td>
                 </tr>
                 <tr>

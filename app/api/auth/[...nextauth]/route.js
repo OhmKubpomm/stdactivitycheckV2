@@ -49,6 +49,7 @@ export const authOptions = {
     async jwt({token, trigger,session}) {
      
         const user=await getUserByEmail({email:token.email})
+        
         token.user=user;
         return token;
     },

@@ -50,7 +50,7 @@ try{
    return {msg:'signup success'}
 
 }   catch(error){
-   redirect(`/errors?error=${error.message}`)
+   return {error : error.message}
 }
 }
 
@@ -96,7 +96,7 @@ export async function changePasswordWithCredentials({old_pass,new_pass}){
       
       }   catch(error){
    
-         redirect(`/errors?error=${error.message}`)
+         return { error: error.message }
          
       }
       }
@@ -120,11 +120,11 @@ export async function forgotPasswordWithCredentials({email}){
                text:'Reset your password'
             })
          
-            return {msg:'Success submit Pls check your email to reset your password'}
+            return {msg:'Success submit Please check your email to reset your password'}
          
          }   catch(error){
       
-            redirect(`/errors?error=${error.message}`)
+            return { error: error.message }
             
          }
          }
@@ -136,6 +136,6 @@ export async function resetPasswordWithCredentials({token,password}){
       return {msg:'Reset password success'}
    }
    catch(error){
-      redirect(`/errors?error=${error.message}`)
+      return { error: error.message }
    }
 }

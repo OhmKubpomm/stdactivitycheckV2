@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import profilePic from "@/components/Image/undraw_sign_up.svg";
 import { motion } from "framer-motion";
-import { Typography, Input,List,Tooltip,Progress } from 'antd';
+import { Typography, Input,List,Tooltip,Progress,message } from 'antd';
 import { MailOutlined, UserOutlined, LockOutlined, GoogleOutlined ,CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 
 import Link from "next/link";
@@ -55,7 +55,12 @@ const SignUp = () => {
     const email = formData.get('email')
     const password = formData.get('password')
     const res = await signUpWithCredentials({ name, email, password })
-    if(res?.msg) alert(res?.msg)
+    if(res?.msg){
+      message.success(res?.msg)
+    }
+    if(res?.error){
+      message.error(res?.error);
+    }
   }
 
   return (

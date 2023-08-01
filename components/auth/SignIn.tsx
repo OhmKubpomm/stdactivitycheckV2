@@ -10,8 +10,8 @@ import Form from "@/components/globals/Form";
 import Button from "@/components/globals/Button";
 import Image from "next/image";
 import profilePic from "@/components/Image/undraw_sign_up.svg";
-import { Typography, Input,Progress,List,Tooltip   } from 'antd';
-import GoogleIcon from '@mui/icons-material/Google';
+import { Typography, Input,Progress,List,Tooltip,Modal,message   } from 'antd';
+
 
 import { motion } from 'framer-motion';
 import { forgotPasswordWithCredentials } from '@/actions/authActions';
@@ -35,30 +35,41 @@ function Copyright(props: any) {
 
  const SignIn = ({callbackUrl}: {callbackUrl: string}) => {
   const { register, handleSubmit } = useForm();
-  
+ 
+// Add new state for "Remember me"
+
 
   const onSubmit = (values: SignInOptions | undefined) => {
     signIn('credentials', { ...values, callbackUrl: `${window.location.origin}/` });
   };
 
 async function handleCredentialsLogin(formData: any) {
+  
   const email =formData.get('email')
   const password =formData.get('password')
   await signIn('credentials', { email, password, callbackUrl })
+  
 }
 
 async function handleForgotPassword(formData: any) {
   const email =formData.get('email')
   console.log({email})
   const res =await forgotPasswordWithCredentials({email})
-  if(res?.msg) alert(res?.msg)
+  if(res?.msg) {
+    message.success(res?.msg)
+   }
+   if(res?.error){
+    message.error(res?.error);
+}
 }
 
 
 
 const [value, setValue] = useState('');
+{/* ฟังก์ชั่นนี้อยู่ในforgot password */}
+const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+const { Text } = Typography;
 
- 
 
   
   return (
@@ -102,13 +113,13 @@ const [value, setValue] = useState('');
             </div>
             {/* sign in with email-pass */}
             <div className="mt-8 space-y-4">
-              <Form action={handleCredentialsLogin}>
+              <Form action={handleCredentialsLogin} className="mt-8 space-y-3 gap-2">
 
-                <div className="mb-4">
-                  <label className="block mb-1 text-sm text-gray-600 dark:text-gray-200">
-                    Email Address
-                  </label>
-                  <Tooltip title="Use you previous register email">
+                <div>
+                <label className="block text-sm font-medium text-gray-700">
+                Email Address
+            </label>
+                  <Tooltip title="Use you previous register email" placement="right">
                   <Input
                     size="large"
                     placeholder=" Enter your email"
@@ -120,88 +131,104 @@ const [value, setValue] = useState('');
                   </Tooltip>
                 </div>
 
-                <div className="mb-6">
-    <label className="block mb-1 text-sm text-gray-600 dark:text-gray-200">
-      Password
-    </label>
-    <Tooltip title="Use a mix of letters, numbers and symbols to create a hard-to-crack password.">
-      <Input.Password
-        size="large"
-        placeholder="Enter your password"
-        prefix={<LockOutlined className="site-form-item-icon" />}
-        name="password"
-        type="password"
-        required
-        value={value}
-        onChange={e => setValue(e.target.value)}
-      />
-    </Tooltip>
-    
-  </div>
-                
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="mt-4"
-                >
-                  <Button
-                    value="Login"
-                    className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:bg-blue-400 focus:ring focus:ring-blue-300 focus:ring-opacity-50"
-           
-                  >
-                  </Button>
-                </motion.div>
-              </Form>
+                <div>
+            <label className="block text-sm font-medium text-gray-700">
+                Password
+            </label>
+            <Tooltip title="Use a mix of letters, numbers, and symbols to create a hard-to-crack password." placement="right">
+            <Input.Password
+                size="large"
+                placeholder="Enter your password"
+                prefix={<LockOutlined className="site-form-item-icon" />}
+                name="password"
+                type="password"
+                required
+                value={value}
+                onChange={e => setValue(e.target.value)}
+            />
+            </Tooltip>
+        </div>
+  
+
+
+
+                {/* forgot password */}
+
+                <Modal title="Forgot Password" open={isModalVisible} onCancel={() => setIsModalVisible(false)} footer={null}>
+    <Form action={handleForgotPassword}>
+        <div className="mb-4">
+            <label className="block mb-1 text-sm text-gray-600 dark:text-gray-200">
+                Email Address
+            </label>
+            <Tooltip title="Use you previous register email" placement="right">
+            <Input
+                size="large"
+                placeholder="Enter your email"
+                prefix={<MailOutlined className="site-form-item-icon" />}
+                name="email"
+                type="email"
+                required
+            />
+            </Tooltip>
+        </div>
+
+        <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="mt-4"
+        >
+            <Button
+                value="Submit"
+                className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:bg-blue-400 focus:ring focus:ring-blue-300 focus:ring-opacity-50"
+            />
+        </motion.div>
+    </Form>
+</Modal>
+
+<Text type="secondary" style={{textAlign: 'right', cursor: 'pointer'}}>
+            <Text onClick={() => setIsModalVisible(true)}>
+                Forgot Password?
+            </Text>
+        </Text>
+
+        <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="mt-2"
+        >
+            <Button
+                value="Login"
+                className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+            Login
+            </Button>
+        </motion.div>
+    </Form>
                 {/*End sign in with email-pass */}
 
               
-                 {/* forget password */}
-
-              <Form action={handleForgotPassword}>
-
-                <div className="mb-4">
-                  <label className="block mb-1 text-sm text-gray-600 dark:text-gray-200">
-                    Email Address
-                  </label>
-                  <Tooltip title="Use you previous register email">
-                  <Input
-                    size="large"
-                    placeholder=" Enter your email"
-                    prefix={<MailOutlined className="site-form-item-icon" />}
-                    name="email"
-                    type="email"
-                    required
-                  />
-                  </Tooltip>
-                </div>
-
-                
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="mt-4"
-                >
-                  <Button
-                    value="Login"
-                    className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:bg-blue-400 focus:ring focus:ring-blue-300 focus:ring-opacity-50"
-           
-                  >
-                  </Button>
-                </motion.div>
-              </Form>
-                {/*End sign in with email-pass */}
+                 
 
 
+                <div className="flex items-center justify-between mt-2">
+        <span className="w-1/5 border-b dark:border-gray-600 md:w-1/4"></span>
 
+        <p className="text-xs text-gray-500 uppercase dark:text-gray-400 hover:underline">or sign in with</p>
+
+        <span className="w-1/5 border-b dark:border-gray-600 md:w-1/4"></span>
+    </div>
 
               {/* sign in with google*/}
               <Button
+             
                 value="Login with Google"
                 variant="contained"
                 onClick={() => signIn('google', { callbackUrl })}
                 className="inline-flex items-center justify-center px-4 py-2 bg-white text-black font-bold rounded shadow-md transform transition hover:scale-105 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full mt-4"
               >
-                <GoogleOutlined />
+             
+        <GoogleOutlined />
+    
               </Button>
                {/*end sign in with google*/}
             </div>
