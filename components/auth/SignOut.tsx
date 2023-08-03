@@ -5,7 +5,7 @@ import { Button } from 'antd'
 const SignOut = () => {
   return (
     <>
-        <Button onClick={signOut}>sign out</Button>
+        <Button onClick={signOut} className='justify-end'>sign out</Button>
     </>
 
   )

@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import Form from "@/components/globals/Form";
 import Button from "@/components/globals/Button";
 import Image from "next/image";
-import profilePic from "@/components/Image/undraw_sign_up.svg";
+import profilePic from "@/public/Image/undraw_sign_up.svg";
 import { Typography, Input,Progress,List,Tooltip,Modal,message   } from 'antd';
 
 
@@ -85,7 +85,7 @@ const { Text } = Typography;
         >
           <div className="flex items-center h-full px-20 bg-opacity-40">
             <div>
-              <motion.h2 className="text-2xl font-bold text-black sm:text-3xl gap-1" animate={{ scale: [1, 1.05, 1] }}>
+              <motion.h2 className="text-2xl font-bold bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-500 via-teal-500 to-orange-500 text-transparent bg-clip-text sm:text-3xl gap-1" animate={{ scale: [1, 1.05, 1] }}>
                 Welcome!
               </motion.h2>
 
@@ -102,7 +102,7 @@ const { Text } = Typography;
           <div className="flex-1">
             <div className="text-center">
               <div className="flex justify-center mx-auto">
-                <Typography.Title style={{ margin: 10 }}>
+                <Typography.Title style={{ margin: 10 }} className='text-gray-500 dark:text-gray-300'>
                   Login
                 </Typography.Title>
               </div>

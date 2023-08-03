@@ -2,7 +2,7 @@
 import { signUpWithCredentials } from "@/actions/authActions";
 import React, { useState } from "react";
 import Image from "next/image";
-import profilePic from "@/components/Image/undraw_sign_up.svg";
+import profilePic from "@/public/Image/undraw_sign_up.svg";
 import { motion } from "framer-motion";
 import { Typography, Input,List,Tooltip,Progress,message } from 'antd';
 import { MailOutlined, UserOutlined, LockOutlined, GoogleOutlined ,CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
@@ -40,7 +40,7 @@ const SignUp = () => {
       {requirement.re.test(value) ? 
         <CheckCircleOutlined style={{ color: 'green' }}/> : 
         <CloseCircleOutlined style={{ color: 'red' }}/>}
-      <Text className="ml-2">{requirement.label}</Text>
+      <Text className="ml-2 text-sm text-gray-600 dark:text-gray-200">{requirement.label}</Text>
     </List.Item>
   ));
 
@@ -74,7 +74,7 @@ const SignUp = () => {
         >
           <div className="flex items-center h-full px-20  bg-opacity-40">
             <div>
-              <motion.h2 className="text-2xl font-bold text-black sm:text-3xl gap-1" animate={{ scale: [1, 1.05, 1] }}>
+              <motion.h2 className="text-2xl font-bold bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-500 via-teal-500 to-orange-500 text-transparent bg-clip-text sm:text-3xl gap-1" animate={{ scale: [1, 1.05, 1] }}>
                 สวัสดี ยินดีต้อนรับ!
               </motion.h2>
 
@@ -92,14 +92,15 @@ const SignUp = () => {
           <div className="flex-1">
             <div className="text-center">
               <div className="flex justify-center mx-auto">
-                <Typography.Title style={{ margin: 10 }}>
+                <p style={{ margin: 10 }} className='font-bold text-2xl'>
                   สมัครผู้ใช้งาน
-                </Typography.Title>
+                </p>
               </div>
 
               <p className="mt-3 text-gray-500 dark:text-gray-300">
                 มีบัญชีอยู่แล้ว? <Link href="/signin">เข้าสู่ระบบ</Link>
               </p>
+              
             </div>
 
             <div className="mt-8">
@@ -160,7 +161,7 @@ const SignUp = () => {
         {value.length > 5 ? 
           <CheckCircleOutlined style={{ color: 'green' }}/> : 
           <CloseCircleOutlined style={{ color: 'red' }}/>}
-        <Text className="ml-2">Has at least 6 characters</Text>
+        <Text className="ml-2 text-sm text-gray-600 dark:text-gray-200">Has at least 6 characters</Text>
       </List.Item>
       {checks}
     </List>
