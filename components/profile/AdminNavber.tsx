@@ -20,7 +20,7 @@ import Link from 'next/link';
 const { Title } = Typography;
 
 
-const Usernavbar = () => {
+const AdminaNavbar = () => {
   const [open, setOpen] = useState(true);
   const menus = [
     { name: "Dashboard", icon: <DashboardOutlined />,Link:"/profile" },
@@ -129,4 +129,4 @@ const bottomMenus = [
   );
 };
 
-export default Usernavbar;
+export default AdminaNavbar;
