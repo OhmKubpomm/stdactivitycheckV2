@@ -40,3 +40,44 @@
 .text-right {
   text-align: right;
 }
+
+
+/* admin dashboard */
+li{
+  list-style: none;
+  margin-bottom: 5px;
+}
+
+html{
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+body.dark{
+  --light: #181a1e;
+  --grey: #25252c;
+  --dark: #fbfbfb
+}
+
+body{
+  background: var(--grey);
+  overflow-x: hidden;
+}
+
+.avatar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.avatar-container .ant-avatar {
+  border: 2px solid white;
+  background-color: #1e90ff;
+}
+
+.avatar-container .ant-btn-primary {
+  background-color: #1e90ff;
+  border-color: #1e90ff;
+}

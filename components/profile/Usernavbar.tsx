@@ -1,62 +1,125 @@
 'use client'
-import { useState } from 'react';
-import { Layout, Menu, Avatar, Button } from 'antd';
+import React,{ useState } from 'react';
+import { Layout, Tooltip,Avatar,Button } from 'antd';
 import {
+  DashboardOutlined,
+  InboxOutlined,
   UserOutlined,
-  LaptopOutlined,
-  NotificationOutlined,
-  HomeOutlined,
+  ScheduleOutlined,
+  SearchOutlined,
+  BarChartOutlined,
+  FolderOutlined,
   SettingOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons';
 import ContentUser from './ContentUser';
-
-const { Sider } = Layout;
-const { SubMenu } = Menu;
+import Link from 'next/link';
 
 const Usernavbar = () => {
-  const [collapsed, setCollapsed] = useState(false);
-  
-  const toggleCollapsed = () => {
-    setCollapsed(!collapsed);
-  };
+
+ 
+
+  const [open, setOpen] = useState(true);
+  const menus = [
+    { name: "Dashboard", icon: <DashboardOutlined />,Link:"/profile" },
+    { name: "Inbox", icon: <InboxOutlined />,Link:"/" },
+    { name: "Accounts", icon: <UserOutlined />, gap:true ,Link:"/" },
+    { name: "Schedule", icon: <ScheduleOutlined /> ,Link:"/"},
+    { name: "Search", icon: <SearchOutlined /> ,Link:"/"},
+    { name: "Analytics", icon: <BarChartOutlined /> ,Link:"/"},
+    { name: "Files", icon: <FolderOutlined />,gap:true ,Link:"/"},
+    { name: "Setting", icon: <SettingOutlined /> ,Link:"/" },  
+  ];
+const bottomMenus = [
+    { name: "Logout", icon: <LogoutOutlined />, gap:false,Link:"/" },
+    { name: "Avatar", icon: <SettingOutlined /> ,Link:"/" },
+  ];
 
   return (
-    <Layout>
-      <Sider width={200} className="site-layout-background" collapsible collapsed={collapsed} onCollapse={toggleCollapsed}>
-        {!collapsed && (
-          <div>
-            <div className="logo" style={{ height: '32px', background: 'rgba(255, 255, 255, 0.2)', margin: '16px' }}>
-              <a href="#">
-                <img className="w-auto h-6 sm:h-7" src="https://merakiui.com/images/full-logo.svg" alt="" />
-              </a>
-            </div>
-            <div className="flex flex-col items-center mt-6 -mx-2">
-              <Avatar
-                size={64}
-                src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80"
-              />
-              <h4 className="mx-2 mt-2 font-medium text-gray-800 dark:text-gray-200">John Doe</h4>
-              <p className="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400">john@example.com</p>
-            </div>
+    <Layout style={{ minHeight: '100vh' }}>
+      <section className="flex gap-6">
+        <div
+          className={`bg-[#fdfdfd] min-h-screen ${
+            open ? "w-72" : "w-16"
+          } duration-500 text-gray px-4 flex flex-col`}
+        >
+          <div className="py-3 flex justify-end">
+            <MenuFoldOutlined
+              size={26}
+              className="cursor-pointer"
+              onClick={() => setOpen(!open)}
+            />
           </div>
-        )}
-        <Menu
-          mode="inline"
-          defaultSelectedKeys={['1']}
-          defaultOpenKeys={['sub1']}
-          style={{ height: '100%', borderRight: 0 }}>
-          <Menu.Item key="1" icon={<HomeOutlined />}>Dashboard</Menu.Item>
-          <Menu.Item key="2" icon={<UserOutlined />}>Accounts</Menu.Item>
-          <Menu.Item key="3" icon={<LaptopOutlined />}>Tickets</Menu.Item>
-          <Menu.Item key="4" icon={<SettingOutlined />}>Settings</Menu.Item>
-        </Menu>
-      </Sider>
-      <ContentUser />
+          <div className="flex-1 mt-4 flex flex-col gap-4 relative ">
+            {menus?.map((menu, i) => (
+              <Link href={menu.Link} key={i}>
+                <div
+                  className={` ${
+                    menu?.gap && "mt-5 bottom-0 "
+                  } group flex items-center text-sm   gap-3.5 font-medium p-2 hover:bg-gray-200 rounded-md cursor-pointer`}
+                >
+                  <div>{menu?.icon}</div>
+                  <h2
+                    style={{
+                      transitionDelay: `${i + 3}00ms`,
+                    }}
+                    className={`whitespace-pre duration-500 ${
+                      !open && "opacity-0 translate-x-28 overflow-hidden"
+                    }`}
+                  >
+                    {menu?.name}
+                  </h2>
+                  <h2
+                    className={`${
+                      open && "hidden"
+                    } absolute left-48 bg-white font-semibold whitespace-pre text-gray-900 rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit  `}
+                  >
+                    {menu?.name}
+                  </h2>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div className="mb-4 flex flex-col gap-4">
+            {bottomMenus?.map((menu, i) => (
+              <Link href={menu.Link} key={i}>
+                <div
+                  className={` ${
+                    menu?.gap && "mt-5 bottom-0 "
+                  } group flex items-center text-sm   gap-3.5 font-medium p-2 hover:bg-gray-200 rounded-md cursor-pointer`}
+                >
+                  <div>{menu?.icon}</div>
+                  <h2
+                    style={{
+                      transitionDelay: `${i + 3}00ms`,
+                    }}
+                    className={`whitespace-pre duration-500 ${
+                      !open && "opacity-0 translate-x-28 overflow-hidden"
+                    }`}
+                  >
+                    {menu?.name}
+                  </h2>
+                  <h2
+                    className={`${
+                      open && "hidden"
+                    } absolute left-48 bg-white font-semibold whitespace-pre text-gray-900 rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit  `}
+                  >
+                    {menu?.name}
+                  </h2>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <Layout>
+          <ContentUser />
+        </Layout>
+      </section>
     </Layout>
-    
-    
+  
   );
 };
 
