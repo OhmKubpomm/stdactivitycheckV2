@@ -48,6 +48,9 @@ const Headers =  async() => {
               <Link href="/dashboard" >
                 <Button color="primary">Dashboard</Button>
               </Link>
+              <Link href="/dashboard/cruduser" >
+                <Button color="primary">crud</Button>
+              </Link>
               <SignOut />
             </>
           ) : null}

@@ -1,13 +1,13 @@
 'use server'
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+
 import { getServerSession } from "next-auth"
 
-const Protectpageserver = async () => {
-  const session = await getServerSession(authOptions);
+
+export default function Protectpageserver() {
   return (
-    <div>Protectpageserver
-      <p>{session?.user?.name}</p>
-    </div>
+
+    <div></div>
+
   )
 }
-export default Protectpageserver

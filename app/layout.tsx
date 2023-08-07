@@ -1,7 +1,7 @@
 import Provider from "@/context/provider"
 import './globals.css'
 import Headers from '@/components/globals/Headers'
-
+import { Suspense } from 'react'
 import { Kanit } from 'next/font/google'
 
 
@@ -26,7 +26,7 @@ export default function RootLayout({
     <html lang="en" className={kanit.className} suppressHydrationWarning>
       
 
-     
+       
           <Provider>
     
             
@@ -37,8 +37,7 @@ export default function RootLayout({
         {children}
         </body>
           </Provider>
-        
-   
+      
     </html>
   )
 }

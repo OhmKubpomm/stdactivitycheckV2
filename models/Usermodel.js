@@ -1,6 +1,6 @@
-import { Schema,model,models } from "mongoose";
+import { Schema,model,models,mongoose } from "mongoose";
 
-const UserSchema = new Schema({
+const UserSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -17,19 +17,19 @@ const UserSchema = new Schema({
     image:{
         type:String,
     },
-    user_firstname:{
+    Firstname:{
         type:String,
     },
-    user_lastname:{
+    Lastname:{
         type:String,
     },
-    user_date:{
-        type:Date,
-    },
-    user_telephone:{
+    Date:{
         type:String,
     },
-    user_address:{
+    Telephone:{
+        type:String,
+    },
+    Address:{
         type:String,
     },
     role:{
@@ -43,12 +43,6 @@ const UserSchema = new Schema({
 },{timestamps:true});
 
 
-UserSchema.pre('save', function(next) {
-    if (this.email === null || this.email === undefined) {
-      this.email = `default_${Date.now()}`;  // assign a unique default value
-    }
-    next();
-  });
+const User = mongoose.models.users || mongoose.model('users', UserSchema);
 
-const User= models.User || model('User',UserSchema);
 export default User;
