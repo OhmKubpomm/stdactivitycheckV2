@@ -47,7 +47,7 @@ try{
 
 
 
-   return {msg:'signup success'}
+   return {msg:'signup success please check your email to verify your account'}
 
 }   catch(error){
    return {error : error.message}

@@ -2,6 +2,7 @@
 import React,{ useRef } from 'react'
 import { createUser } from '@/actions/userActions'
 import Button from '../globals/Button'
+import { message } from 'antd'
 const UserForm = () => {
     const formRef =useRef()
     async function handleAction(formData){
@@ -15,9 +16,17 @@ const UserForm = () => {
         const Telephone =formData.get('Telephone')
         const image =formData.get('image')
 
-        await createUser({name,email,password,Firstname,Lastname,Date,Address,Telephone,image})
+
+       const res = await createUser({name,email,password,Firstname,Lastname,Date,Address,Telephone,image})
        formRef.current.reset()
+       if(res?.msg) {
+        message.success(res?.msg)
+       }
+       if(res?.error){
+        message.error(res?.error);
     }
+    }
+   
   return (
 
     <form action={handleAction} ref={formRef}>
