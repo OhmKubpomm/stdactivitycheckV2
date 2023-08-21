@@ -1,9 +1,39 @@
-import UserForm from '@/components/form/UserForm'
+import AddUserForm from '@/components/form/AddUserForm'
 import React from 'react'
+import { getallUser } from '@/actions/userActions'
+import Userlist from '@/components/profile/Userlist'
 
-const cruduserpage = () => {
+
+const cruduserpage =  async() => {
+  
+  const {allUser}  = await getallUser();
   return (
-    <div><UserForm/></div>
+
+
+
+     <>
+  
+       
+
+        
+     
+    
+
+
+   
+   
+        <AddUserForm />
+
+
+        <div>{allUser && <Userlist allUser={allUser} />}</div>
+
+     
+     
+    
+   
+   </>
+
+  
   )
 }
 

@@ -39,8 +39,9 @@ const bottomMenus = [
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+   
       <section className="flex gap-6">
+         <Layout>
         <div
           className={`bg-[#fdfdfd] min-h-screen ${
             open ? "w-72" : "w-16"
@@ -120,11 +121,9 @@ const bottomMenus = [
           </div>
         </div>
 
-        <Layout>
-          <ContentUser />
         </Layout>
       </section>
-    </Layout>
+   
   
   );
 };

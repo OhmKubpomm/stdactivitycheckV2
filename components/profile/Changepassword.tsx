@@ -1,6 +1,6 @@
 import React from 'react'
 import Form from '../globals/Form'
-import Button from '../globals/Button'
+import ButtonLoad from '@/components/globals/ButtonLoad'
 import { changePasswordWithCredentials } from '@/actions/authActions'
 import { message } from 'antd'
 
@@ -27,7 +27,7 @@ const Changepassword = () => {
   <Form action={handleChangepassword}>
         <input type="password" name="old_pass" placeholder="password" />
         <input type="password" name="new_pass" placeholder="password" />
-        <Button value="Change Password" />
+        <ButtonLoad value="Change Password" htmlType={undefined} />
         </Form>
 
     </div>

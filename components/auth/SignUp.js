@@ -9,7 +9,7 @@ import { MailOutlined, UserOutlined, LockOutlined, GoogleOutlined ,CheckCircleOu
 
 import Link from "next/link";
 import Form from "@/components/globals/Form";
-import Button from "@/components/globals/Button";
+import ButtonLoad from "@/components/globals/ButtonLoad";
 
 const SignUp = () => {
   const { Text } = Typography;
@@ -172,12 +172,12 @@ const SignUp = () => {
                   whileTap={{ scale: 0.95 }}
                   className="mt-4"
                 >
-                  <Button
+                  <ButtonLoad
                    value="สมัครสมาชิก"
                     className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:bg-blue-400 focus:ring focus:ring-blue-300 focus:ring-opacity-50"
                   >
                    
-                  </Button>
+                  </ButtonLoad>
                 </motion.div>
               </Form>
         

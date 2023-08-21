@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */ 
-
+const {fontFamily} = require('tailwindcss/defaultTheme')
 module.exports = {
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
@@ -17,6 +17,10 @@ module.exports = {
         'gradient-conic':
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
+      fontFamily: {
+        myfont: ["var(--font-main-font)", ...fontFamily.sans],
+      },
+
       
       colors: {
         // light mode
@@ -132,7 +136,10 @@ module.exports = {
         /^(fill-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950))$/,
     },
   ],
-  plugins: [require("@headlessui/tailwindcss")],
+  plugins: [
+    require("@headlessui/tailwindcss"), 
+    require("tailwind-scrollbar")({ nocompatible: true }),
+  ],
 };
 
 

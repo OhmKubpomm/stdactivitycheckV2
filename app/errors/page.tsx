@@ -4,7 +4,7 @@ import { Button as MuiButton } from '@mui/material';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Errorpage from '@/components/Image/Pagenotfound.svg'
+import Errorpage from '@/public/Image/Pagenotfound.svg'
 
 
 const page = () => {

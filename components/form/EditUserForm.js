@@ -1,9 +1,9 @@
 'use client'
 import React,{ useRef } from 'react'
 import { createUser } from '@/actions/userActions'
-import Button from '../globals/Button'
+import ButtonLoad from '../globals/ButtonLoad'
 import { message } from 'antd'
-const UserForm = () => {
+const EditUserForm = () => {
     const formRef =useRef()
     async function handleAction(formData){
         const name =formData.get('name') 
@@ -39,7 +39,7 @@ const UserForm = () => {
         <input type="text" name="Address"/>address
         <input type="text" name="Telephone"/>telephone
         <input type="text" name="image"/>image
-        <Button  value="sss"/>
+        <ButtonLoad  value="sss"/>
       </form>
    
     
@@ -47,4 +47,4 @@ const UserForm = () => {
   )
 }
 
-export default UserForm
+export default EditUserForm

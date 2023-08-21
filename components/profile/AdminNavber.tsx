@@ -15,6 +15,10 @@ import {
   LogoutOutlined,
 } from '@ant-design/icons';
 import ContentUser from './ContentUser';
+import {motion } from 'framer-motion';
+
+
+
 import Link from 'next/link';
 
 const { Title } = Typography;
@@ -39,12 +43,15 @@ const bottomMenus = [
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <section className="flex gap-6">
-        <div
-          className={`bg-[#fdfdfd] min-h-screen ${
+   
+    <section className="flex gap-6">
+         <Layout>
+
+        
+        <motion.div
+          className={` bg-[#55f16c] min-h-screen ${
             open ? "w-72" : "w-16"
-          } duration-500 text-gray px-4 flex flex-col`}
+          } duration-500 text-gray px-4 flex flex-col `}
         >
           <div className="py-3 flex justify-end">
             <MenuFoldOutlined
@@ -118,13 +125,11 @@ const bottomMenus = [
               </Link>
             ))}
           </div>
-        </div>
+        </motion.div>
 
-        <Layout>
-          <ContentUser />
-        </Layout>
+      </Layout>
       </section>
-    </Layout>
+    
   
   );
 };
