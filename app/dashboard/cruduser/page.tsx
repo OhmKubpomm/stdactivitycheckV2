@@ -21,13 +21,13 @@ const cruduserpage =  async() => {
 
 
    
-   
-        <AddUserForm />
+      
+       
 
+      
+        <div>{ <Userlist allUser={allUser} />}</div>
 
-        <div>{allUser && <Userlist allUser={allUser} />}</div>
-
-     
+  
      
     
    

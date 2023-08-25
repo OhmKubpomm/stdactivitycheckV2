@@ -5,12 +5,12 @@ import ButtonLoad from '@/components/globals/ButtonLoad'
 
 import { Form, Input, DatePicker,message,Layout } from 'antd';
 import { motion } from 'framer-motion';
-
-
+import { useRouter } from 'next/navigation';
+import { Title,Card } from '@tremor/react';
 
 
 const AddUserForm = () => {
-  
+  const router = useRouter()
 const { Header, Footer, Sider, Content } = Layout;
   const messageApi = message;
     const formRef =useRef();
@@ -38,22 +38,11 @@ const { Header, Footer, Sider, Content } = Layout;
  
  
    
-    <Layout>
-
-  
-  
-      
-    <main className=''>
-
-
-    
-
-
-   
+    <Card className="min-h-screen w-full   flex flex-col">
     <Form onFinish={handleAction} ref={formRef} className='flex flex-row'>
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
       <div className="flex flex-row justify-between ">
-      <h1 className="text-3xl text-left">Add User</h1>
+      <Title className="text-4xl">Add User</Title>
      
         </div>
         <br></br>
@@ -85,19 +74,19 @@ const { Header, Footer, Sider, Content } = Layout;
           <Input placeholder="image" />
         </Form.Item>
        
-        <Form.Item>
-          <ButtonLoad value="submit" className="custom-button flex-col rounded-lg " />
-            
-          <ButtonLoad htmlType="button" onClick={onReset} value="reset" message=""/>
-          
-        
-        </Form.Item>
+        <div className="flex space-x-4">
+
+  <ButtonLoad htmlType="submit" value="Submit" className="bg-blue-500 text-white px-4 py-2 rounded" />
+  <ButtonLoad htmlType="button" onClick={onReset} value="Reset" className="bg-blue-300 px-4 py-2 rounded"/>
+</div>
+
       </motion.div>
     </Form>
+    <div className="flex space-x-4">
+    <ButtonLoad onClick={() => router.back()} value="Go Back" className="bg-gray-300 px-4 py-2 rounded" />
    
-    </main>
-   
-    </Layout>
+    </div>
+    </Card>
    
   )
 }

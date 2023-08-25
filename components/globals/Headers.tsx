@@ -13,58 +13,47 @@ import { AppBar, Toolbar, IconButton, Button, Box, Typography } from '@mui/mater
 import Themebutton from './Themebutton';
 import Usernavbar from '../profile/Usernavbar';
 import AdminaNavbar from '../profile/AdminNavber';
+import MenuResponNav from './MenuResponNav';
 
 
 const Headers =  async() => {
   const session = await getServerSession(authOptions);
 
   return (
-    <AppBar position="static" color="transparent" elevation={0}>
-    <Toolbar>
-      <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>
-      <Link href="/" >
-          <Button color="primary" sx={{
-          transition: 'all 0.3s ease-in-out',
-          '&:hover': {
-            transform: 'scale(1.1)',
-            background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
-            color: 'white',
-          }
-        }}>StdActivitycheck</Button>
+    <div className="bg-transparent p-0">
+    <nav className="flex items-center justify-between flex-wrap p-4">
+      <div className="flex items-center flex-shrink-0 text-2xl mr-6">
+        <Link href="/" className="text-blue-500 hover:scale-110 hover:bg-gradient-to-r hover:from-pink-500 hover:to-orange-500 hover:text-white transition-all duration-300 ease-in-out">
+            <button className="px-4 py-2">StdActivitycheck</button>
+         
         </Link>
-       
-      </Typography>
-      <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
-        {session ? (
-          <>
-        
-            <Link href="/profile/client" >
-              <Button color="primary">Profile Client</Button>
+      </div>
+      <div className="block lg:hidden">
+      <MenuResponNav/>
+    </div>
+    <div id="menu-links" className="w-full hidden lg:flex lg:items-center lg:w-auto">
+        <div className="text-sm lg:flex-grow">
+          {session ? (
+            <>
+              <Link href="/profile/client" className="block mt-4 lg:inline-block lg:mt-0 text-blue-500 hover:text-blue-800 mr-4">Profile Client</Link>
+              <Link href="/profile/server" className="block mt-4 lg:inline-block lg:mt-0 text-blue-500 hover:text-blue-800 mr-4">Profile Server</Link>
+              <Link href="/dashboard" className="block mt-4 lg:inline-block lg:mt-0 text-blue-500 hover:text-blue-800 mr-4">Dashboard</Link>
+              <Link href="/dashboard/cruduser" className="block mt-4 lg:inline-block lg:mt-0 text-blue-500 hover:text-blue-800 mr-4">crud</Link>
+              <SignOut user={session?.user} />
+            </>
+          ) : null}
+        </div>
+        {!session && (
+          <div>
+            <Link href="/signin"
+             className="text-red-500 border-red-500 border-2 px-4 py-2 inline-block text-sm font-semibold rounded hover:text-red-800">
+                Sign In
             </Link>
-            <Link href="/profile/server" >
-              <Button color="primary">Profile Server</Button>
-            </Link>
-            <Link href="/dashboard" >
-              <Button color="primary">Dashboard</Button>
-            </Link>
-            <Link href="/dashboard/cruduser" >
-              <Button color="primary">crud</Button>
-            </Link>
-            <SignOut user={session?.user} />
-          </>
-        ) : null}
-      </Box>
-      {!session && (
-
-        <Link href="/signin" >
-          <Button variant="outlined" color="secondary">
-            Sign In
-          </Button>
-        </Link>
-        
-      )}
-    </Toolbar>
-  </AppBar>
+          </div>
+        )}
+      </div>
+    </nav>
+  </div>
   )
 
 }

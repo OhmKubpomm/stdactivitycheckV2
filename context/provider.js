@@ -10,8 +10,8 @@ export const useMyContext = () => useContext(Context);
 
 export const Provider = ({children}) => {
 
-    const [editPost,seteditPost] = useState();
-    const value ={editPost,seteditPost}
+    const [editUser,setEditUser] = useState();
+    const value ={editUser,setEditUser}
 
     return (
         <Context.Provider value={value}>

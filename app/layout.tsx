@@ -48,7 +48,7 @@ export default async function RootLayout({
         
          
          
-          <div className='flex'>
+          <div className='flex flex-auto'>
           {role === 'admin' ? (
           <>
          
@@ -62,7 +62,7 @@ export default async function RootLayout({
           </>
         ) : null}
       
-      <main className='container'>
+      <main className='container justify-self-auto'>
           {children}
           </main>
         </div>

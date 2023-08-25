@@ -85,3 +85,45 @@ body{
   background-color: #1e90ff;
   border-color: #1e90ff;
 }
+
+
+/* Styles for mobile */
+@media screen and (max-width: 600px) {
+  .desktop-nav {
+    display: none;
+  }
+
+  .mobile-nav {
+    display: flex;
+  }
+
+  .mobile-nav-links {
+    display: none;
+  }
+
+  .mobile-nav.open .mobile-nav-links {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    background-color: white;
+    right: 0;
+    top: 60px;
+  }
+}
+
+/* Styles for desktop */
+@media screen and (min-width: 601px) {
+  .desktop-nav {
+    display: flex;
+  }
+
+  .mobile-nav,
+  .mobile-nav-links {
+    display: none;
+  }
+}
+@media screen and (min-width: 1024px) {
+  #menu-links {
+    display: flex !important;
+  }
+}

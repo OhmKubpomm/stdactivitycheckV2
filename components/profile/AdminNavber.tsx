@@ -43,92 +43,68 @@ const bottomMenus = [
   ];
 
   return (
-   
+
     <section className="flex gap-6">
-         <Layout>
-
-        
-        <motion.div
-          className={` bg-[#55f16c] min-h-screen ${
-            open ? "w-72" : "w-16"
-          } duration-500 text-gray px-4 flex flex-col `}
-        >
-          <div className="py-3 flex justify-end">
-            <MenuFoldOutlined
-              size={26}
-              className="cursor-pointer"
-              onClick={() => setOpen(!open)}
-            />
-          </div>
-          <div className="flex-1 mt-4 flex flex-col gap-4 relative ">
-            {menus?.map((menu, i) => (
-              <Link href={menu.Link} key={i}>
-                <div
-                  className={` ${
-                    menu?.gap && "mt-5"
-                  } group flex items-center text-sm   gap-3.5 font-medium p-2 hover:bg-gray-200 rounded-md cursor-pointer`}
+    <motion.div
+      className={`bg-[#55f16c] min-h-screen transition-all duration-500 text-gray flex flex-col ${open ? 'w-72' : 'w-16'} px-4`}
+    >
+      <div className="py-3 flex justify-end">
+        <MenuFoldOutlined
+          size={26}
+          className="cursor-pointer"
+          onClick={() => setOpen(!open)}
+        />
+      </div>
+      <nav className="flex-1 mt-4 flex flex-col gap-4">
+        {menus?.map((menu, i) => (
+          <Link href={menu.Link} key={i} className={`group flex items-center text-sm gap-3.5 font-medium p-2 hover:bg-gray-200 hover:text-blue-600 rounded-md cursor-pointer
+           ${menu?.gap ? 'mt-5' : ''}`}
+            >
+              <div>{menu?.icon}</div>
+              <h2
+                style={{ transitionDelay: `${i + 3}00ms` }}
+                className={`whitespace-pre transition-all duration-500 ${!open && 'opacity-0 translate-x-28 overflow-hidden'}`}
+              >
+                {menu?.name}
+              </h2>
+              {!open && (
+                <h2
+                  className="absolute left-14 bg-white font-semibold whitespace-pre text-gray-900 rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:duration-300 group-hover:w-fit"
                 >
-                  <div>{menu?.icon}</div>
-                  <h2
-                    style={{
-                      transitionDelay: `${i + 3}00ms`,
-                    }}
-                    className={`whitespace-pre duration-500 ${
-                      !open && "opacity-0 translate-x-28 overflow-hidden"
-                    }`}
-                  >
-                    {menu?.name}
-                  </h2>
-                  <h2
-                    className={`${
-                      open && "hidden"
-                    } absolute left-48 bg-white font-semibold whitespace-pre text-gray-900 rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit  `}
-                  >
-                    {menu?.name}
-                  </h2>
-                </div>
-              </Link>
-            ))}
-          </div>
-          
-          <Title level={5}>Account</Title>
-          <div className="mb-4 flex flex-col gap-4">
+                  {menu?.name}
+                </h2>
+              )}
            
-           
-        
-            {bottomMenus?.map((menu, i) => (
-              <Link href={menu.Link} key={i}>
-                <div
-                  className={` ${
-                    menu?.gap && "mt-5 bottom-0 "
-                  } group flex items-center text-sm   gap-3.5 font-medium p-2 hover:bg-gray-200 rounded-md cursor-pointer`}
+          </Link>
+        ))}
+      </nav>
+      <Title level={5}>Account</Title>
+      <div className="mb-4 flex flex-col gap-4">
+        {bottomMenus?.map((menu, i) => (
+          <Link href={menu.Link} key={i} className={`group flex items-center text-sm gap-3.5 font-medium p-2 hover:bg-gray-200 hover:text-blue-600 rounded-md cursor-pointer
+           ${menu?.gap ? 'mt-5 bottom-0' : ''}`}
+            >
+              <div>{menu?.icon}</div>
+              <h2
+                style={{ transitionDelay: `${i + 3}00ms` }}
+                className={`whitespace-pre transition-all duration-500 ${!open && 'opacity-0 translate-x-28 overflow-hidden'}`}
+              >
+                {menu?.name}
+              </h2>
+              {!open && (
+                <h2
+                  className="absolute left-14 bg-white font-semibold whitespace-pre text-gray-900 rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:duration-300 group-hover:w-fit"
                 >
-                  <div>{menu?.icon}</div>
-                  <h2
-                    style={{
-                      transitionDelay: `${i + 3}00ms`,
-                    }}
-                    className={`whitespace-pre duration-500 ${
-                      !open && "opacity-0 translate-x-28 overflow-hidden"
-                    }`}
-                  >
-                    {menu?.name}
-                  </h2>
-                  <h2
-                    className={`${
-                      open && "hidden"
-                    } absolute left-48 bg-white font-semibold whitespace-pre text-gray-900 rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit  `}
-                  >
-                    {menu?.name}
-                  </h2>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </motion.div>
-
-      </Layout>
-      </section>
+                  {menu?.name}
+                </h2>
+              )}
+           
+          </Link>
+        ))}
+      </div>
+    </motion.div>
+  </section>
+  
     
   
   );
