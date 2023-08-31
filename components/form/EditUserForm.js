@@ -10,6 +10,7 @@ const EditUserForm = () => {
   
   const router = useRouter();
   const { editUser } = useMyContext();
+  
   const formRef = useRef();
   async function handleAction(formData) {
     const { name, email, password, Firstname, Lastname, Date, Address, Telephone, image } = formData;

@@ -63,7 +63,7 @@ export async function deleteUser(userId){
 export async function getoneUser(userId){
     try{
         const user = await User.findById(userId);
-        return {...User._doc, _id:User._doc._id.toString()};
+        return {...user._doc, _id:user._doc._id.toString()};
     }
     catch(error){
         return { error: error.message }

@@ -20,40 +20,48 @@ const Headers =  async() => {
   const session = await getServerSession(authOptions);
 
   return (
-    <div className="bg-transparent p-0">
-    <nav className="flex items-center justify-between flex-wrap p-4">
+    <div className="bg-transparent p-0 glass">
+    <nav className="flex items-center justify-between flex-wrap p-4 ">
       <div className="flex items-center flex-shrink-0 text-2xl mr-6">
-        <Link href="/" className="text-blue-500 hover:scale-110 hover:bg-gradient-to-r hover:from-pink-500 hover:to-orange-500 hover:text-white transition-all duration-300 ease-in-out">
-            <button className="px-4 py-2">StdActivitycheck</button>
-         
+        <Link href="/" >
+          <button className="px-4 py-2 text-blue-500 glass-button">StdActivitycheck</button>
         </Link>
       </div>
       <div className="block lg:hidden">
-      <MenuResponNav/>
-    </div>
-    <div id="menu-links" className="w-full hidden lg:flex lg:items-center lg:w-auto">
+        <MenuResponNav />
+      </div>
+      <div id="menu-links" className="w-full hidden lg:flex lg:items-center lg:w-auto">
         <div className="text-sm lg:flex-grow">
           {session ? (
             <>
-              <Link href="/profile/client" className="block mt-4 lg:inline-block lg:mt-0 text-blue-500 hover:text-blue-800 mr-4">Profile Client</Link>
-              <Link href="/profile/server" className="block mt-4 lg:inline-block lg:mt-0 text-blue-500 hover:text-blue-800 mr-4">Profile Server</Link>
-              <Link href="/dashboard" className="block mt-4 lg:inline-block lg:mt-0 text-blue-500 hover:text-blue-800 mr-4">Dashboard</Link>
-              <Link href="/dashboard/cruduser" className="block mt-4 lg:inline-block lg:mt-0 text-blue-500 hover:text-blue-800 mr-4">crud</Link>
-              <SignOut user={session?.user} />
+              {session.user.role === 'admin' ? (
+                <>
+                  {/* Links for Admin */}
+                  <Link href="/dashboard" className="block mt-4 lg:inline-block lg:mt-0 text-blue-500 hover:text-blue-800 mr-4 ">Dashboard</Link>
+                  <Link href="/dashboard/cruduser" className="block mt-4 lg:inline-block lg:mt-0 text-blue-500 hover:text-blue-800 mr-4">Crud</Link>
+                </>
+              ) : (
+                <>
+                  {/* Links for Users */}
+                  <Link href="/profile/client" className="block mt-4 lg:inline-block lg:mt-0 text-blue-500 hover:text-blue-800 mr-4">Profile Client</Link>
+                </>
+              )}
+              <SignOut User={session?.user} />
             </>
           ) : null}
         </div>
         {!session && (
           <div>
             <Link href="/signin"
-             className="text-red-500 border-red-500 border-2 px-4 py-2 inline-block text-sm font-semibold rounded hover:text-red-800">
-                Sign In
+              className="inline-block text-sm font-semibold rounded hover:text-red-800 text-red-500 border-red-500 border-2 px-4 py-2">
+              Sign In
             </Link>
           </div>
         )}
       </div>
     </nav>
   </div>
+
   )
 
 }

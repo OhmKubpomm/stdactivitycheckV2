@@ -10,6 +10,7 @@ const Userlist = ({allUser}) => {
         <Card>
             
         <Title>จัดการข้อมูล User</Title>
+       
         <Link href="/dashboard/cruduser/AddUser">เพิ่มข้อมูล</Link>
                 <Table>
                     

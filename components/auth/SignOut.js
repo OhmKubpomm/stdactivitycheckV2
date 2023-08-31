@@ -6,20 +6,20 @@ import { Menu } from '@headlessui/react';
 import Link from 'next/link'
 import { ChevronDownIcon } from '@heroicons/react/solid';
 
-const SignOut = ({ user }) => {
+const SignOut = ({ User }) => {
 
 
 
 
 
   return (
-    <div className=" inline-block text-left">
+    <div className=" inline-block text-left ">
   <Menu>
     {({ open }) => (
       <>
-        <span className="rounded-md shadow-sm">
-          <Menu.Button className="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-md hover:bg-gray-700 focus:outline-none">
-           {user?.name}
+        <span className="rounded-md shadow-sm ">
+          <Menu.Button className="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-md hover:bg-gray-700 focus:outline-none ">
+           {User?.name}
             <ChevronDownIcon className="w-5 h-5 ml-2 -mr-1" aria-hidden="true" />
           </Menu.Button>
         </span>
@@ -38,6 +38,7 @@ const SignOut = ({ user }) => {
             </Menu.Item>
             <button onClick={signOut}   className="block px-4 py-2 text-sm text-gray-700">Logout
   </button>
+  <Link href={`/user/${User._id}`} className="block px-4 py-2 text-sm text-gray-700">ข้อมูลเดี่ยว</Link>
             <div className="border-t my-2"></div>
             <div className="px-4 py-2 text-gray-700 text-sm font-bold">Danger zone</div>
             <Menu.Item>

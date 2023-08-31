@@ -1,40 +1,15 @@
-import AddUserForm from '@/components/form/AddUserForm'
-import React from 'react'
-import { getallUser } from '@/actions/userActions'
-import Userlist from '@/components/profile/Userlist'
+import AddUserForm from "@/components/form/AddUserForm";
+import React from "react";
+import { getallUser } from "@/actions/userActions";
+import Userlist from "@/components/profile/Userlist";
 
-
-const cruduserpage =  async() => {
-  
-  const {allUser}  = await getallUser();
+const cruduserpage = async () => {
+  const { allUser } = await getallUser();
   return (
+    <>
+      <div>{<Userlist allUser={allUser} />}</div>
+    </>
+  );
+};
 
-
-
-     <>
-  
-       
-
-        
-     
-    
-
-
-   
-      
-       
-
-      
-        <div>{ <Userlist allUser={allUser} />}</div>
-
-  
-     
-    
-   
-   </>
-
-  
-  )
-}
-
-export default cruduserpage
+export default cruduserpage;

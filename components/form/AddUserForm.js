@@ -38,7 +38,7 @@ const { Header, Footer, Sider, Content } = Layout;
  
  
    
-    <Card className="min-h-screen w-full   flex flex-col">
+    <Card className="min-h-screen w-full   flex flex-col glass-container">
     <Form onFinish={handleAction} ref={formRef} className='flex flex-row'>
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
       <div className="flex flex-row justify-between ">

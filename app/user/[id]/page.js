@@ -1,14 +1,21 @@
-
+'use server'
 import { getoneUser } from '@/actions/userActions'
-import Usercard from '@/components/profile/Usercard';
+import EditUserForm from '@/components/form/EditUserForm';
+import UsercardOne from '@/components/profile/UsercardOne';
 import React from 'react'
 
-const GetoneuserDetails   = async  ({params:{id}, searchParams}) => {
-    const user =await getoneUser(id);
+import Userlist from '@/components/profile/Userlist';
+import Usercard from '@/components/profile/Usercard';
+const GetoneuserDetails   = async  ({params:{id}, searchParams})  => {
+    const User =await getoneUser(id);
+
   return (
-    <div>{user && <Usercard user={user} />}
+    <div>
+      {User &&<UsercardOne User={User} />}
+    
     </div>
   )
+  
 }
 
 export default GetoneuserDetails
