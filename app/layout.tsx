@@ -39,9 +39,10 @@ export default async function RootLayout({
     
 
      
-      <Provider>
+    
         
       <body>
+      <Provider>
         <header>
         <Headers />
         </header>
@@ -62,12 +63,13 @@ export default async function RootLayout({
           </>
         ) : null}
       
-      <main className='container justify-self-auto'>
+    
           {children}
-          </main>
+         
         </div>
+        </Provider>
         </body>
-      </Provider>
+  
       
     </html>
   );

@@ -15,9 +15,10 @@ export async function createUser(data){
         return { error: error.message }
     }
 }
-export async function getallUser(){
+export async function getallUser(searchParams){
+  const search = searchParams.search || '';
     try{
-        const allUser = await User.find();
+        const allUser = await User.find({name:{$regex:search}});
  
        const newData =allUser.map(User =>(
         {

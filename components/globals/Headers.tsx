@@ -24,6 +24,7 @@ const Headers =  async() => {
     <nav className="flex items-center justify-between flex-wrap p-4 ">
       <div className="flex items-center flex-shrink-0 text-2xl mr-6">
         <Link href="/" >
+         
           <button className="px-4 py-2 text-blue-500 glass-button">StdActivitycheck</button>
         </Link>
       </div>
@@ -52,6 +53,7 @@ const Headers =  async() => {
         </div>
         {!session && (
           <div>
+            
             <Link href="/signin"
               className="inline-block text-sm font-semibold rounded hover:text-red-800 text-red-500 border-red-500 border-2 px-4 py-2">
               Sign In

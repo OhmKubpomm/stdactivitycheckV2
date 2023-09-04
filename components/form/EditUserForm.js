@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Form, Input, message } from "antd";
 import { Title, Card } from "@tremor/react";
 const EditUserForm = () => {
+
+  
   
   const router = useRouter();
   const { editUser } = useMyContext();
@@ -48,7 +50,7 @@ const EditUserForm = () => {
         >
     
           <div className="space-y-4">
-            <Form.Item name="name" label="Username">
+            <Form.Item name="name" label="Username" >
               <Input
                 type="text"
                 name="name"
@@ -128,6 +130,8 @@ const EditUserForm = () => {
                 className="border rounded"
               />
             </Form.Item>
+
+            
           </div>
 
           <div className="flex space-x-4">

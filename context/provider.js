@@ -16,14 +16,16 @@ export const Provider = ({children}) => {
     const value ={editUser,setEditUser}
 
     return (
+        <ThemeProvider attribute='class'>
         <Context.Provider value={value}>
 
-        <ThemeProvider attribute='class'>
+       
     <SessionProvider>
         {children}
         </SessionProvider>
-        </ThemeProvider>
+        
 
         </Context.Provider>
+        </ThemeProvider>
 )
 }
