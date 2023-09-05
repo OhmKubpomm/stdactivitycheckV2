@@ -17,8 +17,20 @@ export async function createUser(data){
 }
 export async function getallUser(searchParams){
   const search = searchParams.search || '';
+
+  const limit =searchParams.limit *1|| 5;
+  const page =searchParams.page *1|| 1;
+  const skip =searchParams.skip *1|| limit * (page - 1);
     try{
-        const allUser = await User.find({name:{$regex:search}});
+        const allUser = await User.find({name:{$regex:search}})
+
+        .limit(limit).skip(skip)
+
+        const count =await User.find({name:{$regex:search}}).count()
+        const totalPage = Math.ceil(count/limit)
+
+      
+      
  
        const newData =allUser.map(User =>(
         {
@@ -28,7 +40,7 @@ export async function getallUser(searchParams){
        }
        ))
     
-         return{allUser:newData}
+         return{allUser:newData,count,totalPage}
     } catch(error){
         return { error: error.message }
     }

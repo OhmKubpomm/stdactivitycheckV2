@@ -20,12 +20,12 @@ const Headers =  async() => {
   const session = await getServerSession(authOptions);
 
   return (
-    <div className="bg-transparent p-0 glass">
+    <div className="bg-transparent p-0">
     <nav className="flex items-center justify-between flex-wrap p-4 ">
       <div className="flex items-center flex-shrink-0 text-2xl mr-6">
         <Link href="/" >
          
-          <button className="px-4 py-2 text-blue-500 glass-button">StdActivitycheck</button>
+          <button className="px-4 py-2 glass-button hover:text-blue-800">StdActivitycheck</button>
         </Link>
       </div>
       <div className="block lg:hidden">
@@ -38,13 +38,13 @@ const Headers =  async() => {
               {session.user.role === 'admin' ? (
                 <>
                   {/* Links for Admin */}
-                  <Link href="/dashboard" className="block mt-4 lg:inline-block lg:mt-0 text-blue-500 hover:text-blue-800 mr-4 ">Dashboard</Link>
-                  <Link href="/dashboard/cruduser" className="block mt-4 lg:inline-block lg:mt-0 text-blue-500 hover:text-blue-800 mr-4">Crud</Link>
+                  <Link href="/dashboard" className="block mt-4 lg:inline-block lg:mt-0  hover:text-blue-800 mr-4 ">Dashboard</Link>
+                  <Link href="/dashboard/cruduser" className="block mt-4 lg:inline-block lg:mt-0  hover:text-blue-800 mr-4">Crud</Link>
                 </>
               ) : (
                 <>
                   {/* Links for Users */}
-                  <Link href="/profile/client" className="block mt-4 lg:inline-block lg:mt-0 text-blue-500 hover:text-blue-800 mr-4">Profile Client</Link>
+                  <Link href="/profile/client" className="block mt-4 lg:inline-block lg:mt-0  hover:text-blue-800 mr-4">Profile Client</Link>
                 </>
               )}
               <SignOut User={session?.user} />

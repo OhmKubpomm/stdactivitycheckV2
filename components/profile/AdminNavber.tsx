@@ -46,7 +46,7 @@ const bottomMenus = [
 
     <section className="flex gap-6">
     <motion.div
-      className={`bg-[#55f16c] min-h-screen transition-all duration-500 text-gray flex flex-col ${open ? 'w-72' : 'w-16'} px-4`}
+      className={`bg-[#FEE3C6] min-h-screen transition-all duration-500 text-gray flex flex-col ${open ? 'w-72' : 'w-16'} px-4`}
     >
       <div className="py-3 flex justify-end">
         <MenuFoldOutlined
@@ -57,7 +57,7 @@ const bottomMenus = [
       </div>
       <nav className="flex-1 mt-4 flex flex-col gap-4">
         {menus?.map((menu, i) => (
-          <Link href={menu.Link} key={i} className={`group flex items-center text-sm gap-3.5 font-medium p-2 hover:bg-gray-200 hover:text-blue-600 rounded-md cursor-pointer
+          <Link href={menu.Link} key={i} className={`group flex items-center text-sm gap-3.5 font-medium p-2 hover:bg-red-200 hover:text-blue-600 rounded-md cursor-pointer
            ${menu?.gap ? 'mt-5' : ''}`}
             >
               <div>{menu?.icon}</div>

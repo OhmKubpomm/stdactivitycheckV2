@@ -1,16 +1,20 @@
-import AddUserForm from "@/components/form/AddUserForm";
+
 import React from "react";
 import { getallUser } from "@/actions/userActions";
 import Userlist from "@/components/profile/Userlist";
 
 
 
+
+
 const cruduserpage = async ({params, searchParams}) => {
 
-  const { allUser } = await getallUser(searchParams);
+
+  const { allUser,totalPage } = await getallUser(searchParams);
   return (
     <>
-      <div>{<Userlist allUser={allUser} />}</div>
+      <div>{<Userlist allUser={allUser} totalPage={totalPage}/>}</div>
+ 
     </>
   );
 };

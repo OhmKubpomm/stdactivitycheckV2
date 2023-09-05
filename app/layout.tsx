@@ -32,7 +32,7 @@ export default async function RootLayout({
   return (
     <html
       lang="th"
-      className={`${mainfont.variable}  font-myfont !scroll-smooth scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-amber-500 scrollbar-track-gray-100`}
+      className={`${mainfont.variable}  font-myfont !scroll-smooth scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-amber-500 scrollbar-track-gray-100 `}
       suppressHydrationWarning={true}
      
     >
@@ -41,7 +41,7 @@ export default async function RootLayout({
      
     
         
-      <body>
+      <body className={`bg-[#fcfcfc]`}>
       <Provider>
         <header>
         <Headers />
