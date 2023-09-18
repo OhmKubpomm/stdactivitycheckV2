@@ -49,7 +49,7 @@ export async function getallUser(searchParams){
 export async function updateUser({name,email,password,Firstname,Lastname,Date,Address,Telephone,image,id }){
     try{
         const user = await User.findByIdAndUpdate(id, {name,email,password,Firstname,Lastname,Date,Address,Telephone,image}, {new:true});
-
+      
         revalidatePath("/")
     
         return {...user._doc, _id:user._id.toString(),msg:'แก้ไขข้อมูลสำเร็จ'}

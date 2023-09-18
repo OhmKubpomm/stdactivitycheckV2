@@ -1,11 +1,10 @@
 "use client";
 import React, { useTransition } from "react";
 import Link from "next/link";
-import AddUserForm from "../form/AddUserForm";
-import EditUserForm from "../form/EditUserForm";
+
 import { useMyContext } from "@/context/provider";
 
-import { Button, Popconfirm, message } from "antd";
+import {  Popconfirm, message } from "antd";
 import { deleteUser } from "@/actions/userActions";
 import {
   Card,
@@ -21,8 +20,8 @@ import {
 } from "@tremor/react";
 import { TrashIcon } from "@heroicons/react/solid";
 import ModeEditRoundedIcon from '@mui/icons-material/ModeEditRounded';
-import Image from "next/image";
 
+import Image from "next/image";
 
 
 const Usercard = ({ User }) => {
@@ -56,7 +55,23 @@ const Usercard = ({ User }) => {
             <Text>{User?.name}</Text>
           </TableCell>
           <TableCell className="table-cell">
-           
+          {User?.image ? (
+  <Image 
+    src={User?.image}
+    alt="User profile picture"
+    sizes="100vw"
+    width={100}
+    height={100}
+    
+    quality={60}
+    className="transition-opacity opacity-0 duration-[2s]"
+    onLoadingComplete={(image) => { image.classList.remove('opacity-0'); }}
+  />
+) : (
+  // You can put some placeholder here when image is not available
+  <div>No Image</div>
+)}
+
           </TableCell>
           <TableCell className="table-cell">
             <Text>{User?.email}</Text>
@@ -86,6 +101,7 @@ const Usercard = ({ User }) => {
      
               <Link
                 href="/dashboard/cruduser/EditUser"
+             
                 onClick={() => setEditUser(User)}
               >
  <Badge color="yellow" icon={ModeEditRoundedIcon} >

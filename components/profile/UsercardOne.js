@@ -3,9 +3,11 @@ import React from "react";
 import Link from "next/link";
 
 import { useMyContext } from "@/context/provider";
+import Image from "next/image";
 
 import {
   Card,
+  Badge,
   Table,
   TableHead,
   TableRow,
@@ -13,7 +15,7 @@ import {
   TableBody,
   TableCell,
 } from "@tremor/react";
-
+import ModeEditRoundedIcon from '@mui/icons-material/ModeEditRounded';
 const UsercardOne = ({ User }) => {
   const { setEditUser } = useMyContext();
 
@@ -32,6 +34,7 @@ const UsercardOne = ({ User }) => {
         <TableHead>
           <TableRow>
             <TableHeaderCell>ชื่อผู้ใช้งาน</TableHeaderCell>
+            <TableHeaderCell>รูปภาพ</TableHeaderCell>
             <TableHeaderCell>อีเมล</TableHeaderCell>
             <TableHeaderCell>รหัสผ่าน</TableHeaderCell>
             <TableHeaderCell>ชื่อ</TableHeaderCell>
@@ -47,6 +50,25 @@ const UsercardOne = ({ User }) => {
         <TableBody>
           <TableRow>
             <TableCell>{User?.name}</TableCell>
+            <TableCell className="table-cell">
+          {User?.image ? (
+  <Image 
+    src={User?.image}
+    alt="User profile picture"
+    sizes="100vw"
+    width={100}
+    height={100}
+    className="transition-opacity opacity-0 duration-[2s]"
+    onLoadingComplete={(image) => { image.classList.remove('opacity-0'); }}
+    quality={60}
+  
+  />
+) : (
+  // You can put some placeholder here when image is not available
+  <div>No Image</div>
+)}
+
+          </TableCell>
             <TableCell>{User?.email}</TableCell>
             <TableCell>{User?.password}</TableCell>
             <TableCell>{User?.Firstname}</TableCell>
@@ -55,9 +77,22 @@ const UsercardOne = ({ User }) => {
             <TableCell>{User?.Address}</TableCell>
             <TableCell>{User?.Telephone}</TableCell>
             <TableCell>{User?.role}</TableCell>
-            <TableCell>
-            <Link href="/dashboard/cruduser/EditUser" onClick={() => setEditUser(User)}>แก้ไข</Link>
-            </TableCell>
+            <TableCell className="table-cell" >
+     
+     <Link
+       href="/dashboard/cruduser/EditUser"
+    
+       onClick={() => setEditUser(User)}
+     >
+<Badge color="yellow" icon={ModeEditRoundedIcon} >
+
+
+       แก้ไข
+      
+       </Badge>
+     </Link>
+  
+ </TableCell>
           </TableRow>
         </TableBody>
       </Table>

@@ -3,7 +3,16 @@
 @tailwind utilities;
 
 
-
+/* image && image upload  */
+img{
+  object-fit: contain;
+}
+.image-upload-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+/* end image && image upload  */
 .events {
     margin: 0;
     padding: 0;
