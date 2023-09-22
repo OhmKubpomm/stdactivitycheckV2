@@ -94,7 +94,15 @@ const SignUp = () => {
               <Image
                 src={profilePic}
                 alt="Picture of the author"
+               
                 loading="lazy"
+                sizes="100vw"
+                style={{ width: "100%", height: "auto" }}
+                width={200}
+                height={100}
+              
+               
+                quality={60}
               />
             </div>
           </div>

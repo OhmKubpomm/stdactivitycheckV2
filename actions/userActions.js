@@ -2,11 +2,20 @@
 import connectdatabase from "@/utils/connectdatabase"
 import User from "@/models/Usermodel"
 import { revalidatePath } from "next/cache";
+import bcrypt from 'bcrypt'
 connectdatabase();
 export async function createUser(data){
     try{
-        const newUser = new User(data);
+        // Hash the password first
+        const hashedPassword = await bcrypt.hash(data.password, 12);
         
+        // Create a new User object with the hashed password
+        const newUser = new User({
+            ...data,
+            password: hashedPassword
+        });
+      
+         
         await newUser.save();
         revalidatePath("/") // ใช้ในการ refresh หน้าเว็บ
         return {...newUser._doc,_id:newUser._id.toString()},{msg:'เพิ่มข้อมูลสำเร็จ'};

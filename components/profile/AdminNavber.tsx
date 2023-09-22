@@ -24,7 +24,7 @@ const { Title } = Typography;
 const AdminaNavbar = () => {
   const [open, setOpen] = useState(true);
   const menus = [
-    { name: "Dashboard", icon: <DashboardOutlined />, Link: "/profile" },
+    { name: "จัดการข้อมูลผู้ใช้งาน", icon: <DashboardOutlined />, Link: "/dashboard/cruduser" },
     { name: "Inbox", icon: <InboxOutlined />, Link: "/" },
     { name: "Accounts", icon: <UserOutlined />, gap: true, Link: "/" },
     { name: "Schedule", icon: <ScheduleOutlined />, Link: "/" },
@@ -78,33 +78,7 @@ const AdminaNavbar = () => {
           ))}
         </nav>
 
-        <div className="flex-1"></div>
-        <Title level={5}>Account</Title>
-        <div className="mb-4 flex flex-col gap-4">
-          {bottomMenus?.map((menu, i) => (
-            <Link
-              href={menu.Link}
-              key={i}
-              className={`group flex items-center text-sm gap-3.5 font-medium p-2 hover:bg-gray-200 hover:text-blue-600 rounded-md cursor-pointer
-           ${menu?.gap ? "mt-5 bottom-0" : ""}`}
-            >
-              <div>{menu?.icon}</div>
-              <h2
-                style={{ transitionDelay: `${i + 3}00ms` }}
-                className={`whitespace-pre transition-all duration-500 ${
-                  !open && "opacity-0 translate-x-28 overflow-hidden"
-                }`}
-              >
-                {menu?.name}
-              </h2>
-              {!open && (
-                <h2 className="absolute left-14 bg-white font-semibold whitespace-pre text-gray-900 rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:duration-300 group-hover:w-fit">
-                  {menu?.name}
-                </h2>
-              )}
-            </Link>
-          ))}
-        </div>
+    
       </motion.div>
     </section>
   );

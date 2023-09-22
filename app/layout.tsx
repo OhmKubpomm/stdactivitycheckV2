@@ -41,15 +41,17 @@ export default async function RootLayout({
      
     
         
-      <body className={`bg-[#fcfcfc]`}>
+      <body>
       <Provider>
         <header>
         <Headers />
         </header>
         
          
+       
+          <div className="flex">
+
          
-          <div className='flex flex-auto'>
           {role === 'admin' ? (
           <>
          
@@ -64,9 +66,12 @@ export default async function RootLayout({
         ) : null}
       
     
+      <div className='flex flex-auto'>
+
           {children}
-         
-        </div>
+        
+      </div>
+      </div>
         </Provider>
         </body>
   

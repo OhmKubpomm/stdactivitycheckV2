@@ -54,7 +54,7 @@ const UsercardOne = ({ User }) => {
           {User?.image ? (
   <Image 
     src={User?.image}
-    alt="User profile picture"
+    alt={User?.image}
     sizes="100vw"
     width={100}
     height={100}

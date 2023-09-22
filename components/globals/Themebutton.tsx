@@ -13,9 +13,9 @@ const Themebutton = () => {
     }
   return (
     <Button
-    className='flex items-center justify-center rounded-lg gap-2'
+    className='  rounded-lg '
      onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}>
-        {resolvedTheme === 'dark' ?(
+        {resolvedTheme === 'light' ?(
             <LightModeIcon  className='h-5 w-5 text-orange-500'/>
         )  : (
             <DarkModeIcon className='h-5 w-5 text-slate-800'/>

@@ -5,9 +5,11 @@ export default withAuth(
     function middleware(req){
         const {pathname,origin} =req.nextUrl;
         const {token} =req.nextauth;
-        if(pathname.startsWith('/dashboard') && token?.user?.role !== 'admin'){
+      
+        if(pathname.startsWith('/dashboard') && !token){
             return new NextResponse('You are not Authorized')
         }
+    
     },
     {
         callbacks:{

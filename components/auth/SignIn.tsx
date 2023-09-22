@@ -108,6 +108,13 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                     src={profilePic}
                     alt="Author's profile picture"
                     loading="lazy"
+                    sizes="100vw"
+                    style={{ width: "100%", height: "auto" }}
+                    width={200}
+                    height={100}
+                  
+                   
+                    quality={60}
                   />
                 </div>
               </div>
