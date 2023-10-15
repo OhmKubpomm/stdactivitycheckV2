@@ -1,51 +1,21 @@
+/* eslint-disable tailwindcss/migration-from-tailwind-2 */
+/* eslint-disable tailwindcss/no-custom-classname */
 "use client";
 
 import React, { useState } from "react";
 import { SignInOptions, signIn } from "next-auth/react";
 import Link from "@mui/material/Link";
-import {
-  MailOutlined,
-  LockOutlined,
-  GoogleOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-} from "@ant-design/icons";
+import { MailOutlined, LockOutlined, GoogleOutlined } from "@ant-design/icons";
 
 import { useForm } from "react-hook-form";
 import Form from "@/components/globals/Form";
 import ButtonLoad from "@/components/globals/ButtonLoad";
 import Image from "next/image";
 import profilePic from "@/public/Image/undraw_sign_up.svg";
-import {
-  Typography,
-  Input,
-  Progress,
-  List,
-  Layout,
-  Tooltip,
-  Modal,
-  message,
-} from "antd";
+import { Typography, Input, Layout, Tooltip, Modal, message } from "antd";
 
 import { motion } from "framer-motion";
 import { forgotPasswordWithCredentials } from "@/actions/authActions";
-function Copyright(props: any) {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
 
 const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
   const { register, handleSubmit } = useForm();
@@ -78,27 +48,27 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
   }
 
   const [value, setValue] = useState("");
-  {
-    /* ฟังก์ชั่นนี้อยู่ในforgot password */
-  }
+
+  /* ฟังก์ชั่นนี้อยู่ในforgot password */
+
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const { Text } = Typography;
 
   return (
     <>
       <Layout>
-        <div className="bg-white dark:bg-gray-900 transition-all ease-in-out duration-700">
-          <div className="flex justify-center h-screen">
+        <div className="bg-white transition-all duration-700 ease-in-out dark:bg-gray-900">
+          <div className="flex h-screen justify-center">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 1 }}
               className="hidden bg-cover lg:block lg:w-1/3"
             >
-              <div className="flex items-center h-full px-20 bg-opacity-40">
+              <div className="flex h-full items-center bg-opacity-40 px-20">
                 <div>
                   <motion.h2
-                    className="text-2xl font-bold bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-500 via-teal-500 to-orange-500 text-transparent bg-clip-text sm:text-3xl gap-1"
+                    className="gap-1 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-500 via-teal-500 to-orange-500 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl"
                     animate={{ scale: [1, 1.05, 1] }}
                   >
                     Welcome!
@@ -112,8 +82,6 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                     style={{ width: "100%", height: "auto" }}
                     width={200}
                     height={100}
-                  
-                   
                     quality={60}
                   />
                 </div>
@@ -121,14 +89,14 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
             </motion.div>
 
             <motion.div
-              className="flex items-center w-full max-w-md px-6 mx-auto lg:w-2/6 space-y-4"
+              className="mx-auto flex w-full max-w-md items-center space-y-4 px-6 lg:w-2/6"
               initial={{ x: 100 }}
               animate={{ x: 0 }}
               transition={{ type: "spring", stiffness: 120 }}
             >
               <div className="flex-1">
                 <div className="text-center">
-                  <div className="flex justify-center mx-auto">
+                  <div className="mx-auto flex justify-center">
                     <Typography.Title
                       style={{ margin: 10 }}
                       className="text-gray-500 dark:text-gray-300"
@@ -145,7 +113,7 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                 <div className="mt-8 space-y-4">
                   <Form
                     action={handleCredentialsLogin}
-                    className="mt-8 space-y-3 gap-2"
+                    className="mt-8 gap-2 space-y-3"
                   >
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
@@ -201,7 +169,7 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                     >
                       <Form action={handleForgotPassword}>
                         <div className="mb-4">
-                          <label className="block mb-1 text-sm text-gray-600 dark:text-gray-200">
+                          <label className="mb-1 block text-sm text-gray-600 dark:text-gray-200">
                             Email Address
                           </label>
                           <Tooltip
@@ -229,7 +197,7 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                           <ButtonLoad
                             htmlType={undefined}
                             value="Submit"
-                            className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:bg-blue-400 focus:ring focus:ring-blue-300 focus:ring-opacity-50"
+                            className="w-full rounded-lg bg-blue-500 px-4 py-2 tracking-wide text-white transition-colors duration-300 hover:bg-blue-400 focus:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-50"
                           />
                         </motion.div>
                       </Form>
@@ -252,34 +220,34 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                       <ButtonLoad
                         htmlType={undefined}
                         value="Login"
-                        className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        className="w-full rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                       >
                         Login
                       </ButtonLoad>
                     </motion.div>
                   </Form>
-                  {/*End sign in with email-pass */}
+                  {/* End sign in with email-pass */}
 
-                  <div className="flex items-center justify-between mt-2">
+                  <div className="mt-2 flex items-center justify-between">
                     <span className="w-1/5 border-b dark:border-gray-600 md:w-1/4"></span>
 
-                    <p className="text-xs text-gray-500 uppercase dark:text-gray-400 hover:underline">
+                    <p className="text-xs uppercase text-gray-500 hover:underline dark:text-gray-400">
                       or sign in with
                     </p>
 
                     <span className="w-1/5 border-b dark:border-gray-600 md:w-1/4"></span>
                   </div>
 
-                  {/* sign in with google*/}
+                  {/* sign in with google */}
                   <ButtonLoad
                     htmlType={undefined}
                     icon={<GoogleOutlined />}
                     value="Login with Google"
                     variant="contained"
                     onClick={() => signIn("google", { callbackUrl })}
-                    className="inline-flex items-center justify-center px-4 py-2 bg-white text-black font-bold rounded shadow-md transform transition hover:scale-105 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full mt-4"
+                    className="mt-4 inline-flex w-full items-center justify-center rounded bg-white px-4 py-2 font-bold text-black shadow-md transition hover:scale-105 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   ></ButtonLoad>
-                  {/*end sign in with google*/}
+                  {/* end sign in with google */}
                 </div>
               </div>
             </motion.div>

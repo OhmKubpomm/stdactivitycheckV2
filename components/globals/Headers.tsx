@@ -1,79 +1,68 @@
+"use server";
+import { getServerSession } from "next-auth";
+import * as React from "react";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-'use server'
-import { getServerSession } from 'next-auth'
-import * as React from 'react';
-import { authOptions} from '@/app/api/auth/[...nextauth]/route'
+import Link from "next/link";
+import SignOut from "../auth/SignOut";
 
+import Themebutton from "./Themebutton";
 
+import MenuResponNav from "./MenuResponNav";
 
-import Link from 'next/link';
-import SignOut from '../auth/SignOut';
-
-
-import Themebutton from './Themebutton';
-
-import MenuResponNav from './MenuResponNav';
-
-
-const Headers =  async() => {
+const Headers = async () => {
   const session = await getServerSession(authOptions);
 
   return (
     <div className="bg-transparent p-0">
-    <nav className="flex items-center justify-between flex-wrap p-4 ">
-      <div className="flex items-center flex-shrink-0 text-2xl mr-6">
-        <Link href="/" >
-         
-          <button className="px-4 py-2 glass-button hover:text-blue-800">StdActivitycheck</button>
-        </Link>
-      </div>
-      <div className="block lg:hidden">
-        <MenuResponNav />
-      </div>
-      <div id="menu-links" className="w-full hidden lg:flex lg:items-center lg:w-auto">
-        <div className="text-sm lg:flex-grow">
-      
-          {session ? (
-            <>
-              {session.user.role === 'admin' ? (
-                <>
-                  {/* Links for Admin */}
-                
-                </>
-              ) : (
-                <>
-                  {/* Links for Users */}
-                 
-                </>
-              )}
-               <div className="flex items-center space-x-4">
-                <div>
-                  <Themebutton />
-                </div>
-                <div>
-                <SignOut User={session?.user} />
-                </div>
-              </div>
-              
-            </>
-          ) : null}
+      <nav className="flex flex-wrap items-center justify-between p-4 ">
+        <div className="mr-6 flex shrink-0 items-center text-2xl">
+          <Link href="/">
+            <button className="glass-button px-4 py-2 hover:text-blue-800">
+              StdActivitycheck
+            </button>
+          </Link>
         </div>
-        {!session && (
-          <div>
-            
-            <Link href="/signin"
-              className="inline-block text-sm font-semibold rounded hover:text-red-800 text-red-500 border-red-500 border-2 px-4 py-2">
-              Sign In
-            </Link>
+        <div className="block lg:hidden">
+          <MenuResponNav />
+        </div>
+        <div
+          id="menu-links"
+          className="hidden w-full lg:flex lg:w-auto lg:items-center"
+        >
+          <div className="text-sm lg:grow">
+            {session ? (
+              <>
+                {session.user.role === "admin" ? (
+                  <>{/* Links for Admin */}</>
+                ) : (
+                  <>{/* Links for Users */}</>
+                )}
+                <div className="flex items-center space-x-4">
+                  <div>
+                    <Themebutton />
+                  </div>
+                  <div>
+                    <SignOut User={session?.user} />
+                  </div>
+                </div>
+              </>
+            ) : null}
           </div>
-        )}
-      </div>
-    </nav>
-  </div>
+          {!session && (
+            <div>
+              <Link
+                href="/Signin"
+                className="inline-block rounded border-2 border-red-500 px-4 py-2 text-sm font-semibold text-red-500 hover:text-red-800"
+              >
+                Sign In
+              </Link>
+            </div>
+          )}
+        </div>
+      </nav>
+    </div>
+  );
+};
 
-  )
-
-}
-
-export default Headers
-
+export default Headers;

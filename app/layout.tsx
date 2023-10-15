@@ -1,13 +1,13 @@
+import React from "react";
 import { Provider } from "@/context/provider";
 import "./globals.css";
 import Headers from "@/components/globals/Headers";
 
 import { Prompt } from "next/font/google";
 import Usernavbar from "@/components/profile/Usernavbar";
-import { getServerSession } from 'next-auth'
+import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import AdminaNavbar from "@/components/profile/AdminNavber";
-import Head from "next/head"
 
 export const metadata = {
   title: "STDACTIVITYCHECK",
@@ -18,10 +18,11 @@ export const metadata = {
 const mainfont = Prompt({
   weight: "400",
   subsets: ["thai"],
-  style:"normal",
+  style: "normal",
   display: "swap",
   variable: "--font-main-font",
 });
+
 export default async function RootLayout({
   children,
 }: {
@@ -32,50 +33,31 @@ export default async function RootLayout({
   return (
     <html
       lang="th"
-      className={`${mainfont.variable}  font-myfont !scroll-smooth scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-amber-500 scrollbar-track-gray-100 `}
+      className={`${mainfont.variable}  !scroll-smooth font-myfont scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-amber-500 scrollbar-thumb-rounded `}
       suppressHydrationWarning={true}
-     
     >
-    
-
-     
-    
-        
       <body>
-      <Provider>
-        <header>
-        <Headers />
-        </header>
-        
-         
-       
+        <Provider>
+          <header>
+            <Headers />
+          </header>
+
           <div className="flex">
-
-         
-          {role === 'admin' ? (
-          <>
-         
-          <AdminaNavbar/>
-           
-          </>
-        ) : role === 'user' ? (
-          <>
-             <Usernavbar/>
-           
-          </>
-        ) : null}
-      
-    
-      <div className='flex flex-auto'>
-
-          {children}
-        
-      </div>
-      </div>
+            {role === "admin" ? (
+              <>
+                <AdminaNavbar />
+              </>
+            ) : role === "user" ? (
+              <>
+                <Usernavbar />
+              </>
+            ) : null}
+            <section>
+              <div>{children}</div>
+            </section>
+          </div>
         </Provider>
-        </body>
-  
-      
+      </body>
     </html>
   );
 }
