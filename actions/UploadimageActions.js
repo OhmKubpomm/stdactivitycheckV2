@@ -14,7 +14,6 @@ cloudinary.config({
 });
 async function savePhotoLocal(formData2) {
   const files = formData2.getAll("files");
-  
 
   const multipleBufferPromise = files.map((file) =>
     file.arrayBuffer().then((data) => {
@@ -43,9 +42,9 @@ export async function uploadPhoto(formData2, userId) {
     // save photo to temp folder
     const newFiles = await savePhotoLocal(formData2);
 
-    //upload to cloudiary
+    // upload to cloudiary
     const photos = await uploadphotoToCloud(newFiles);
-    //delete photo in temp folder after upload to cloudiary
+    // delete photo in temp folder after upload to cloudiary
     newFiles.map((file) => fs.unlink(file.filepath));
 
     // update photo user to mongodb
@@ -66,7 +65,7 @@ export async function uploadPhoto(formData2, userId) {
 
     return { msg: "เพิ่มรูปภาพสำเร็จ", image: newPhotos };
   } catch (error) {
-    //end update photo user
+    // end update photo user
 
     return { error: error.message };
   }
@@ -83,21 +82,13 @@ export async function deletePhoto(userId, imageUrl) {
   try {
     const publicId = extractPublicIdFromUrl(imageUrl);
 
+    await cloudinary.v2.uploader.destroy(publicId);
 
-     await cloudinary.v2.uploader.destroy(publicId); 
-   
-  
-      // Update MongoDB
-       await User.findByIdAndUpdate(userId, { image: "" }, { new: true });
-      revalidatePath("/");
-     
+    // Update MongoDB
+    await User.findByIdAndUpdate(userId, { image: "" }, { new: true });
+    revalidatePath("/");
 
-      return { msg: "ลบรูปภาพสำเร็จ" };
-     
- 
-    
- 
-
+    return { msg: "ลบรูปภาพสำเร็จ" };
   } catch (error) {
     console.error(error);
     return { error: error.message };
@@ -105,13 +96,12 @@ export async function deletePhoto(userId, imageUrl) {
 }
 export async function insertPhoto(formData2) {
   try {
-
     // save photo to temp folder
     const newFiles = await savePhotoLocal(formData2);
 
-    //upload to cloudiary
+    // upload to cloudiary
     const photos = await uploadphotoToCloud(newFiles);
-    //delete photo in temp folder after upload to cloudiary
+    // delete photo in temp folder after upload to cloudiary
     newFiles.map((file) => fs.unlink(file.filepath));
 
     // update photo user to mongodb
@@ -121,13 +111,11 @@ export async function insertPhoto(formData2) {
       return newPhoto;
     });
 
-
     revalidatePath("/");
-
 
     return { msg: "เพิ่มรูปภาพสำเร็จ", image: newPhotos };
   } catch (error) {
-    //end update photo user
+    // end update photo user
 
     return { error: error.message };
   }

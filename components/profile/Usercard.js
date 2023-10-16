@@ -9,7 +9,7 @@ import { useMyContext } from "@/context/provider";
 import { Popconfirm, message } from "antd";
 import { deleteUser } from "@/actions/userActions";
 import { Text, Badge } from "@tremor/react";
-import { TableRow, TableCell } from "@mui/material";
+import { TableRow, TableCell } from "@/components/ui/table";
 import { TrashIcon } from "@heroicons/react/solid";
 import ModeEditRoundedIcon from "@mui/icons-material/ModeEditRounded";
 
@@ -41,9 +41,7 @@ const Usercard = ({ User }) => {
 
   return (
     <TableRow>
-      <TableCell>
-        <Text>{User?.name}</Text>
-      </TableCell>
+      <TableCell>{User?.name}</TableCell>
       <TableCell>
         {User?.image ? (
           <Image
@@ -64,30 +62,14 @@ const Usercard = ({ User }) => {
           <div>No Image</div>
         )}
       </TableCell>
-      <TableCell>
-        <Text>{User?.email}</Text>
-      </TableCell>
-      <TableCell>
-        <Text>{User?.password}</Text>
-      </TableCell>
-      <TableCell>
-        <Text>{User?.Firstname}</Text>
-      </TableCell>
-      <TableCell>
-        <Text>{User?.Lastname}</Text>
-      </TableCell>
-      <TableCell>
-        <Text>{User?.Date}</Text>
-      </TableCell>
-      <TableCell>
-        <Text>{User?.Address}</Text>
-      </TableCell>
-      <TableCell>
-        <Text>{User?.Telephone}</Text>
-      </TableCell>
-      <TableCell>
-        <Text>{User?.role}</Text>
-      </TableCell>
+      <TableCell>{User?.email}</TableCell>
+      <TableCell>{User?.password}</TableCell>
+      <TableCell>{User?.Firstname}</TableCell>
+      <TableCell>{User?.Lastname}</TableCell>
+      <TableCell>{User?.Date}</TableCell>
+      <TableCell>{User?.Address}</TableCell>
+      <TableCell>{User?.Telephone}</TableCell>
+      <TableCell>{User?.role}</TableCell>
       <TableCell>
         <Link
           href="/dashboard/cruduser/EditUser"

@@ -117,7 +117,7 @@ const AddUserForm = () => {
     });
   };
   return (
-    <Card className="gap-4 rounded-lg p-6 shadow-md">
+    <Card className="gap-4 rounded-lg p-6 shadow-md ">
       <Form
         onFinish={handleAction}
         ref={formRef}
@@ -133,7 +133,7 @@ const AddUserForm = () => {
           </div>
 
           <Form.Item label="Username" name="name">
-            <Input type="text" name="name" className="rounded border " />
+            <Input type="text" name="name" className="  rounded  border" />
           </Form.Item>
           <Form.Item label="Email" name="email">
             <Input type="email" name="email" className="rounded border" />
@@ -238,11 +238,11 @@ const AddUserForm = () => {
         </motion.div>
       </Form>
 
-      <div className="flex space-x-4">
+      <div className="flex space-x-4 ">
         <ButtonLoad
           onClick={() => router.back()}
           value="Go Back"
-          className="rounded bg-gray-300 px-4 py-2"
+          className="btn glass-button px-4 py-2 hover:text-blue-800"
         />
       </div>
     </Card>

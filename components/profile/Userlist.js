@@ -4,22 +4,21 @@ import Usercard from "@/components/profile/Usercard";
 import Link from "next/link";
 
 import {
-  Card,
   Table,
-  TableHead,
-  TableRow,
-  TableHeaderCell,
   TableBody,
-  Title,
-  Badge,
-} from "@tremor/react";
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+import { Card, Title, Badge } from "@tremor/react";
 import Searchform from "@/components/globals/Searchform";
 import PersonAddAltRoundedIcon from "@mui/icons-material/PersonAddAltRounded";
 import Pagination from "@/components/globals/Paginationform";
 const Userlist = ({ allUser, totalPage }) => {
   return (
     <>
-      <Card>
+      <Card className="card-wrapper">
         <Title>จัดการข้อมูล User</Title>
 
         <Link href="/dashboard/cruduser/AddUser">
@@ -30,22 +29,22 @@ const Userlist = ({ allUser, totalPage }) => {
         <div>
           <Searchform />
         </div>
-        <Table className="container mt-5  justify-self-auto">
-          <TableHead>
+        <Table className="mt-5">
+          <TableHeader>
             <TableRow>
-              <TableHeaderCell>ชื่อผู้ใช้งาน</TableHeaderCell>
-              <TableHeaderCell>รูปภาพ</TableHeaderCell>
-              <TableHeaderCell>อีเมล</TableHeaderCell>
-              <TableHeaderCell>รหัสผ่าน</TableHeaderCell>
-              <TableHeaderCell>ชื่อ</TableHeaderCell>
-              <TableHeaderCell>นามสกุล</TableHeaderCell>
-              <TableHeaderCell>วันเกิด</TableHeaderCell>
-              <TableHeaderCell>ที่อยู่</TableHeaderCell>
-              <TableHeaderCell>เบอร์โทร</TableHeaderCell>
-              <TableHeaderCell>สิทธิ์การใช้งาน</TableHeaderCell>
-              <TableHeaderCell>ตั้งค่า</TableHeaderCell>
+              <TableHead>ชื่อผู้ใช้งาน</TableHead>
+              <TableHead>รูปภาพ</TableHead>
+              <TableHead>อีเมล</TableHead>
+              <TableHead>รหัสผ่าน</TableHead>
+              <TableHead>ชื่อ</TableHead>
+              <TableHead>นามสกุล</TableHead>
+              <TableHead>วันเกิด</TableHead>
+              <TableHead>ที่อยู่</TableHead>
+              <TableHead>เบอร์โทร</TableHead>
+              <TableHead>สิทธิ์การใช้งาน</TableHead>
+              <TableHead>ตั้งค่า</TableHead>
             </TableRow>
-          </TableHead>
+          </TableHeader>
           <TableBody>
             {allUser.map((User) => {
               return <Usercard key={User._id} User={User} />;

@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 const { fontFamily } = require("tailwindcss/defaultTheme");
 module.exports = {
+  darkMode: ["class"],
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -8,7 +9,7 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}",
     "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}", // Tremor module
   ],
-  darkMode: "class",
+
   theme: {
     container: {
       center: true,
@@ -30,6 +31,11 @@ module.exports = {
       },
 
       colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
         primary: {
           500: "#FF7000",
           100: "#FFF1E6",
@@ -49,7 +55,7 @@ module.exports = {
           500: "#7B8EC8",
           400: "#858EAD",
         },
-
+        "accent-blue": "#1DA1F2",
         // light mode
         tremor: {
           brand: {
@@ -124,8 +130,17 @@ module.exports = {
           "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
         "dark-tremor-dropdown":
           "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+        "light-100":
+          "0px 12px 20px 0px rgba(184, 184, 184, 0.03), 0px 6px 12px 0px rgba(184, 184, 184, 0.02), 0px 2px 4px 0px rgba(184, 184, 184, 0.03)",
+        "light-200": "10px 10px 20px 0px rgba(218, 213, 213, 0.10)",
+        "light-300": "-10px 10px 20px 0px rgba(218, 213, 213, 0.10)",
+        "dark-100": "0px 2px 10px 0px rgba(46, 52, 56, 0.10)",
+        "dark-200": "2px 0px 20px 0px rgba(39, 36, 36, 0.04)",
       },
       borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
         "tremor-small": "0.375rem",
         "tremor-default": "0.5rem",
         "tremor-full": "9999px",
@@ -135,6 +150,23 @@ module.exports = {
         "tremor-default": ["0.875rem", { lineHeight: "1.25rem" }],
         "tremor-title": ["1.125rem", { lineHeight: "1.75rem" }],
         "tremor-metric": ["1.875rem", { lineHeight: "2.25rem" }],
+      },
+      screens: {
+        xs: "420px",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: 0 },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: 0 },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },
@@ -170,5 +202,7 @@ module.exports = {
   plugins: [
     require("@headlessui/tailwindcss"),
     require("tailwind-scrollbar")({ nocompatible: true }),
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
   ],
 };

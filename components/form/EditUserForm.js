@@ -1,3 +1,4 @@
+/* eslint-disable array-callback-return */
 "use client";
 import React, { useRef, useState } from "react";
 import { updateUser } from "@/actions/userActions";
@@ -6,14 +7,9 @@ import ButtonLoad from "../globals/ButtonLoad";
 import { useMyContext } from "@/context/provider";
 import { useRouter } from "next/navigation";
 import { Form, Input, message, Upload, Modal } from "antd";
-import { Title, Card,Icon } from "@tremor/react";
-import { RefreshIcon } from "@heroicons/react/outline";
+import { Title, Card } from "@tremor/react";
 
-import {
-  UploadOutlined,
-
-  
-} from "@ant-design/icons";
+import { UploadOutlined } from "@ant-design/icons";
 import Image from "next/image";
 const EditUserForm = () => {
   /* โค้ดเกี่ยวกับการอัพโหลดรูปภาพ */
@@ -52,8 +48,6 @@ const EditUserForm = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
 
-
-
   const handlePreview = async (file) => {
     setPreviewImage(file.thumbUrl);
     setPreviewOpen(true);
@@ -69,9 +63,6 @@ const EditUserForm = () => {
       message.error(resdelete?.error);
     }
   };
-
-
-
 
   const router = useRouter();
   const { editUser } = useMyContext();
@@ -114,8 +105,8 @@ const EditUserForm = () => {
 
   return (
     <>
-      <Card className="gap-4 p-6 rounded-lg shadow-md ">
-        <Title className="text-2xl font-semibold mb-4">แก้ไขข้อมูล User</Title>
+      <Card className="gap-4 rounded-lg p-6 shadow-md ">
+        <Title className="mb-4 text-2xl font-semibold">แก้ไขข้อมูล User</Title>
         <Form
           onFinish={handleAction}
           ref={formRef}
@@ -131,18 +122,18 @@ const EditUserForm = () => {
             Telephone: editUser?.Telephone,
           }}
         >
-          <div className="space-y-4" >
-            <Form.Item label="Username" name="name"  >
-              <Input type="text" name="name" className="border rounded " />
+          <div className="space-y-4">
+            <Form.Item label="Username" name="name">
+              <Input type="text" name="name" className="rounded border " />
             </Form.Item>
             <Form.Item label="Email" name="email">
-              <Input type="email" name="email" className="border rounded" />
+              <Input type="email" name="email" className="rounded border" />
             </Form.Item>
             <Form.Item label="Password" name="password">
               <Input.Password
                 type="password"
                 name="password"
-                className="border rounded"
+                className="rounded border"
               />
             </Form.Item>
           </div>
@@ -152,31 +143,31 @@ const EditUserForm = () => {
               <Input
                 type="text"
                 name="Firstname"
-                className="border rounded w-full"
+                className="w-full rounded border"
               />
             </Form.Item>
             <Form.Item label="Lastname" name="Lastname">
               <Input
                 type="text"
                 name="Lastname"
-                className="border rounded w-full"
+                className="w-full rounded border"
               />
             </Form.Item>
           </div>
 
           <div className="space-y-4">
             <Form.Item label="Date" name="Date">
-              <Input type="date" name="Date" className="border rounded" />
+              <Input type="date" name="Date" className="rounded border" />
             </Form.Item>
             <Form.Item label="Address" name="Address">
               <Input.TextArea
                 type="textarea"
                 name="Address"
-                className="border rounded"
+                className="rounded border"
               />
             </Form.Item>
             <Form.Item label="Telephone" name="Telephone">
-              <Input type="tel" name="Telephone" className="border rounded" />
+              <Input type="tel" name="Telephone" className="rounded border" />
             </Form.Item>
           </div>
 
@@ -184,11 +175,11 @@ const EditUserForm = () => {
             <ButtonLoad
               htmlType="submit"
               value="Submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded"
+              className="rounded bg-blue-500 px-4 py-2 text-white"
             />
           </div>
         </Form>
-        
+
         <Form.Item label="Image" className="mb-4">
           {editUser?.image && (
             <div className="mb-4">
@@ -200,7 +191,7 @@ const EditUserForm = () => {
                 src={editUser?.image}
                 alt={editUser?.image}
                 quality={60}
-                className="transition-opacity opacity-0 duration-[2s]"
+                className="opacity-0 transition-opacity duration-[2s]"
                 onLoadingComplete={(image) => {
                   image.classList.remove("opacity-0");
                 }}
@@ -209,7 +200,7 @@ const EditUserForm = () => {
               <ButtonLoad
                 onClick={handleDelete}
                 value="Delete"
-                className="bg-red-500 text-white px-4 py-2 rounded"
+                className="rounded bg-red-500 px-4 py-2 text-white"
               />
             </div>
           )}
@@ -261,20 +252,17 @@ const EditUserForm = () => {
             <ButtonLoad
               icon={UploadOutlined}
               value="upload"
-              className="bg-gray-300 px-4 py-2 rounded"
+              className="rounded bg-gray-300 px-4 py-2"
             />
           </Form.Item>
         </Form>
-        {/*End Display existing image from database */}
-       
-        
+        {/* End Display existing image from database */}
+
         <ButtonLoad
-         
           onClick={() => router.back()}
           value="go back"
-          className="bg-gray-300 px-4 py-2 rounded"
+          className="rounded bg-gray-300 px-4 py-2"
         />
-         
       </Card>
     </>
   );

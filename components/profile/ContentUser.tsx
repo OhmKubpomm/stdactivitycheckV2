@@ -1,28 +1,12 @@
 "use client";
 
-import {
-  Card,
-  Grid,
-  Title,
-  Text,
-  Tab,
-  TabList,
-  TabGroup,
-  TabPanel,
-  TabPanels,
-} from "@tremor/react";
-import { useRouter } from "next/router";
 import React from "react";
-import Link from 'next/link'
+import Link from "next/link";
 type Props = {
   User: {
     _id: Object;
-  }
+  };
 };
-
-
-
-
 
 const ContentUser = ({ User }: Props) => {
   return (
@@ -32,4 +16,4 @@ const ContentUser = ({ User }: Props) => {
   );
 };
 
-export default ContentUser
+export default ContentUser;

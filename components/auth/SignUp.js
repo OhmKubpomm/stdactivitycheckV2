@@ -127,7 +127,7 @@ const SignUp = () => {
                 </div>
 
                 <p className="mt-3 text-gray-500 dark:text-gray-300">
-                  มีบัญชีอยู่แล้ว? <Link href="/signin">เข้าสู่ระบบ</Link>
+                  มีบัญชีอยู่แล้ว? <Link href="/Signin">เข้าสู่ระบบ</Link>
                 </p>
               </div>
 

@@ -53,7 +53,7 @@ const AdminaNavbar = () => {
             <Link
               href={menu.Link}
               key={i}
-              className={`group flex cursor-pointer items-center gap-3.5 rounded-md p-2 text-sm font-medium hover:bg-red-200 hover:text-blue-600
+              className={`group flex cursor-pointer items-center gap-3.5 rounded-md p-2 text-sm font-medium hover:bg-white hover:text-blue-600
            ${menu?.gap ? "mt-5" : ""}`}
             >
               <div>{menu?.icon}</div>

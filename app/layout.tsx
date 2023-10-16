@@ -1,3 +1,4 @@
+/* eslint-disable tailwindcss/no-custom-classname */
 import React from "react";
 import { Provider } from "@/context/provider";
 import "./globals.css";
@@ -33,7 +34,7 @@ export default async function RootLayout({
   return (
     <html
       lang="th"
-      className={`${mainfont.variable}  !scroll-smooth font-myfont scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-amber-500 scrollbar-thumb-rounded `}
+      className={`${mainfont.variable}  font-myfont scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-amber-500 scrollbar-thumb-rounded !scroll-smooth `}
       suppressHydrationWarning={true}
     >
       <body>
@@ -52,7 +53,7 @@ export default async function RootLayout({
                 <Usernavbar />
               </>
             ) : null}
-            <section>
+            <section className="   max-md:pb-14 sm:px-6">
               <div>{children}</div>
             </section>
           </div>
