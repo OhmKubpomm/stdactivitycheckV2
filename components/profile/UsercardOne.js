@@ -51,7 +51,7 @@ const UsercardOne = ({ User }) => {
                       sizes="100vw"
                       width={100}
                       height={100}
-                      className="opacity-0 transition-opacity duration-[2s]"
+                      className=" opacity-0 transition-opacity"
                       onLoadingComplete={(image) => {
                         image.classList.remove("opacity-0");
                       }}

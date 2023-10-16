@@ -191,7 +191,7 @@ const EditUserForm = () => {
                 src={editUser?.image}
                 alt={editUser?.image}
                 quality={60}
-                className="opacity-0 transition-opacity duration-[2s]"
+                className=" opacity-0 transition-opacity"
                 onLoadingComplete={(image) => {
                   image.classList.remove("opacity-0");
                 }}
