@@ -45,6 +45,7 @@ export async function uploadPhoto(formData2, userId) {
     // upload to cloudiary
     const photos = await uploadphotoToCloud(newFiles);
     // delete photo in temp folder after upload to cloudiary
+    console.log("newFiles", newFiles);
     newFiles.map((file) => fs.unlink(file.filepath));
 
     // update photo user to mongodb
