@@ -57,7 +57,8 @@ export async function uploadPhoto(formData2, userId) {
     // upload to cloudiary
     const photos = await uploadphotoToCloud(newFiles);
 
-    console.log(newFiles);
+    console.log("this is newFiles:", newFiles);
+    console.log("this is photoslog:", photos);
     // delete photo in temp folder after upload to cloudiary
 
     await Promise.all(newFiles.map((file) => fs.unlink(file.filepath)));
@@ -68,6 +69,7 @@ export async function uploadPhoto(formData2, userId) {
 
       return newPhoto;
     });
+    console.log("this is newPhotos:", newPhotos);
     const user = await User.findByIdAndUpdate(
       userId,
       { image: newPhotos[0].image },
