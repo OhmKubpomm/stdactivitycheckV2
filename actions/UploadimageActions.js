@@ -39,6 +39,7 @@ async function savePhotoLocal(formData2) {
 
 async function uploadphotoToCloud(newFiles) {
   try {
+    console.log("this is newFiles log", newFiles);
     const multiplePhotoPromise = newFiles.map((file) =>
       cloudinary.v2.uploader.upload(file.filepath, {
         folder: "uploadfrom_nextjs",
