@@ -15,23 +15,18 @@ cloudinary.config({
 async function savePhotoLocal(formData2) {
   try {
     const files = formData2.getAll("files");
+    const file = files[0]; // Only process the first file
+    const data = await file.arrayBuffer();
+    const buffer = Buffer.from(data);
+    const name = uuidv4();
+    const ext = file.type.split("/")[1];
 
-    const multipleBufferPromise = files.map(async (file) => {
-      const data = await file.arrayBuffer();
-      const buffer = Buffer.from(data);
-      const name = uuidv4();
-      const ext = file.type.split("/")[1];
+    const tempdir = os.tmpdir();
+    const uploadDir = path.join(tempdir, `/${name}.${ext}`);
 
-      //
-      const tempdir = os.tmpdir();
-      const uploadDir = path.join(tempdir, `/${name}.${ext}`);
+    await fs.writeFile(uploadDir, buffer);
 
-      await fs.writeFile(uploadDir, buffer); // Now you can use await here
-
-      return { filepath: uploadDir, filename: file.name };
-    });
-
-    return await Promise.all(multipleBufferPromise);
+    return [{ filepath: uploadDir, filename: file.name }]; // Return an array with a single object for consistency
   } catch (error) {
     return { error: error.message };
   }
@@ -39,25 +34,22 @@ async function savePhotoLocal(formData2) {
 
 async function uploadphotoToCloud(newFiles) {
   try {
-    console.log("this is newFiles log", newFiles);
-    const multiplePhotoPromise = newFiles.map((file) =>
-      cloudinary.v2.uploader.upload(file.filepath, {
-        folder: "uploadfrom_nextjs",
-      })
-    );
-    const result = await Promise.all(multiplePhotoPromise);
+    const file = newFiles[0]; // Only process the first file
+    const result = await cloudinary.v2.uploader.upload(file.filepath, {
+      folder: "uploadfrom_nextjs",
+    });
 
-    console.log("this is result log", result); // log result
-
-    return result;
+    return [result]; // Return an array with a single object for consistency
   } catch (error) {
     return { error: error.message };
   }
 }
+
 export async function uploadPhoto(formData2, userId) {
   try {
     // save photo to temp folder
     const newFiles = await savePhotoLocal(formData2);
+    console.log("this is a newfiles", newFiles);
 
     // upload to cloudiary
     const photos = await uploadphotoToCloud(newFiles);
