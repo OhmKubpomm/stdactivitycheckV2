@@ -25,7 +25,7 @@ async function savePhotoLocal(formData2) {
       //
       const tempdir = "/tmp";
       const uploadDir = path.join(tempdir, `/${name}.${ext}`);
-      console.log(os.tmpdir());
+      console.log(uploadDir);
 
       await fs.writeFile(uploadDir, buffer); // Now you can use await here
 
