@@ -23,6 +23,7 @@ async function savePhotoLocal(formData2) {
 
       const tempdir = os.tmpdir();
       const uploadDir = path.join(tempdir, `/${name}.${ext}`);
+      console.log(uploadDir);
       fs.writeFile(uploadDir, buffer);
       return { filepath: uploadDir, filename: file.name };
     })
@@ -47,7 +48,8 @@ export async function uploadPhoto(formData2, userId) {
     // delete photo in temp folder after upload to cloudiary
     console.log("New files to upload:", newFiles);
 
-    newFiles.map((file) => fs.unlink(file.filepath));
+    // Use await here to ensure file deletion
+    await Promise.all(newFiles.map((file) => fs.unlink(file.filepath)));
 
     // update photo user to mongodb
     const newPhotos = photos.map((photo) => {
