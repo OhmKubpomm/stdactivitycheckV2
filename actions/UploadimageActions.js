@@ -38,12 +38,16 @@ async function savePhotoLocal(formData2) {
 }
 
 async function uploadphotoToCloud(newFiles) {
-  const multiplePhotoPromise = newFiles.map((file) =>
-    cloudinary.v2.uploader.upload(file.filepath, {
-      folder: "uploadfrom_nextjs",
-    })
-  );
-  return await Promise.all(multiplePhotoPromise);
+  try {
+    const multiplePhotoPromise = newFiles.map((file) =>
+      cloudinary.v2.uploader.upload(file.filepath, {
+        folder: "uploadfrom_nextjs",
+      })
+    );
+    return await Promise.all(multiplePhotoPromise);
+  } catch (error) {
+    return { error: error.message };
+  }
 }
 export async function uploadPhoto(formData2, userId) {
   try {
