@@ -15,21 +15,24 @@ cloudinary.config({
 async function savePhotoLocal(formData2) {
   const files = formData2.getAll("files");
 
-  const multipleBufferPromise = files.map((file) =>
-    file.arrayBuffer().then((data) => {
-      const buffer = Buffer.from(data);
-      const name = uuidv4();
-      const ext = file.type.split("/")[1];
+  const multipleBufferPromise = files.map(async (file) => {
+    const data = await file.arrayBuffer();
+    const buffer = Buffer.from(data);
+    const name = uuidv4();
+    const ext = file.type.split("/")[1];
 
-      const tempdir = os.tmpdir();
-      const uploadDir = path.join(tempdir, `/${name}.${ext}`);
-      console.log(uploadDir);
-      fs.writeFile(uploadDir, buffer);
-      return { filepath: uploadDir, filename: file.name };
-    })
-  );
+    const tempdir = os.tmpdir();
+    const uploadDir = path.join(tempdir, `/${name}.${ext}`);
+    console.log(uploadDir);
+
+    await fs.writeFile(uploadDir, buffer); // Now you can use await here
+
+    return { filepath: uploadDir, filename: file.name };
+  });
+
   return await Promise.all(multipleBufferPromise);
 }
+
 async function uploadphotoToCloud(newFiles) {
   const multiplePhotoPromise = newFiles.map((file) =>
     cloudinary.v2.uploader.upload(file.filepath, {
