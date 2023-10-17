@@ -23,9 +23,8 @@ async function savePhotoLocal(formData2) {
       const ext = file.type.split("/")[1];
 
       //
-      const tempdir = "/tmp";
+      const tempdir = os.tmpdir();
       const uploadDir = path.join(tempdir, `/${name}.${ext}`);
-      console.log(uploadDir);
 
       await fs.writeFile(uploadDir, buffer); // Now you can use await here
 
@@ -57,6 +56,8 @@ export async function uploadPhoto(formData2, userId) {
 
     // upload to cloudiary
     const photos = await uploadphotoToCloud(newFiles);
+
+    console.log(newFiles);
     // delete photo in temp folder after upload to cloudiary
 
     await Promise.all(newFiles.map((file) => fs.unlink(file.filepath)));
