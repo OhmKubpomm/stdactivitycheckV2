@@ -20,7 +20,7 @@ async function uploadphotoToCloud(formData2) {
     const name = uuidv4();
     const ext = file.type.split("/")[1];
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       cloudinary.v2.uploader
         .upload_stream(
           {
@@ -40,7 +40,7 @@ async function uploadphotoToCloud(formData2) {
     });
   } catch (error) {
     console.error(error);
-    return { error: error.message };
+    return formData2.status(500).json({ error: error.message });
   }
 }
 
@@ -71,9 +71,8 @@ export async function uploadPhoto(formData2, userId) {
 
     return { msg: "เพิ่มรูปภาพสำเร็จ", image: newPhotos };
   } catch (error) {
-    // End update photo user
     console.error(error);
-    return { error: error.message };
+    return formData2.status(500).json({ error: error.message });
   }
 }
 

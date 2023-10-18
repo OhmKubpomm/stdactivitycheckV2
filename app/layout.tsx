@@ -34,7 +34,7 @@ export default async function RootLayout({
   return (
     <html
       lang="th"
-      className={`${mainfont.variable}  font-myfont scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-amber-500 scrollbar-thumb-rounded !scroll-smooth `}
+      className={`${mainfont.variable}  !scroll-smooth font-myfont scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-amber-500 scrollbar-thumb-rounded `}
       suppressHydrationWarning={true}
     >
       <body>

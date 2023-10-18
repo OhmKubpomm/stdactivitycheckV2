@@ -1,6 +1,7 @@
-'use client'
-import React, { useEffect, useState } from 'react';
-import MenuIcon from '@mui/icons-material/Menu';
+/* eslint-disable react-hooks/exhaustive-deps */
+"use client";
+import React, { useEffect, useState } from "react";
+import MenuIcon from "@mui/icons-material/Menu";
 
 const MenuResponNav: React.FC = () => {
   const [menuLinks, setMenuLinks] = useState<HTMLElement | null>(null);
@@ -20,13 +21,13 @@ const MenuResponNav: React.FC = () => {
   useEffect(() => {
     const element = document.getElementById("menu-links");
     setMenuLinks(element);
-    window.addEventListener('resize', updateMenuDisplay);
+    window.addEventListener("resize", updateMenuDisplay);
     updateMenuDisplay(); // Call it once on initial render
 
     return () => {
-      window.removeEventListener('resize', updateMenuDisplay);
+      window.removeEventListener("resize", updateMenuDisplay);
     };
-  }, [menuLinks]);
+  }, [menuLinks, updateMenuDisplay]);
 
   const toggleMenu = () => {
     if (menuLinks) {
@@ -40,10 +41,11 @@ const MenuResponNav: React.FC = () => {
 
   return (
     <div>
-      <button onClick={toggleMenu}><MenuIcon/></button>
+      <button onClick={toggleMenu}>
+        <MenuIcon />
+      </button>
     </div>
   );
 };
 
 export default MenuResponNav;
-
