@@ -1,7 +1,5 @@
 "use server";
-import path from "path";
-import os from "os";
-import fs from "fs/promises";
+
 import { v4 as uuidv4 } from "uuid";
 import cloudinary from "cloudinary";
 import User from "@/models/Usermodel";
@@ -12,7 +10,8 @@ cloudinary.config({
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET,
 });
-async function savePhotoLocal(formData2) {
+
+async function uploadphotoToCloud(formData2) {
   try {
     const files = formData2.getAll("files");
     const file = files[0]; // Only process the first file
@@ -21,26 +20,24 @@ async function savePhotoLocal(formData2) {
     const name = uuidv4();
     const ext = file.type.split("/")[1];
 
-    const tempdir = os.tmpdir();
-    const uploadDir = path.join(tempdir, `/${name}.${ext}`);
-
-    await fs.writeFile(uploadDir, buffer);
-
-    return [{ filepath: uploadDir, filename: file.name }]; // Return an array with a single object for consistency
-  } catch (error) {
-    console.error(error);
-    return { error: error.message };
-  }
-}
-
-async function uploadphotoToCloud(newFiles) {
-  try {
-    const file = newFiles[0]; // Only process the first file
-    const result = await cloudinary.v2.uploader.upload(file.filepath, {
-      folder: "uploadfrom_nextjs",
+    return new Promise((resolve, reject) => {
+      cloudinary.v2.uploader
+        .upload_stream(
+          {
+            resource_type: "image", // Ensure resource type is 'image'
+            public_id: `uploadfrom_nextjs/${name}`,
+            format: ext, // Specify the image format
+          },
+          (error, result) => {
+            if (error) {
+              console.error(error);
+            } else {
+              resolve([result]); // Return an array with a single object for consistency
+            }
+          }
+        )
+        .end(buffer);
     });
-
-    return [result]; // Return an array with a single object for consistency
   } catch (error) {
     console.error(error);
     return { error: error.message };
@@ -49,21 +46,16 @@ async function uploadphotoToCloud(newFiles) {
 
 export async function uploadPhoto(formData2, userId) {
   try {
-    // save photo to temp folder
-    const newFiles = await savePhotoLocal(formData2);
-    console.log("this is a newfiles", newFiles);
+    // Upload to Cloudinary
+    const photos = await uploadphotoToCloud(formData2);
 
-    // upload to cloudiary
-    const photos = await uploadphotoToCloud(newFiles);
+    // Check for errors from Cloudinary
+    if (photos.error) throw new Error(photos.error);
 
-    // delete photo in temp folder after upload to cloudiary
-
-    await Promise.all(newFiles.map((file) => fs.unlink(file.filepath)));
-
-    // update photo user to mongodb
+    // Update photo URL in MongoDB
     const newPhotos = photos.map((photo) => {
       const newPhoto = { image: photo.secure_url };
-
+      console.log("newphoto:", newPhoto);
       return newPhoto;
     });
 
@@ -79,8 +71,8 @@ export async function uploadPhoto(formData2, userId) {
 
     return { msg: "เพิ่มรูปภาพสำเร็จ", image: newPhotos };
   } catch (error) {
-    // end update photo user
-
+    // End update photo user
+    console.error(error);
     return { error: error.message };
   }
 }
@@ -110,13 +102,8 @@ export async function deletePhoto(userId, imageUrl) {
 }
 export async function insertPhoto(formData2) {
   try {
-    // save photo to temp folder
-    const newFiles = await savePhotoLocal(formData2);
-
     // upload to cloudiary
-    const photos = await uploadphotoToCloud(newFiles);
-    // delete photo in temp folder after upload to cloudiary
-    newFiles.map((file) => fs.unlink(file.filepath));
+    const photos = await uploadphotoToCloud(formData2);
 
     // update photo user to mongodb
     const newPhotos = photos.map((photo) => {
