@@ -28,6 +28,7 @@ async function savePhotoLocal(formData2) {
 
     return [{ filepath: uploadDir, filename: file.name }]; // Return an array with a single object for consistency
   } catch (error) {
+    console.error(error);
     return { error: error.message };
   }
 }
@@ -41,6 +42,7 @@ async function uploadphotoToCloud(newFiles) {
 
     return [result]; // Return an array with a single object for consistency
   } catch (error) {
+    console.error(error);
     return { error: error.message };
   }
 }
