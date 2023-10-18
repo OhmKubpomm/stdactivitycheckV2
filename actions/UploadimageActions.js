@@ -11,9 +11,9 @@ cloudinary.config({
   api_secret: process.env.CLOUD_API_SECRET,
 });
 
-async function uploadphotoToCloud(formData2) {
+async function uploadphotoToCloud(formData) {
   try {
-    const files = formData2.getAll("files");
+    const files = formData.getAll("files");
     const file = files[0]; // Only process the first file
     const data = await file.arrayBuffer();
     const buffer = Buffer.from(data);
@@ -40,14 +40,14 @@ async function uploadphotoToCloud(formData2) {
     });
   } catch (error) {
     console.error(error);
-    return formData2.status(500).json({ error: error.message });
+    return formData.status(500).json({ error: error.message });
   }
 }
 
-export async function uploadPhoto(formData2, userId) {
+export async function uploadPhoto(formData, userId) {
   try {
     // Upload to Cloudinary
-    const photos = await uploadphotoToCloud(formData2);
+    const photos = await uploadphotoToCloud(formData);
 
     // Check for errors from Cloudinary
     if (photos.error) throw new Error(photos.error);
@@ -72,7 +72,7 @@ export async function uploadPhoto(formData2, userId) {
     return { msg: "เพิ่มรูปภาพสำเร็จ", image: newPhotos };
   } catch (error) {
     console.error(error);
-    return formData2.status(500).json({ error: error.message });
+    return formData.status(500).json({ error: error.message });
   }
 }
 

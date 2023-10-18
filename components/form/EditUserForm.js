@@ -31,13 +31,13 @@ const EditUserForm = () => {
 
   async function handleuploadCloud() {
     if (!files.length) return alert("Please select files");
-    const formData2 = new FormData();
+    const formData = new FormData();
 
     files.forEach((file) => {
-      formData2.append("files", file);
+      formData.append("files", file);
     });
 
-    const res = await uploadPhoto(formData2, editUser._id);
+    const res = await uploadPhoto(formData, editUser._id);
     if (res?.msg) {
       message.success(res?.msg);
     }
