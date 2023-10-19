@@ -20,7 +20,7 @@ async function uploadphotoToCloud(formData) {
     const name = uuidv4();
     const ext = file.type.split("/")[1];
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       cloudinary.v2.uploader
         .upload_stream(
           {
@@ -31,7 +31,10 @@ async function uploadphotoToCloud(formData) {
           (error, result) => {
             if (error) {
               console.error(error);
+              reject(error);
             } else {
+              console.log("Upload result:", result);
+
               resolve([result]); // Return an array with a single object for consistency
             }
           }
@@ -40,7 +43,7 @@ async function uploadphotoToCloud(formData) {
     });
   } catch (error) {
     console.error(error);
-    return formData.status(500).json({ error: error.message });
+    return { error: error.message };
   }
 }
 
@@ -72,7 +75,7 @@ export async function uploadPhoto(formData, userId) {
     return { msg: "เพิ่มรูปภาพสำเร็จ", image: newPhotos };
   } catch (error) {
     console.error(error);
-    return formData.status(500).json({ error: error.message });
+    return { error: error.message };
   }
 }
 
