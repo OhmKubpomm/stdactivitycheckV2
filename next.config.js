@@ -1,13 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    images: {
-        domains: ['https://icons8.com/','res.cloudinary.com'],
-        formats: ['image/avif', 'image/webp'],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+    ],
 
-},
-experimental: {
-    serverActions: true,
-}, 
+    formats: ["image/avif", "image/webp"],
+  },
 };
 
 module.exports = nextConfig;

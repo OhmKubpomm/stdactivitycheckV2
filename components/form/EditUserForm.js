@@ -192,8 +192,8 @@ const EditUserForm = () => {
                 alt={editUser?.image}
                 quality={60}
                 className=" opacity-0 transition-opacity"
-                onLoadingComplete={(image) => {
-                  image.classList.remove("opacity-0");
+                onLoad={(image) => {
+                  image.target.classList.remove("opacity-0");
                 }}
               />
 

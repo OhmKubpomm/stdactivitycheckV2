@@ -30,7 +30,7 @@ async function uploadphotoToCloud(formData) {
           },
           (error, result) => {
             if (error) {
-              console.error(error);
+              console.error("Upload to Cloudinary error:", error);
               reject(error);
             } else {
               console.log("Upload result:", result);
@@ -42,7 +42,11 @@ async function uploadphotoToCloud(formData) {
         .end(buffer);
     });
   } catch (error) {
-    console.error(error);
+    console.error(
+      "uploadphotoToCloud error response:",
+      error.response ? error.response.data : error
+    );
+
     return { error: error.message };
   }
 }
@@ -74,7 +78,10 @@ export async function uploadPhoto(formData, userId) {
 
     return { msg: "เพิ่มรูปภาพสำเร็จ", image: newPhotos };
   } catch (error) {
-    console.error(error);
+    console.error(
+      "uploadPhoto error response:",
+      error.response ? error.response.data : error
+    );
     return { error: error.message };
   }
 }
