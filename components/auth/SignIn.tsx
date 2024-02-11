@@ -69,7 +69,7 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
               <div className="flex h-full items-center bg-opacity-40 px-20">
                 <div>
                   <motion.h2
-                    className="gap-1 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-500 via-teal-500 to-orange-500 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl"
+                    className="to-primary-gradient gap-1 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-500 via-teal-500 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl"
                     animate={{ scale: [1, 1.05, 1] }}
                   >
                     Welcome!

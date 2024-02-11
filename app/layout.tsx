@@ -3,12 +3,14 @@ import React from "react";
 import { Provider } from "@/context/provider";
 import "./globals.css";
 import Headers from "@/components/globals/Headers";
+import { ThemeProvider } from "@/context/theme-provider";
 
 import { Prompt } from "next/font/google";
 import Usernavbar from "@/components/profile/Usernavbar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import AdminaNavbar from "@/components/profile/AdminNavber";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata = {
   title: "STDACTIVITYCHECK",
@@ -38,26 +40,27 @@ export default async function RootLayout({
       suppressHydrationWarning={true}
     >
       <body>
-        <Provider>
-          <header>
-            <Headers />
-          </header>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Provider>
+            <header>
+              <Headers />
+            </header>
 
-          <div className="flex">
-            {role === "admin" ? (
-              <>
-                <AdminaNavbar />
-              </>
-            ) : role === "user" ? (
-              <>
-                <Usernavbar />
-              </>
-            ) : null}
-            <section className="   max-md:pb-14 sm:px-6">
-              <div>{children}</div>
-            </section>
-          </div>
-        </Provider>
+            <div className="flex min-h-screen">
+              {role === "admin" ? <AdminaNavbar /> : null}
+              {role === "user" ? <Usernavbar /> : null}
+              <main className="flex-1 overflow-hidden max-md:pb-14 sm:px-6">
+                {children}
+              </main>
+            </div>
+            <Toaster />
+          </Provider>
+        </ThemeProvider>
       </body>
     </html>
   );

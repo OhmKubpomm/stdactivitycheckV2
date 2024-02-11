@@ -44,7 +44,9 @@
     "components/profile/Usercard.js",
     "app/dashboard/cruduser/EditUser/page.js",
     "app/dashboard/cruduser/page.js",
-    "components/maptool/Maplayout.js"
+    "components/maptool/Maplayout.js",
+    "components/maptool/Maplist.js",
+    "app/dashboard/crudmap/AddMap/page.js"
   ],
   "exclude": ["node_modules"]
 }

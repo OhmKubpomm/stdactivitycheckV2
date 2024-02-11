@@ -25,8 +25,13 @@ const AdminaNavbar = () => {
       icon: <DashboardOutlined />,
       Link: "/dashboard/cruduser",
     },
-    { name: "Inbox", icon: <InboxOutlined />, Link: "/" },
-    { name: "Accounts", icon: <UserOutlined />, gap: true, Link: "/" },
+    { name: "จัดการข้อมูลกิจกรรมนักศึกษา", icon: <InboxOutlined />, Link: "/" },
+    {
+      name: "จัดการข้อมูลแผนที่",
+      icon: <UserOutlined />,
+      gap: true,
+      Link: "/dashboard/crudmap",
+    },
     { name: "Schedule", icon: <ScheduleOutlined />, Link: "/" },
     { name: "Search", icon: <SearchOutlined />, Link: "/" },
     { name: "Analytics", icon: <BarChartOutlined />, Link: "/" },
@@ -35,9 +40,10 @@ const AdminaNavbar = () => {
   ];
 
   return (
-    <section className="flex gap-6 ">
+    <section className="flex min-h-screen">
       <motion.div
-        className={`text-dark300_light900 background-light800_dark400 flex min-h-screen flex-col transition-all duration-500 ${
+        style={{ border: "1px solid #ccc", borderRadius: "4px" }}
+        className={`text-dark300_light900  flex flex-col transition-all duration-500 ${
           open ? "w-72" : "w-16"
         } px-4`}
       >
@@ -53,20 +59,20 @@ const AdminaNavbar = () => {
             <Link
               href={menu.Link}
               key={i}
-              className={`group flex cursor-pointer items-center gap-3.5 rounded-md p-2 text-sm font-medium hover:bg-white hover:text-blue-600
+              className={`group flex cursor-pointer items-center gap-3.5 rounded-md p-2 text-sm font-medium hover:bg-primary-500 hover:text-white
            ${menu?.gap ? "mt-5" : ""}`}
             >
               <div>{menu?.icon}</div>
               <h2
-                style={{ transitionDelay: `${i + 3}00ms` }}
-                className={`whitespace-pre transition-all duration-500 ${
+                style={{ transitionDelay: `${i + 2}00ms` }}
+                className={`whitespace-pre transition-all duration-200 ${
                   !open && "translate-x-28 overflow-hidden opacity-0"
                 }`}
               >
                 {menu?.name}
               </h2>
               {!open && (
-                <h2 className="absolute left-14 w-0 overflow-hidden whitespace-pre rounded-md bg-white p-0 font-semibold text-gray-900 drop-shadow-lg group-hover:w-fit group-hover:px-2 group-hover:py-1 group-hover:duration-300">
+                <h2 className="absolute left-14 w-0 overflow-hidden whitespace-pre rounded-md  p-0 font-semibold text-gray-900  group-hover:w-fit group-hover:px-2 group-hover:py-1 group-hover:duration-200">
                   {menu?.name}
                 </h2>
               )}

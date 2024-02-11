@@ -4,8 +4,8 @@ const Maplayout = dynamic(() => import("@/components/maptool/Maplayout"), {
   ssr: false,
 });
 
-const Mapleaflet = () => {
+const AddMap = () => {
   return <Maplayout />;
 };
 
-export default Mapleaflet;
+export default AddMap;
