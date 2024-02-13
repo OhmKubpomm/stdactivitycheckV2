@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/context/theme-provider";
 import { Prompt } from "next/font/google";
 import Usernavbar from "@/components/profile/Usernavbar";
 import { getServerSession } from "next-auth";
-import { authOptions } from "./api/auth/[...nextauth]/route";
+import { config } from "@/utils/authOptions";
 import AdminaNavbar from "@/components/profile/AdminNavber";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -31,8 +31,8 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
-  const role = session?.user?.role;
+  const session = await getServerSession(config);
+  const role = (session?.user as { role?: string })?.role || "";
   return (
     <html
       lang="th"

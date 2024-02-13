@@ -1,7 +1,7 @@
 "use server";
 import { getServerSession } from "next-auth";
 import * as React from "react";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { config } from "@/utils/authOptions";
 
 import Link from "next/link";
 import SignOut from "../auth/SignOut";
@@ -11,7 +11,7 @@ import Themebutton from "./Themebutton";
 import MenuResponNav from "./MenuResponNav";
 
 const Headers = async () => {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(config);
 
   return (
     <div className="bg-transparent p-0">
@@ -33,7 +33,7 @@ const Headers = async () => {
           <div className="text-sm lg:grow">
             {session ? (
               <>
-                {session.user.role === "admin" ? (
+                {(session.user as { role: string }).role === "admin" ? (
                   <>{/* Links for Admin */}</>
                 ) : (
                   <>{/* Links for Users */}</>

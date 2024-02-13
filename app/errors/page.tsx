@@ -37,7 +37,7 @@ const page = () => {
               src={Errorpage}
               loading="lazy"
               alt="Photo by Jeremy Cai"
-              className="h-full w-full object-cover object-center"
+              className="size-full object-cover object-center"
             />
             <MuiButton
               className="custom-button mt-8"

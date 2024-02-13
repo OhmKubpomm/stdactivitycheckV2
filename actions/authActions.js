@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable camelcase */
 "use server";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { config } from "@/utils/authOptions";
 import { getServerSession } from "next-auth/next";
 import User from "@/models/Usermodel";
 import { redirect } from "next/navigation";
@@ -13,7 +13,7 @@ import sendEmail from "@/utils/sendEmail";
 const BASE_URL = process.env.NEXTAUTH_URL;
 
 export async function updateUser({ name, image }) {
-  const seesion = await getServerSession(authOptions);
+  const seesion = await getServerSession(config);
   if (!session) throw new Error("Unauthorized");
   try {
     const user = await User.findByIdAndUpdate(
@@ -73,7 +73,7 @@ export async function verifyWithCredentials(token) {
 
 export async function changePasswordWithCredentials({ old_pass, new_pass }) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(config);
     if (!session) throw new Error("Unauthorized");
     if (session?.user?.provider !== "credentials") {
       throw new Error(

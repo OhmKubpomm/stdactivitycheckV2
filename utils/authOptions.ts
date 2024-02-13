@@ -1,17 +1,16 @@
-import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import connectDatabase from "@/utils/connectdatabase";
 import CredentialsProvider from "next-auth/providers/credentials";
 import User from "@/models/Usermodel";
 import bcrypt from "bcrypt";
 
+import type { NextAuthOptions } from "next-auth";
 connectDatabase();
-
-export const authOptions = {
+export const config = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -21,7 +20,7 @@ export const authOptions = {
         password: { label: "Password", type: "password", require: true },
       },
       async authorize(credentials, req) {
-        const { email, password } = credentials;
+        const { email, password } = credentials ?? { email: "", password: "" };
         const user = await signInwithCredentials({ email, password });
         return user;
       },
@@ -33,7 +32,7 @@ export const authOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
-      if (account.type === "oauth") {
+      if (account && account.type === "oauth") {
         return await signInWith0Auth({ account, profile });
       }
 
@@ -41,23 +40,38 @@ export const authOptions = {
     },
 
     async jwt({ token, trigger, session }) {
-      const user = await getUserByEmail({ email: token.email });
+      const user = await getUserByEmail({ email: token.email || "" });
 
-      token.user = user;
+      token.user = user as
+        | {
+            name?: string | null | undefined;
+            email?: string | null | undefined;
+            image?: string | null | undefined;
+          }
+        | undefined;
       return token;
     },
     async session({ session, token }) {
-      session.user = token.user;
+      session.user = token.user as
+        | {
+            name?: string | null | undefined;
+            email?: string | null | undefined;
+            image?: string | null | undefined;
+          }
+        | undefined;
       return session;
     },
   },
-};
-
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
+} satisfies NextAuthOptions;
 
 /* ------------------------------------ */
-async function signInWith0Auth({ account, profile }) {
+async function signInWith0Auth({
+  account,
+  profile,
+}: {
+  account: any;
+  profile: any;
+}) {
   const user = await User.findOne({ email: profile.email });
   if (user) return true; // sign in
 
@@ -71,12 +85,18 @@ async function signInWith0Auth({ account, profile }) {
   return true;
 }
 
-async function getUserByEmail({ email }) {
+async function getUserByEmail({ email }: { email: string }) {
   const user = await User.findOne({ email }).select("-password");
   if (!user) throw new Error("Email not found");
   return { ...user._doc, _id: user._id.toString() };
 }
-async function signInwithCredentials({ email, password }) {
+async function signInwithCredentials({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}) {
   const user = await User.findOne({ email });
   if (!user) throw new Error("Email not found");
 
