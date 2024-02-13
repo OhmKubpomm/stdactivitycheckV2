@@ -37,12 +37,16 @@ const EditUserForm = () => {
       formData.append("files", file);
     });
 
-    const res = await uploadPhoto(formData, editUser._id);
-    if (res?.msg) {
-      message.success(res?.msg);
-    }
-    if (res?.error) {
-      message.error(res?.error);
+    try {
+      const res = await uploadPhoto(formData, editUser._id);
+      if (res?.msg) {
+        message.success(res.msg);
+      } else if (res?.error) {
+        message.error(res.error);
+      }
+    } catch (error) {
+      console.error("Error uploading files:", error);
+      message.error("Failed to upload photo. Please try again.");
     }
   }
   const [previewOpen, setPreviewOpen] = useState(false);

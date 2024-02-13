@@ -31,7 +31,7 @@ async function uploadphotoToCloud(formData) {
           (error, result) => {
             if (error) {
               console.error("Upload to Cloudinary error:", error);
-              reject(error);
+              reject(new Error("Failed to upload image to Cloudinary"));
             } else {
               console.log("Upload result:", result);
 
