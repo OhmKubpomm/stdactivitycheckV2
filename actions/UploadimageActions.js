@@ -16,37 +16,32 @@ async function uploadphotoToCloud(formData) {
     const files = formData.getAll("files");
     const file = files[0]; // Only process the first file
     const data = await file.arrayBuffer();
-    const buffer = Buffer.from(data);
+    const base64 = Buffer.from(data).toString("base64");
     const name = uuidv4();
     const ext = file.type.split("/")[1];
+    const base64Image = `data:image/${ext};base64,${base64}`;
 
     return new Promise((resolve, reject) => {
-      cloudinary.v2.uploader
-        .upload_stream(
-          {
-            resource_type: "image", // Ensure resource type is 'image'
-            public_id: `uploadfrom_nextjs/${name}`,
-            format: ext, // Specify the image format
-          },
-          (error, result) => {
-            if (error) {
-              console.error("Upload to Cloudinary error:", error);
-              reject(new Error("Failed to upload image to Cloudinary"));
-            } else {
-              console.log("Upload result:", result);
-
-              resolve([result]); // Return an array with a single object for consistency
-            }
+      cloudinary.v2.uploader.upload(
+        base64Image, // Use base64 string for upload
+        {
+          resource_type: "image",
+          public_id: `uploadfrom_nextjs/${name}`,
+          format: ext,
+        },
+        (error, result) => {
+          if (error) {
+            console.error("Upload to Cloudinary error:", error);
+            reject(new Error("Failed to upload image to Cloudinary"));
+          } else {
+            console.log("Upload result:", result);
+            resolve([result]); // Return an array with a single object for consistency
           }
-        )
-        .end(buffer);
+        }
+      );
     });
   } catch (error) {
-    console.error(
-      "uploadphotoToCloud error response:",
-      error.response ? error.response.data : error
-    );
-
+    console.error("uploadphotoToCloud error response:", error);
     return { error: error.message };
   }
 }
