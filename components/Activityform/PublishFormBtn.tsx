@@ -1,0 +1,79 @@
+import { PublishForm } from "@/actions/ActivityAction";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { FaSpinner } from "react-icons/fa";
+import { MdOutlinePublish } from "react-icons/md";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
+
+function PublishFormBtn({ id }: { id: number }) {
+  const [loading, startTransition] = useTransition();
+  const router = useRouter();
+
+  async function publishForm() {
+    try {
+      await PublishForm(id);
+      toast({
+        title: "Success",
+        description: "Your form is now available to the public",
+      });
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+      });
+    }
+  }
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button className="gap-2 bg-gradient-to-r from-indigo-400 to-cyan-400 text-white">
+          <MdOutlinePublish className="size-4" />
+          เผยแพร่
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>คุณแน่ใจแล้วใช่หรือไม่</AlertDialogTitle>
+          <AlertDialogDescription>
+            การดำเนินการนี้ไม่สามารถยกเลิกได้ หลังจากเผยแพร่แล้วคุณจะไม่สามารถ
+            แก้ไขแบบฟอร์มนี้ <br />
+            <br />
+            <span className="font-medium">
+              การเผยแพร่แบบฟอร์มนี้จะเป็นการเปิดเผยต่อสาธารณะ
+              และคุณจะสามารถรวบรวมผลงานได้
+            </span>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={loading}
+            onClick={(e) => {
+              e.preventDefault();
+              startTransition(publishForm);
+            }}
+            className=" bg-gradient-to-r from-primary-500 to-yellow-500 text-white"
+          >
+            ดำเนินการ {loading && <FaSpinner className="animate-spin" />}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+export default PublishFormBtn;

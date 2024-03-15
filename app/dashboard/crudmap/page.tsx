@@ -10,9 +10,11 @@ const Crudmappage = async () => {
   const { allMap } = await getallMap();
   return (
     <div>
-      <h1>จัดการข้อมูลแผนที่</h1>
+      <h3 className="scroll-m-20 text-2xl  tracking-tight">
+        จัดการข้อมูลแผนที่
+      </h3>
       <div>
-        <Button>
+        <Button className=" bg-gradient-to-r from-primary-500 to-yellow-500 text-white ">
           <Link href="/dashboard/crudmap/AddMap">เพิ่มข้อมูลแผนที่</Link>
         </Button>
       </div>

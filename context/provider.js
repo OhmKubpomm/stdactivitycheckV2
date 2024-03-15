@@ -2,6 +2,7 @@
 
 import React, { useContext, useState } from "react";
 import { SessionProvider } from "next-auth/react";
+import DesignerContextProvider from "./DesignerContext";
 
 const Context = React.createContext();
 
@@ -15,7 +16,9 @@ export const Provider = ({ children }) => {
 
   return (
     <Context.Provider value={value}>
-      <SessionProvider>{children}</SessionProvider>
+      <DesignerContextProvider>
+        <SessionProvider>{children}</SessionProvider>
+      </DesignerContextProvider>
     </Context.Provider>
   );
 };

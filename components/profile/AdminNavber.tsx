@@ -25,7 +25,11 @@ const AdminaNavbar = () => {
       icon: <DashboardOutlined />,
       Link: "/dashboard/cruduser",
     },
-    { name: "จัดการข้อมูลกิจกรรมนักศึกษา", icon: <InboxOutlined />, Link: "/" },
+    {
+      name: "จัดการข้อมูลกิจกรรมนักศึกษา",
+      icon: <InboxOutlined />,
+      Link: "/dashboard/crudactivityform",
+    },
     {
       name: "จัดการข้อมูลแผนที่",
       icon: <UserOutlined />,
@@ -59,7 +63,7 @@ const AdminaNavbar = () => {
             <Link
               href={menu.Link}
               key={i}
-              className={`group flex cursor-pointer items-center gap-3.5 rounded-md p-2 text-sm font-medium hover:bg-primary-500 hover:text-white
+              className={`group flex cursor-pointer items-center gap-3.5 rounded-md from-primary-500 to-yellow-500 p-2 text-sm font-medium hover:bg-gradient-to-r hover:text-white
            ${menu?.gap ? "mt-5" : ""}`}
             >
               <div>{menu?.icon}</div>

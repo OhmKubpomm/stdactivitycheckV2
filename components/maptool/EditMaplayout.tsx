@@ -30,9 +30,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-import { createLocation } from "@/actions/mapActions";
+import { updateMap } from "@/actions/mapActions";
 
 import { useToast } from "@/components/ui/use-toast";
+import { useMyContext } from "@/context/provider";
 
 const heroIcon = L.icon({
   iconUrl: "/icon/map-marker.svg",
@@ -103,8 +104,15 @@ const LocationMarker = ({
 const EditMaplayout = () => {
   const autocompleteInput = useRef(null);
   const [position, setPosition] = useState([13, 100]);
-  const [address, setAddress] = useState<string>("");
+
   const { toast } = useToast();
+  const { editMap, setEditMap } = useMyContext();
+  const [address, setAddress] = useState("");
+  useEffect(() => {
+    if (editMap?.MapAddress) {
+      setAddress(editMap.MapAddress);
+    }
+  }, [editMap?.MapAddress]);
 
   const API_URL = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -121,8 +129,10 @@ const EditMaplayout = () => {
         const place = autocomplete.getPlace();
         if (place.geometry) {
           const location = place.geometry.location;
+          const address = place.formatted_address; // Get the formatted address
           if (location) {
             setPosition([location.lat(), location.lng()]);
+            setEditMap((prevMap: any) => ({ ...prevMap, MapAddress: address })); // Update context with new address
           }
         }
       });
@@ -153,7 +163,9 @@ const EditMaplayout = () => {
   const locateUser = () => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setPosition([position.coords.latitude, position.coords.longitude]);
+        const newPos = [position.coords.latitude, position.coords.longitude];
+        setPosition(newPos);
+
         toast({
           style: {
             background: "green",
@@ -161,7 +173,7 @@ const EditMaplayout = () => {
             boxShadow: "0 0 10px rgba(0,0,0,0.2)",
           },
           title: "เพิ่มตำแหน่งแผนที่สำเร็จ",
-          description: "ตำแหน่งแผนที่ถูกเพิ่มลงในระบบของคุณแล้ว",
+          description: "ตำแหน่งแผนที่ถูกเพิ่มลงช่องข้อความของคุณแล้ว",
         });
       },
       () => {
@@ -175,12 +187,9 @@ const EditMaplayout = () => {
   const handleAction = async () => {
     try {
       // Manually prepare the data
-      const formData = {
-        MapAddress: address, // Using the state directly
-      };
-
+      setEditMap((prevMap: any) => ({ ...prevMap, MapAddress: address }));
       // Assuming createLocation is a function that performs the API call
-      const res = await createLocation(formData);
+      const res = await updateMap({ id: editMap._id, MapAddress: address });
 
       if (res.error) {
         toast({
@@ -194,7 +203,7 @@ const EditMaplayout = () => {
             color: "white",
             boxShadow: "0 0 10px rgba(0,0,0,0.2)",
           },
-          title: "เพิ่มตำแหน่งแผนที่สำเร็จ",
+          title: "แก้ไขตำแหน่งแผนที่สำเร็จ",
           description: "ตำแหน่งแผนที่ถูกเพิ่มลงในระบบของคุณแล้ว",
         });
       }
@@ -206,7 +215,11 @@ const EditMaplayout = () => {
       });
     }
   };
-
+  // Function to handle input changes and update context
+  const handleInputChange = (e: { target: { value: any } }) => {
+    const updatedMap = { ...editMap, MapAddress: e.target.value };
+    setEditMap(updatedMap); // Update the context with the new editMap object
+  };
   return (
     <>
       <div
@@ -229,9 +242,9 @@ const EditMaplayout = () => {
             }}
           >
             <CardHeader>
-              <CardTitle>เพิ่มตำแหน่งแผนที่</CardTitle>
+              <CardTitle>แก้ไขตำแหน่งแผนที่</CardTitle>
               <CardDescription>
-                ค้นหาตำแหน่งที่ต้องการเพิ่มแผนที่
+                ค้นหาตำแหน่งที่ต้องการแก้ไขแผนที่
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -249,8 +262,8 @@ const EditMaplayout = () => {
                 <Input
                   ref={autocompleteInput}
                   name="MapAddress"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  value={editMap?.MapAddress}
+                  onChange={handleInputChange}
                   placeholder="ค้นหาตำแหน่ง"
                   style={{
                     flex: 1,
@@ -287,16 +300,16 @@ const EditMaplayout = () => {
                     className=" w-full bg-primary-500 text-white "
                     type="button"
                   >
-                    เพิ่มตำแหน่งแผนที่
+                    เเก้ไขตำแหน่งแผนที่
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>
-                      คุณแน่ใจหรือไม่ว่าต้องการเพิ่มตำแหน่งแผนที่
+                      คุณแน่ใจหรือไม่ว่าต้องการเเก้ไขตำแหน่งแผนที่
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                      การดำเนินการนี้จะเพิ่มตำแหน่งแผนที่ลงในบัญชีของคุณจากเซิร์ฟเวอร์ของเรา
+                      การดำเนินการนี้จะเเเก้ไขตำแหน่งแผนที่ลงในบัญชีของคุณจากเซิร์ฟเวอร์ของเรา
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

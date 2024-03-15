@@ -35,3 +35,32 @@ export async function getallMap() {
     return { error: error.message };
   }
 }
+
+export async function updateMap({ MapAddress, id }) {
+  try {
+    const map = await Map.findByIdAndUpdate(
+      id,
+      {
+        MapAddress,
+      },
+      { new: true }
+    );
+
+    revalidatePath("/");
+
+    return { ...map._doc, _id: map._id.toString(), msg: "แก้ไขข้อมูลสำเร็จ" };
+  } catch (error) {
+    return { error: error.message };
+  }
+}
+
+export async function deleteMap(mapId) {
+  try {
+    const map = await Map.findByIdAndDelete(mapId, { new: true });
+    revalidatePath("/");
+
+    return { ...map._doc, _id: map._id.toString() };
+  } catch (error) {
+    return { error: error.message };
+  }
+}

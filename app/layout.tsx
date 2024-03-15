@@ -11,6 +11,7 @@ import { getServerSession } from "next-auth";
 import { config } from "@/utils/authOptions";
 import AdminaNavbar from "@/components/profile/AdminNavber";
 import { Toaster } from "@/components/ui/toaster";
+import NextToploader from "nextjs-toploader";
 
 export const metadata = {
   title: "STDACTIVITYCHECK",
@@ -47,6 +48,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <Provider>
+            <NextToploader />
             <header>
               <Headers />
             </header>

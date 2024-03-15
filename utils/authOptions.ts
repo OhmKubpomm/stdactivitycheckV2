@@ -5,7 +5,9 @@ import User from "@/models/Usermodel";
 import bcrypt from "bcrypt";
 
 import type { NextAuthOptions } from "next-auth";
+
 connectDatabase();
+
 export const config = {
   providers: [
     GoogleProvider({
@@ -44,6 +46,7 @@ export const config = {
 
       token.user = user as
         | {
+            _id?: string | null | undefined;
             name?: string | null | undefined;
             email?: string | null | undefined;
             image?: string | null | undefined;
@@ -52,13 +55,12 @@ export const config = {
       return token;
     },
     async session({ session, token }) {
-      session.user = token.user as
-        | {
-            name?: string | null | undefined;
-            email?: string | null | undefined;
-            image?: string | null | undefined;
-          }
-        | undefined;
+      // ตรวจสอบว่า token.user ไม่เป็น undefined ก่อนที่จะ assign ค่าให้ session.user
+      if (token.user) {
+        session.user = {
+          ...token.user,
+        };
+      }
       return session;
     },
   },

@@ -284,7 +284,7 @@ const MapLayout = () => {
               <AlertDialog>
                 <AlertDialogTrigger className=" w-full ">
                   <Button
-                    className=" w-full bg-primary-500 text-white "
+                    className=" w-full bg-gradient-to-r from-primary-500 to-yellow-500 text-white "
                     type="button"
                   >
                     เพิ่มตำแหน่งแผนที่
