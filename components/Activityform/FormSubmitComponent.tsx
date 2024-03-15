@@ -77,9 +77,7 @@ function FormSubmitComponent({
       <div className="flex size-full items-center justify-center p-8">
         <div className="flex w-full max-w-[620px] grow flex-col gap-4 overflow-y-auto rounded border bg-background p-8 shadow-xl shadow-blue-700">
           <h1 className="text-2xl font-bold">Form submitted</h1>
-          <p className="text-muted-foreground">
-            Thank you for submitting the form, you can close this page now.
-          </p>
+          <p>Thank you for submitting the form, you can close this page now.</p>
         </div>
       </div>
     );
