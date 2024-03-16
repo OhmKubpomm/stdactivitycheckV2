@@ -52,8 +52,8 @@ function FormSubmitComponent({
     if (!validForm) {
       setRenderKey(new Date().getTime());
       toast({
-        title: "Error",
-        description: "please check the form for errors",
+        title: "ข้อผิดพลาด",
+        description: "โปรดตรวจสอบแบบฟอร์มเพื่อแก้ไขข้อผิดพลาด",
         variant: "destructive",
       });
       return;
@@ -65,8 +65,8 @@ function FormSubmitComponent({
       setSubmitted(true);
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Something went wrong",
+        title: "ข้อผิดพลาด",
+        description: "เกิดข้อผิดพลาดบางอย่าง",
         variant: "destructive",
       });
     }
@@ -76,8 +76,8 @@ function FormSubmitComponent({
     return (
       <div className="flex size-full items-center justify-center p-8">
         <div className="flex w-full max-w-[620px] grow flex-col gap-4 overflow-y-auto rounded border bg-background p-8 shadow-xl shadow-blue-700">
-          <h1 className="text-2xl font-bold">Form submitted</h1>
-          <p>Thank you for submitting the form, you can close this page now.</p>
+          <h1 className="text-2xl font-bold">ส่งแบบฟอร์มแล้ว</h1>
+          <p>ขอบคุณที่ส่งแบบฟอร์ม คุณสามารถปิดหน้านี้ได้เลย</p>
         </div>
       </div>
     );
@@ -102,7 +102,7 @@ function FormSubmitComponent({
           );
         })}
         <Button
-          className="mt-8"
+          className="mt-8 bg-gradient-to-r from-primary-500 to-yellow-500 text-white"
           onClick={() => {
             startTransition(submitForm);
           }}
@@ -111,7 +111,7 @@ function FormSubmitComponent({
           {!pending && (
             <>
               <HiCursorClick className="mr-2" />
-              Submit
+              ส่ง
             </>
           )}
           {pending && <ImSpinner2 className="animate-spin" />}

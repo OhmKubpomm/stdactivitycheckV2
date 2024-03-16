@@ -32,7 +32,7 @@ function FormLinkShare({ shareUrl }: { shareUrl: string }) {
         }}
       >
         <ImShare className="mr-2 size-4" />
-        Share link
+        แชร์ฟอร์มนี้
       </Button>
     </div>
   );

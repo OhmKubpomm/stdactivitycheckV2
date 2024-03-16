@@ -22,7 +22,7 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
         window.open(shareLink, "_blank");
       }}
     >
-      Visit
+      ดูแบบฟอร์ม
     </Button>
   );
 }

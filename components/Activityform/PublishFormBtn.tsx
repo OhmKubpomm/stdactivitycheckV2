@@ -25,14 +25,14 @@ function PublishFormBtn({ id }: { id: number }) {
     try {
       await PublishForm(id);
       toast({
-        title: "Success",
-        description: "Your form is now available to the public",
+        title: "สำเร็จ",
+        description: "แบบฟอร์มของคุณพร้อมให้บริการแก่สาธารณะแล้ว",
       });
       router.refresh();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Something went wrong",
+        title: "ข้อผิดพลาด",
+        description: "เกิดข้อผิดพลาดบางอย่าง",
       });
     }
   }
