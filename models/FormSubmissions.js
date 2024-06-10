@@ -2,6 +2,10 @@ import { mongoose } from "mongoose";
 
 const FormsubSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     formId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Form",

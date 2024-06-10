@@ -1,12 +1,12 @@
 import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+
 export default withAuth(
   function middleware(req) {
     const { pathname } = req.nextUrl;
     const { token } = req.nextauth;
 
     if (pathname.startsWith("/dashboard") && !token) {
-      return new NextResponse("You are not Authorized");
+      return { Error };
     }
   },
   {
@@ -18,5 +18,5 @@ export default withAuth(
   }
 );
 export const config = {
-  matcher: ["/profile/:path*", "/protected/:path*", "/dashboard/:path*"],
+  matcher: ["/profile/:path*", "/protected/:path*", "/submit/:path*"],
 };

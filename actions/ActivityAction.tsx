@@ -190,6 +190,10 @@ export async function GetFormContentByUrl(formUrl: string) {
 
 export async function SubmitForm(formUrl: string, content: string) {
   try {
+    const session = await getServerSession(config);
+    const user = await User.findById(session?.user?._id);
+    if (!session) throw new Error("User not found");
+
     const form = await ActivityForm.findOne({
       ActivityShareurl: formUrl,
       published: true,
@@ -206,6 +210,7 @@ export async function SubmitForm(formUrl: string, content: string) {
     const formSubmission = new Formsubs({
       Formsubcontent: content,
       formId: form._id,
+      userId: user._id,
     });
 
     // บันทึก submission ใหม่
@@ -216,6 +221,7 @@ export async function SubmitForm(formUrl: string, content: string) {
     return {
       ...formSubmission._doc,
       _id: formSubmission._id.toString(),
+      userId: formSubmission._id.toString(),
       formId: formSubmission._id.toString(),
     };
   } catch (error) {
@@ -242,10 +248,11 @@ export async function GetFormWithSubmissions(id: number) {
   // ค้นหา submissions ที่เกี่ยวข้องกับฟอร์มนี้
   const submissions = await Formsubs.find({
     formId: form._id,
-  }).lean(); // ใช้ form._id เพื่ออ้างอิง
+  }).lean();
 
   // รวมข้อมูล submissions กลับเข้าไปใน object ฟอร์ม
   form.FormSubmissions = submissions;
+  console.log(form.FormSubmissions, "form");
   if (!submissions) {
     return null; // หรือจัดการกรณีที่ไม่พบข้อมูลตามที่ต้องการ
   }

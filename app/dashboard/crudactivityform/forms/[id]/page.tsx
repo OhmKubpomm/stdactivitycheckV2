@@ -114,6 +114,8 @@ export default FormDetailPage;
 
 type Row = { [key: string]: string } & {
   submittedAt: Date;
+
+  userSendName: string;
 };
 
 async function SubmissionsTable({ id }: { id: number }) {
@@ -160,10 +162,11 @@ async function SubmissionsTable({ id }: { id: number }) {
 
     return {
       ...content,
+      userSendName: submission.userId, // ชื่อผู้ส่ง
       submittedAt: new Date(submission.createdAt),
     };
   });
-
+  console.log(rows, "content");
   // ตรวจสอบว่ามีข้อมูลในตาราง หรือไม่
   if (rows.length === 0) {
     return <div>ไม่พบการส่งแบบฟอร์ม</div>;
@@ -184,6 +187,9 @@ async function SubmissionsTable({ id }: { id: number }) {
               <TableHead className="text-muted-foreground text-right uppercase">
                 ส่งเมื่อ
               </TableHead>
+              <TableHead className="text-muted-foreground text-right uppercase">
+                ผู้ส่ง
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -200,6 +206,9 @@ async function SubmissionsTable({ id }: { id: number }) {
                   {formatDistance(row.submittedAt, new Date(), {
                     addSuffix: true,
                   })}
+                </TableCell>
+                <TableCell className="text-muted-foreground text-right">
+                  {row.userSendName}
                 </TableCell>
               </TableRow>
             ))}

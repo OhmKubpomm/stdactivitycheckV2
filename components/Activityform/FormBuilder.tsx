@@ -92,8 +92,8 @@ function FormBuilder({ form }: { form: typeof ActivityForm }) {
                 onClick={() => {
                   navigator.clipboard.writeText(shareUrl);
                   toast({
-                    title: "Copied!",
-                    description: "Link copied to clipboard",
+                    title: "คัดลอกลิงก์!",
+                    description: "คัดลอกลิงก์ไปยังคลิปบอร์ดแล้ว",
                   });
                 }}
               >

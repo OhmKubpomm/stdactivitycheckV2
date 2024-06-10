@@ -26,8 +26,8 @@ function FormLinkShare({ shareUrl }: { shareUrl: string }) {
         onClick={() => {
           navigator.clipboard.writeText(shareLink);
           toast({
-            title: "Copied!",
-            description: "Link copied to clipboard",
+            title: "คัดลอกลิงก์!",
+            description: "คัดลอกลิงก์ไปยังคลิปบอร์ดแล้ว",
           });
         }}
       >
