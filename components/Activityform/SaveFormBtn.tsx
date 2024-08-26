@@ -12,12 +12,27 @@ function SaveFormBtn({ id }: { id: number }) {
 
   const updateFormContent = async () => {
     try {
+      if (!elements) {
+        console.error("Elements is undefined");
+        return;
+      }
+
       const jsonElements = JSON.stringify(elements);
+      const dateFieldElement = elements.find((el) => el.type === "DateField");
+
+      if (!dateFieldElement || !dateFieldElement.extraAttributes) {
+        console.error("DateField element or its extraAttributes are not found");
+        return;
+      }
+
+      const endTime = dateFieldElement.extraAttributes.endTime;
+
       if (!jsonElements) {
         console.error("No form elements to save", jsonElements);
-        return; // Or handle the error appropriately
+        return;
       }
-      await UpdateFormContent(id, jsonElements);
+
+      await UpdateFormContent(id, jsonElements, endTime);
       toast({
         title: "สำเร็จ",
         description: "ฟอร์มได้รับการบันทึกแล้ว",
@@ -30,6 +45,7 @@ function SaveFormBtn({ id }: { id: number }) {
       });
     }
   };
+
   return (
     <Button
       variant={"outline"}

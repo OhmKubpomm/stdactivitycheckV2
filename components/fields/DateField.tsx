@@ -15,9 +15,7 @@ import {
 import useDesigner from "@/hooks/useDesigner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 import { cn } from "@/lib/utils";
-
 import { CalendarDays } from "lucide-react";
 import { format } from "date-fns";
 import { BsFillCalendarDateFill } from "react-icons/bs";
@@ -45,12 +43,14 @@ const extraAttributes = {
   label: "ฟิลด์วันที่",
   helperText: "เลือกเวลา",
   required: false,
+  endTime: undefined as Date | undefined, // เพิ่มตัวแปรสำหรับกำหนดเวลาหมดอายุ
 };
 
 const propertiesSchema = z.object({
   label: z.string().min(2).max(50),
   helperText: z.string().max(200),
   required: z.boolean().default(false),
+  endTime: z.date().optional(), // กำหนด schema สำหรับ endTime
 });
 
 export const DateFieldFormElement: FormElement = {
@@ -73,6 +73,14 @@ export const DateFieldFormElement: FormElement = {
     currentValue: string
   ): boolean => {
     const element = formElement as CustomInstance;
+    const currentTime = new Date();
+    const endTime = element.extraAttributes.endTime as Date | undefined;
+
+    // ตรวจสอบก่อนว่า endTime มีค่าเป็น Date
+    if (endTime instanceof Date && currentTime > endTime) {
+      return false; // ไม่อนุญาตให้กรอกฟอร์มหากหมดเวลา
+    }
+
     if (element.extraAttributes.required) {
       return currentValue.length > 0;
     }
@@ -130,12 +138,32 @@ function FormComponent({
   );
 
   const [error, setError] = useState(false);
+  const [expired, setExpired] = useState(false);
+
+  useEffect(() => {
+    const currentTime = new Date();
+    if (
+      element.extraAttributes.endTime instanceof Date &&
+      currentTime > element.extraAttributes.endTime
+    ) {
+      setExpired(true); // เช็คว่าหมดเวลาหรือยัง
+    }
+  }, [element.extraAttributes.endTime]);
 
   useEffect(() => {
     setError(isInvalid === true);
   }, [isInvalid]);
 
   const { label, required, helperText } = element.extraAttributes;
+
+  if (expired) {
+    return (
+      <div className="flex w-full flex-col gap-2">
+        <Label className="text-red-500">ฟอร์มนี้หมดเวลาแล้ว</Label>
+      </div>
+    );
+  }
+
   return (
     <div className="flex w-full flex-col gap-2">
       <Label className={cn(error && "text-red-500")}>
@@ -188,6 +216,7 @@ function FormComponent({
 }
 
 type propertiesFormSchemaType = z.infer<typeof propertiesSchema>;
+
 function PropertiesComponent({
   elementInstance,
 }: {
@@ -202,6 +231,7 @@ function PropertiesComponent({
       label: element.extraAttributes.label,
       helperText: element.extraAttributes.helperText,
       required: element.extraAttributes.required,
+      endTime: element.extraAttributes.endTime,
     },
   });
 
@@ -210,13 +240,14 @@ function PropertiesComponent({
   }, [element, form]);
 
   function applyChanges(values: propertiesFormSchemaType) {
-    const { label, helperText, required } = values;
+    const { label, helperText, required, endTime } = values;
     updateElement(element.id, {
       ...element,
       extraAttributes: {
         label,
         helperText,
         required,
+        endTime, // บันทึกเวลาหมดอายุ
       },
     });
   }
@@ -276,6 +307,28 @@ function PropertiesComponent({
         />
         <FormField
           control={form.control}
+          name="endTime"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>เวลาหมดอายุ</FormLabel>
+              <FormControl>
+                <Input
+                  type="datetime-local"
+                  value={
+                    field.value
+                      ? format(new Date(field.value), "yyyy-MM-dd'T'HH:mm")
+                      : ""
+                  }
+                  onChange={(e) => field.onChange(new Date(e.target.value))}
+                />
+              </FormControl>
+              <FormDescription>กำหนดเวลาหมดอายุสำหรับฟอร์มนี้</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="required"
           render={({ field }) => (
             <FormItem className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
@@ -283,7 +336,7 @@ function PropertiesComponent({
                 <FormLabel>กำหนดการกรอกที่จำเป็น</FormLabel>
                 <FormDescription>
                   เปิดใช้งานที่ปุ่มจะเป็นการกำหนดการกรอกที่จำเป็น <br />
-                  แสดงที่ด้านล่างของฟิลด์
+                  ข้อความนี้จะปรากฏที่ด้านล่างของฟิลด์
                 </FormDescription>
               </div>
               <FormControl>

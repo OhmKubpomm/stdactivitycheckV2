@@ -30,6 +30,7 @@ import {
   ArrowRightCircle,
   Eye,
 } from "lucide-react";
+import DeleteBtn from "@/components/Activityform/DeleteBtn";
 
 connectdatabase();
 
@@ -217,6 +218,7 @@ function FormCard({ form }: { form: typeof ActivityForm }) {
             </Link>
           </Button>
         )}
+        <DeleteBtn formId={form.id} />
       </CardFooter>
     </Card>
   );

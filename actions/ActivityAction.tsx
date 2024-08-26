@@ -129,15 +129,24 @@ export async function GetFormById(id: Object) {
 }
 
 // Update form content
-export async function UpdateFormContent(id: number, jsonContent: string) {
+export async function UpdateFormContent(
+  id: number,
+  jsonContent: string,
+  endTime: Date | undefined
+) {
   try {
     const session = await getServerSession(config);
     const user = await User.findById(session?.user?._id);
     if (!session) throw new Error("User not found");
 
+    const updateData: any = { ActivityContent: jsonContent };
+    if (endTime) {
+      updateData.endTime = endTime;
+    }
+
     const updatedForm = await ActivityForm.findOneAndUpdate(
       { _id: id, userId: user._id }, // Match the form by its ID and the user's ID
-      { ActivityContent: jsonContent }, // Update the content field
+      updateData, // Update the content field and endTime if provided
       { new: true } // Return the updated document
     );
 
@@ -148,15 +157,20 @@ export async function UpdateFormContent(id: number, jsonContent: string) {
   }
 }
 
-export async function PublishForm(id: number) {
+export async function PublishForm(id: number, endTime?: Date) {
   try {
     const session = await getServerSession(config);
     const user = await User.findById(session?.user?._id);
     if (!session) throw new Error("User not found");
 
+    const updateData: any = { published: true };
+    if (endTime) {
+      updateData.endTime = endTime; // บันทึก endTime ลงในฐานข้อมูล
+    }
+
     const updatedForm = await ActivityForm.findOneAndUpdate(
       { _id: id, userId: user._id },
-      { published: true },
+      updateData,
       { new: true }
     );
 
@@ -169,19 +183,24 @@ export async function PublishForm(id: number) {
 
 export async function GetFormContentByUrl(formUrl: string) {
   try {
+    // ดึงข้อมูล `endTime` และ `ActivityContent` จากฐานข้อมูล
     const form = await ActivityForm.findOneAndUpdate(
       { ActivityShareurl: formUrl }, // Match document by shared URL
       { $inc: { ActivityVisits: 1 } }, // Increment visits counter
-      { new: true } // Return updated document with only the content field
+      { new: true } // Return updated document
     );
 
-    // Check if the form is null and handle the case
+    // ตรวจสอบว่ามีฟอร์มหรือไม่
     if (!form) {
       console.error("No form found with the given URL:", formUrl);
-      // Handle according to your application's needs, e.g., return null, throw an error, or return a default value
-      return { ActivityContent: null }; // or throw new Error("Form not found");
+      return { ActivityContent: null, endTime: null }; // ส่งกลับ endTime เป็น null
     }
-    return { ActivityContent: form.ActivityContent };
+
+    // ส่ง `ActivityContent` และ `endTime` กลับไป
+    return {
+      ActivityContent: form.ActivityContent,
+      endTime: form.endTime, // ดึง `endTime` มาจากฐานข้อมูล
+    };
   } catch (error) {
     console.error("Error updating form visits:", error);
     throw error;
@@ -199,6 +218,10 @@ export async function SubmitForm(formUrl: string, content: string) {
       published: true,
     });
 
+    if (!form) {
+      throw new Error("Form not found");
+    }
+
     // Check if ActivitySubmissions is a valid number
     if (isNaN(form.ActivitySubmissions)) {
       form.ActivitySubmissions = 0;
@@ -206,6 +229,7 @@ export async function SubmitForm(formUrl: string, content: string) {
 
     // Increment submissions count
     form.ActivitySubmissions += 1;
+
     // สร้าง submission ใหม่
     const formSubmission = new Formsubs({
       Formsubcontent: content,
@@ -221,11 +245,11 @@ export async function SubmitForm(formUrl: string, content: string) {
     return {
       ...formSubmission._doc,
       _id: formSubmission._id.toString(),
-      userId: formSubmission._id.toString(),
-      formId: formSubmission._id.toString(),
+      userId: formSubmission.userId.toString(),
+      formId: formSubmission.formId.toString(),
     };
   } catch (error) {
-    console.error("Error updating form visits:", error);
+    console.error("Error submitting form:", error);
     throw error;
   }
 }
@@ -252,7 +276,7 @@ export async function GetFormWithSubmissions(id: number) {
 
   // รวมข้อมูล submissions กลับเข้าไปใน object ฟอร์ม
   form.FormSubmissions = submissions;
-  console.log(form.FormSubmissions, "form");
+
   if (!submissions) {
     return null; // หรือจัดการกรณีที่ไม่พบข้อมูลตามที่ต้องการ
   }

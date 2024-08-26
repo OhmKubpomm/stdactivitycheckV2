@@ -36,6 +36,9 @@ const ActivityFormSchema = new mongoose.Schema(
     FormSubmissions: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Formsubs" },
     ],
+    endTime: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );

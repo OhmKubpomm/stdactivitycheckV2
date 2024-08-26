@@ -13,7 +13,7 @@ const FormsubSchema = new mongoose.Schema(
     },
     createdAt: {
       type: Date,
-      default: Date.now(),
+      default: Date.now,
     },
     Formsubcontent: { type: String, required: true },
   },

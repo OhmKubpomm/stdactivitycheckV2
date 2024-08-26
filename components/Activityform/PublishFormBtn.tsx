@@ -16,14 +16,19 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+import useDesigner from "@/hooks/useDesigner";
 
 function PublishFormBtn({ id }: { id: number }) {
+  const { elements } = useDesigner();
   const [loading, startTransition] = useTransition();
   const router = useRouter();
 
   async function publishForm() {
     try {
-      await PublishForm(id);
+      const dateFieldElement = elements.find((el) => el.type === "DateField");
+      const endTime = dateFieldElement?.extraAttributes?.endTime; // ตรวจสอบว่ามี endTime หรือไม่
+
+      await PublishForm(id, endTime); // ส่ง endTime ไปยัง API หากมี
       toast({
         title: "สำเร็จ",
         description: "แบบฟอร์มของคุณพร้อมให้บริการแก่สาธารณะแล้ว",
