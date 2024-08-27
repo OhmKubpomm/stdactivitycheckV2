@@ -35,8 +35,6 @@ function FormSubmitComponent({
   const [timeLeft, setTimeLeft] = useState<string>("");
 
   useEffect(() => {
-    console.log("endTime:", endTime); // ตรวจสอบว่าค่า endTime ถูกส่งมาอย่างถูกต้อง
-
     if (endTime) {
       const updateTimeLeft = () => {
         const currentTime = new Date().getTime();
@@ -47,16 +45,20 @@ function FormSubmitComponent({
           setIsExpired(true);
           setTimeLeft("หมดเวลาแล้ว");
         } else {
-          const hours = Math.floor(timeDifference / (1000 * 60 * 60));
+          const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+          const hours = Math.floor(
+            (timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+          );
           const minutes = Math.floor(
             (timeDifference % (1000 * 60 * 60)) / (1000 * 60)
           );
           const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
 
-          setTimeLeft(`${hours} ชั่วโมง ${minutes} นาที ${seconds} วินาที`);
+          setTimeLeft(
+            `${days} วัน ${hours} ชั่วโมง ${minutes} นาที ${seconds} วินาที`
+          );
         }
       };
-
       updateTimeLeft();
       const timer = setInterval(updateTimeLeft, 1000);
 

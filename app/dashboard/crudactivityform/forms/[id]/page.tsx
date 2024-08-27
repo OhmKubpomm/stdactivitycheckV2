@@ -160,7 +160,7 @@ async function SubmissionsTable({ id }: { id: number }) {
 
     return {
       ...content,
-      userSendName: submission.userId,
+      userSendName: submission.userSendName,
       submittedAt: submission.createdAt.toString(), // Convert Date to string
     };
   });

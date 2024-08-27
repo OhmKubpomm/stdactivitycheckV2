@@ -7,8 +7,32 @@ import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import User from "@/models/Usermodel";
 import Formsubs from "@/models/FormSubmissions";
+import { Document, ObjectId } from "mongoose";
 
 connectdatabase();
+
+// Interface สำหรับ Formsub
+interface FormSubmission extends Document {
+  userId: ObjectId;
+  formId: ObjectId;
+  createdAt: Date;
+  Formsubcontent: string;
+}
+
+// Interface สำหรับ User
+interface IUser extends Document {
+  name: string;
+  email: string;
+  password?: string;
+  image?: string;
+  Firstname?: string;
+  Lastname?: string;
+  Date?: string;
+  Telephone?: string;
+  Address?: string;
+  role: string;
+  provider: string;
+}
 
 export async function GetFormStats() {
   const session = await getServerSession(config);
@@ -259,27 +283,32 @@ export async function GetFormWithSubmissions(id: number) {
   const user = await User.findById(session?.user?._id);
   if (!session) throw new Error("User not found");
 
-  // หาฟอร์มที่ตรงกับ ID และ userID ของผู้ใช้งาน
   const form = await ActivityForm.findOne({
     _id: id,
     userId: user?.id,
-  }).lean(); // ใช้ .lean() เพื่อรับข้อมูลเป็น plain JavaScript object
-
-  if (!form) {
-    return null; // หรือจัดการกรณีที่ไม่พบข้อมูลตามที่ต้องการ
-  }
-
-  // ค้นหา submissions ที่เกี่ยวข้องกับฟอร์มนี้
-  const submissions = await Formsubs.find({
-    formId: form._id,
   }).lean();
 
-  // รวมข้อมูล submissions กลับเข้าไปใน object ฟอร์ม
-  form.FormSubmissions = submissions;
-
-  if (!submissions) {
-    return null; // หรือจัดการกรณีที่ไม่พบข้อมูลตามที่ต้องการ
+  if (!form) {
+    return null;
   }
+
+  const submissions = (await Formsubs.find({
+    formId: form._id,
+  }).lean()) as FormSubmission[]; // ใช้ interface ที่เราสร้างขึ้น
+
+  // ดึงชื่อผู้ใช้สำหรับแต่ละ submission
+  const submissionsWithUserNames = await Promise.all(
+    submissions.map(async (submission) => {
+      const user = (await User.findById(submission.userId).lean()) as IUser; // ใช้ interface ของ User
+      return {
+        ...submission,
+        userSendName: user?.name || "Unknown User",
+      };
+    })
+  );
+
+  form.FormSubmissions = submissionsWithUserNames;
+
   return { ...form };
 }
 
