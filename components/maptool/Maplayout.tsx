@@ -174,12 +174,16 @@ const MapLayout = () => {
   };
   const handleAction = async () => {
     try {
-      // Manually prepare the data
       const formData = {
-        MapAddress: address, // Using the state directly
+        MapAddress: address,
+        Maplocation: {
+          type: "Point",
+          coordinates: [position[1], position[0]], // [longitude, latitude] ต้องตรงกับ Schema
+        },
       };
 
-      // Assuming createLocation is a function that performs the API call
+      console.log("FormData being sent:", formData);
+
       const res = await createLocation(formData);
 
       if (res.error) {

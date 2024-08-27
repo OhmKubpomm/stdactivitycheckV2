@@ -1,140 +1,98 @@
-/* eslint-disable tailwindcss/migration-from-tailwind-2 */
 "use client";
+
 import * as React from "react";
 import { signOut } from "next-auth/react";
-import { Avatar } from "antd";
-
-import { Menu } from "@headlessui/react";
 import Link from "next/link";
-import { ChevronDownIcon } from "@heroicons/react/solid";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  ChevronDown,
+  Settings,
+  UserCircle,
+  LogOut,
+  PauseCircle,
+  Trash2,
+} from "lucide-react";
 
 const SignOut = ({ User }) => {
   return (
-    <div className="inline-block w-full text-left lg:w-auto">
-      <Menu>
-        {({ open }) => (
-          <>
-            <span className="w-full rounded-md shadow-sm lg:w-auto">
-              <Menu.Button className="inline-flex w-full items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-opacity-80  md:justify-center">
-                {User?.image ? (
-                  <Avatar
-                    shape="square"
-                    size="medium"
-                    src={User?.image}
-                    style={{ width: "48px", height: "48px" }}
-                    className="mr-2"
-                  />
-                ) : (
-                  <Avatar
-                    shape="square"
-                    size="medium"
-                    src={null}
-                    icon={<span>U</span>}
-                    className="mr-2"
-                  />
-                )}
-                {User?.name}
-                <ChevronDownIcon
-                  className="-mr-1 ml-2 size-5"
-                  aria-hidden="true"
-                />
-              </Menu.Button>
-            </span>
-            <Menu.Items
-              className={`origin-top-right transition duration-100 ease-out${
-                open
-                  ? "visible scale-100 opacity-100"
-                  : "invisible scale-95 opacity-0"
-              } absolute right-0 z-50 mt-2 w-56 rounded-md border border-gray-300 bg-white shadow-lg`}
-            >
-              <div
-                className="w-full py-1"
-                role="menu"
-                aria-orientation="vertical"
-                aria-labelledby="options-menu"
-              >
-                <div className="px-4 py-2 text-sm font-bold">
-                  ส่วนนี้คือส่วนนำSettings
-                </div>
-
-                <Menu.Item>
-                  {({ active }) => (
-                    <Link
-                      href="/"
-                      className={`block px-4 py-2 text-sm ${
-                        active ? "bg-blue-500 text-white" : "text-gray-900"
-                      }`}
-                    >
-                      Account settings
-                    </Link>
-                  )}
-                </Menu.Item>
-
-                <Menu.Item>
-                  {({ active }) => (
-                    <Link
-                      href="/"
-                      className={`block px-4 py-2 text-sm ${
-                        active ? "bg-blue-500 text-white" : "text-gray-900"
-                      }`}
-                    >
-                      Change account
-                    </Link>
-                  )}
-                </Menu.Item>
-
-                <button onClick={signOut} className="block px-4 py-2 text-sm">
-                  Logout
-                </button>
-
-                <Menu.Item>
-                  {({ active }) => (
-                    <Link
-                      href={`/user/${User._id}`}
-                      className={`block px-4 py-2 text-sm ${
-                        active ? "bg-blue-500 text-white" : "text-gray-900"
-                      }`}
-                    >
-                      ข้อมูลเดี่ยว
-                    </Link>
-                  )}
-                </Menu.Item>
-
-                <div className="my-2 border-t"></div>
-
-                <div className="px-4 py-2 text-sm font-bold">Danger zone</div>
-
-                <Menu.Item>
-                  {({ active }) => (
-                    <Link
-                      href="/"
-                      className={`block px-4 py-2 text-sm ${
-                        active ? "bg-blue-500 text-white" : "text-gray-900"
-                      }`}
-                    >
-                      Pause subscription
-                    </Link>
-                  )}
-                </Menu.Item>
-
-                <Menu.Item>
-                  {({ active }) => (
-                    <Link
-                      href="/"
-                      className={`block px-4 py-2 text-sm ${
-                        active ? "bg-blue-500 text-white" : "text-gray-900"
-                      }`}
-                    >
-                      Delete account
-                    </Link>
-                  )}
-                </Menu.Item>
-              </div>
-            </Menu.Items>
-          </>
-        )}
-      </Menu>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="flex items-center space-x-2 px-2 py-1.5"
+        >
+          <Avatar className="size-8">
+            <AvatarImage src={User?.image} alt={User?.name} />
+            <AvatarFallback>{User?.name?.[0] || "U"}</AvatarFallback>
+          </Avatar>
+          <span className="hidden md:inline">{User?.name}</span>
+          <ChevronDown className="size-4 opacity-50" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">{User?.name}</p>
+            <p className="text-muted-foreground text-xs leading-none">
+              {User?.email}
+            </p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem asChild>
+            <Link href="/">
+              <Settings className="mr-2 size-4" />
+              <span>Account settings</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/">
+              <UserCircle className="mr-2 size-4" />
+              <span>Change account</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href={`/user/${User._id}`}>
+              <UserCircle className="mr-2 size-4" />
+              <span>ข้อมูลเดี่ยว</span>
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel>Danger zone</DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuItem asChild>
+            <Link href="/">
+              <PauseCircle className="mr-2 size-4" />
+              <span>Pause subscription</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/">
+              <Trash2 className="mr-2 size-4" />
+              <span>Delete account</span>
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => signOut()}>
+          <LogOut className="mr-2 size-4" />
+          <span>Log out</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
+
 export default SignOut;

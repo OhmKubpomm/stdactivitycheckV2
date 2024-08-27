@@ -6,21 +6,24 @@ import { revalidatePath } from "next/cache";
 connectdatabase();
 export async function createLocation(data) {
   try {
-    // Create a new Map object with the hashed password
     const newMap = new Map({
-      ...data,
+      ...data, // ฟิลด์ Maplocation ควรอยู่ใน newMap
     });
 
     await newMap.save();
-    revalidatePath("/"); // ใช้ในการ refresh หน้าเว็บ
-    return (
-      { ...newMap._doc, _id: newMap._id.toString() },
-      { msg: "เพิ่มข้อมูลสำเร็จ" }
-    );
+    revalidatePath("/");
+
+    return {
+      ...newMap._doc,
+      _id: newMap._id.toString(),
+      msg: "เพิ่มข้อมูลสำเร็จ",
+    };
   } catch (error) {
+    console.error("Error saving Maplocation:", error); // ดูว่ามีข้อผิดพลาดอะไรบ้าง
     return { error: error.message };
   }
 }
+
 export async function getallMap() {
   try {
     const allMap = await Map.find();

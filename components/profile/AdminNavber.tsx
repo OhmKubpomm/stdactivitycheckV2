@@ -1,91 +1,230 @@
+/* eslint-disable tailwindcss/no-custom-classname */
 "use client";
-import React, { useState } from "react";
 
-import {
-  DashboardOutlined,
-  InboxOutlined,
-  UserOutlined,
-  ScheduleOutlined,
-  SearchOutlined,
-  BarChartOutlined,
-  FolderOutlined,
-  SettingOutlined,
-  MenuFoldOutlined,
-} from "@ant-design/icons";
-
-import { motion } from "framer-motion";
-
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
+import {
+  Users,
+  CalendarDays,
+  Map,
+  Search,
+  BarChart,
+  FolderClosed,
+  Settings,
+  Menu,
+  ChevronLast,
+  Activity,
+  LogOut,
+  AlignJustify,
+  Home,
+} from "lucide-react";
 
-const AdminaNavbar = () => {
+const menus = [
+  { name: "หน้าหลัก", icon: Home, link: "/dashboard" },
+  { name: "จัดการข้อมูลผู้ใช้งาน", icon: Users, link: "/dashboard/cruduser" },
+  {
+    name: "จัดการข้อมูลกิจกรรมนักศึกษา",
+    icon: Activity,
+    link: "/dashboard/crudactivityform",
+  },
+  { name: "จัดการข้อมูลแผนที่", icon: Map, link: "/dashboard/crudmap" },
+  { name: "ตารางเวลา", icon: CalendarDays, link: "/dashboard/schedule" },
+  { name: "ค้นหา", icon: Search, link: "/dashboard/search" },
+  { name: "วิเคราะห์", icon: BarChart, link: "/dashboard/analytics" },
+  { name: "ไฟล์", icon: FolderClosed, link: "/dashboard/files" },
+];
+
+const AdminNavbar = () => {
   const [open, setOpen] = useState(true);
-  const menus = [
-    {
-      name: "จัดการข้อมูลผู้ใช้งาน",
-      icon: <DashboardOutlined />,
-      Link: "/dashboard/cruduser",
-    },
-    {
-      name: "จัดการข้อมูลกิจกรรมนักศึกษา",
-      icon: <InboxOutlined />,
-      Link: "/dashboard/crudactivityform",
-    },
-    {
-      name: "จัดการข้อมูลแผนที่",
-      icon: <UserOutlined />,
-      gap: true,
-      Link: "/dashboard/crudmap",
-    },
-    { name: "Schedule", icon: <ScheduleOutlined />, Link: "/" },
-    { name: "Search", icon: <SearchOutlined />, Link: "/" },
-    { name: "Analytics", icon: <BarChartOutlined />, Link: "/" },
-    { name: "Files", icon: <FolderOutlined />, gap: true, Link: "/" },
-    { name: "Setting", icon: <SettingOutlined />, Link: "/" },
-  ];
+  const [isMobile, setIsMobile] = useState(false);
 
-  return (
-    <section className="flex min-h-screen">
-      <motion.div
-        style={{ border: "1px solid #ccc", borderRadius: "4px" }}
-        className={`text-dark300_light900  flex flex-col transition-all duration-500 ${
-          open ? "w-72" : "w-16"
-        } px-4`}
-      >
-        <div className="flex justify-end py-3">
-          <MenuFoldOutlined
-            size={26}
-            className="cursor-pointer"
-            onClick={() => setOpen(!open)}
-          />
-        </div>
-        <nav className="mt-4 flex flex-1 flex-col gap-4 ">
-          {menus?.map((menu, i) => (
-            <Link
-              href={menu.Link}
-              key={i}
-              className={`group flex cursor-pointer items-center gap-3.5 rounded-md from-primary-500 to-yellow-500 p-2 text-sm font-medium hover:bg-gradient-to-r hover:text-white
-           ${menu?.gap ? "mt-5" : ""}`}
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileView = window.innerWidth < 1024;
+      setIsMobile(isMobileView);
+      setOpen(!isMobileView);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const NavContent = ({ isMobileView = false }) => (
+    <motion.div
+      initial={{ width: isMobileView ? 280 : open ? 280 : 80 }}
+      animate={{ width: open || isMobileView ? 280 : 80 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="flex h-full flex-col border-r bg-background"
+    >
+      <div className="flex items-center justify-between p-4">
+        <AnimatePresence>
+          {(open || isMobileView) && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-center gap-3"
             >
-              <div>{menu?.icon}</div>
-              <h2
-                style={{ transitionDelay: `${i + 2}00ms` }}
-                className={`whitespace-pre transition-all duration-200 ${
-                  !open && "translate-x-28 overflow-hidden opacity-0"
-                }`}
-              >
-                {menu?.name}
-              </h2>
-              {!open && (
-                <h2 className="absolute left-14 w-0 overflow-hidden whitespace-pre rounded-md  p-0 font-semibold text-gray-900  group-hover:w-fit group-hover:px-2 group-hover:py-1 group-hover:duration-200">
-                  {menu?.name}
-                </h2>
+              <div className="flex flex-col">
+                <span className="text-lg font-semibold">แผงควบคุม</span>
+                <span className="text-muted-foreground text-sm">
+                  ยินดีต้อนรับกลับ!
+                </span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {!isMobile && !isMobileView && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setOpen(!open)}
+            className="rounded-full transition-transform duration-300 ease-in-out hover:bg-orange-100 hover:text-orange-500"
+          >
+            <motion.div
+              animate={{ rotate: open ? 0 : 180 }}
+              transition={{ duration: 0.3 }}
+            >
+              {open ? (
+                <AlignJustify className="size-5" />
+              ) : (
+                <ChevronLast className="size-5" />
               )}
-            </Link>
+            </motion.div>
+          </Button>
+        )}
+      </div>
+      <ScrollArea className="flex-1 px-3">
+        <nav className="flex flex-col gap-1 py-2">
+          {menus.map((menu, i) => (
+            <TooltipProvider key={i}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href={menu.link}
+                    className={`group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-300 ease-in-out
+                      ${!open && !isMobileView ? "justify-center" : ""} 
+                      ${
+                        i === 0
+                          ? "bg-orange-100 text-orange-500"
+                          : "hover:bg-orange-100 hover:text-orange-500"
+                      }`}
+                  >
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <menu.icon className="size-5 shrink-0" />
+                    </motion.div>
+                    <AnimatePresence>
+                      {(open || isMobileView) && (
+                        <motion.span
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: "auto" }}
+                          exit={{ opacity: 0, width: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="overflow-hidden whitespace-nowrap"
+                        >
+                          {menu.name}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </Link>
+                </TooltipTrigger>
+                {!open && !isMobileView && (
+                  <TooltipContent side="right">{menu.name}</TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
           ))}
         </nav>
-      </motion.div>
-    </section>
+      </ScrollArea>
+      <div className="space-y-2 p-4">
+        <Separator />
+        <div className="flex gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="flex-1 transition-colors duration-300 hover:bg-orange-100 hover:text-orange-500"
+                >
+                  <Settings className="size-5" />
+                  {(open || isMobileView) && (
+                    <span className="ml-2">ตั้งค่า</span>
+                  )}
+                </Button>
+              </TooltipTrigger>
+              {!open && !isMobileView && (
+                <TooltipContent side="top">ตั้งค่า</TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="flex-1 transition-colors duration-300 hover:bg-red-600"
+                >
+                  <LogOut className="size-5" />
+                  {(open || isMobileView) && (
+                    <span className="ml-2">ออกจากระบบ</span>
+                  )}
+                </Button>
+              </TooltipTrigger>
+              {!open && !isMobileView && (
+                <TooltipContent side="top">ออกจากระบบ</TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden h-screen lg:block">
+        <NavContent />
+      </aside>
+
+      {/* Mobile Navbar */}
+      <nav className="fixed inset-x-0 top-0 z-50  lg:hidden">
+        <div className="flex items-center justify-between">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="transition-colors duration-300 hover:bg-orange-100 hover:text-orange-500"
+              >
+                <Menu className="size-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[280px] p-0">
+              <NavContent isMobileView={true} />
+            </SheetContent>
+          </Sheet>
+        </div>
+      </nav>
+    </>
   );
 };
 
-export default AdminaNavbar;
+export default AdminNavbar;
