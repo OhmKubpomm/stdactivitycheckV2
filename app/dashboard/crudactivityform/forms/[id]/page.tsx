@@ -216,6 +216,7 @@ async function SubmissionsTable({ id }: { id: number }) {
                   {new Date(row.submittedAt).toLocaleString("th-TH", {
                     dateStyle: "full",
                     timeStyle: "short",
+                    timeZone: "Asia/Bangkok",
                   })}
                 </TableCell>
                 <TableCell className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
@@ -242,6 +243,7 @@ function RowCell({ type, value }: { type: ElementsType; value: string }) {
           {date.toLocaleString("th-TH", {
             dateStyle: "full",
             timeStyle: "short",
+            timeZone: "Asia/Bangkok",
           })}{" "}
         </Badge>
       );
