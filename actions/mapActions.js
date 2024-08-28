@@ -67,3 +67,27 @@ export async function deleteMap(mapId) {
     return { error: error.message };
   }
 }
+
+export async function checkUserWithinRange(userLocation, maxDistanceInMeters) {
+  try {
+    const locations = await Map.aggregate([
+      {
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [userLocation.lng, userLocation.lat],
+          },
+          distanceField: "distance",
+          maxDistance: maxDistanceInMeters,
+          spherical: true,
+        },
+      },
+    ]);
+
+    const isWithinRange = locations.length > 0;
+    return { isWithinRange };
+  } catch (error) {
+    console.error("Error checking user location:", error);
+    return { error: "Error checking user location" };
+  }
+}

@@ -16,6 +16,7 @@ import { HiCursorClick } from "react-icons/hi";
 import { toast } from "@/components/ui/use-toast";
 import { ImSpinner2 } from "react-icons/im";
 import { SubmitForm } from "@/actions/ActivityAction";
+import { checkUserWithinRange } from "@/actions/mapActions"; // Import Server Action นี้
 
 function FormSubmitComponent({
   formUrl,
@@ -33,6 +34,7 @@ function FormSubmitComponent({
   const [pending, startTransition] = useTransition();
   const [isExpired, setIsExpired] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>("");
+  const [isWithinRange, setIsWithinRange] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (endTime) {
@@ -65,6 +67,46 @@ function FormSubmitComponent({
       return () => clearInterval(timer);
     }
   }, [endTime]);
+
+  // ฟังก์ชันตรวจสอบตำแหน่งของผู้ใช้เมื่อโหลดฟอร์ม
+  useEffect(() => {
+    const checkUserLocation = async () => {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const userLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+
+          const { isWithinRange } = await checkUserWithinRange(
+            userLocation,
+            100 // ระยะทางในเมตร
+          );
+
+          setIsWithinRange(isWithinRange ?? false);
+
+          if (!isWithinRange) {
+            toast({
+              title: "คุณอยู่ไกลเกินไป!",
+              description:
+                "คุณไม่สามารถเข้าถึงฟอร์มนี้ได้เนื่องจากคุณอยู่ไกลเกินไป",
+              variant: "destructive",
+            });
+          }
+        },
+        () => {
+          toast({
+            title: "พบข้อผิดพลาด",
+            description: "ไม่สามารถเข้าถึงตำแหน่งของคุณได้",
+            variant: "destructive",
+          });
+          setIsWithinRange(false);
+        }
+      );
+    };
+
+    checkUserLocation();
+  }, []);
 
   const validateForm: () => boolean = useCallback(() => {
     for (const field of content) {
@@ -134,6 +176,19 @@ function FormSubmitComponent({
     }
   };
 
+  if (isWithinRange === false) {
+    return (
+      <div className="flex size-full items-center justify-center p-8">
+        <div className="flex w-full max-w-[620px] grow flex-col gap-4 overflow-y-auto rounded border bg-background p-8 shadow-xl shadow-blue-700">
+          <h1 className="text-2xl font-bold text-red-500">
+            คุณไม่สามารถเข้าถึงฟอร์มนี้ได้
+          </h1>
+          <p>คุณไม่ได้อยู่ในพื้นที่ที่กำหนด จึงไม่สามารถส่งแบบฟอร์มนี้ได้</p>
+        </div>
+      </div>
+    );
+  }
+
   if (submitted) {
     return (
       <div className="flex size-full items-center justify-center p-8">
@@ -153,6 +208,17 @@ function FormSubmitComponent({
             ฟอร์มนี้หมดเวลาแล้ว
           </h1>
           <p>คุณไม่สามารถส่งแบบฟอร์มนี้ได้เนื่องจากฟอร์มหมดเวลาแล้ว</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isWithinRange === null) {
+    return (
+      <div className="flex size-full items-center justify-center p-8">
+        <div className="flex w-full max-w-[620px] grow flex-col gap-4 overflow-y-auto rounded border bg-background p-8 shadow-xl shadow-blue-700">
+          <ImSpinner2 className="mx-auto animate-spin text-3xl text-blue-500" />
+          <p className="text-center">กำลังตรวจสอบตำแหน่งของคุณ...</p>
         </div>
       </div>
     );
