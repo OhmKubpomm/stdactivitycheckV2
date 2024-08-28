@@ -119,11 +119,20 @@ export async function GetForms() {
 
   // ดึงและคืนค่าฟอร์มกิจกรรมสำหรับผู้ใช้
   try {
-    const activityForms = await ActivityForm.find({
-      userId: user.id,
-    })
-      .sort({ createdAt: -1 })
-      .exec();
+    let activityForms;
+
+    if (user.isAdmin) {
+      // ถ้าเป็นแอดมิน ให้ดึงฟอร์มทั้งหมด
+      activityForms = await ActivityForm.find().sort({ createdAt: -1 }).exec();
+    } else {
+      // ถ้าไม่ใช่แอดมิน ให้ดึงฟอร์มเฉพาะของผู้ใช้นั้น
+      activityForms = await ActivityForm.find({
+        userId: user.id,
+      })
+        .sort({ createdAt: -1 })
+        .exec();
+    }
+
     return activityForms;
   } catch (error) {
     console.error("ไม่สามารถค้นหาฟอร์มกิจกรรมได้:", error);
