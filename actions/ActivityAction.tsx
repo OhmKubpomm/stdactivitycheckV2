@@ -121,7 +121,7 @@ export async function GetForms() {
   try {
     let activityForms;
 
-    if (user.isAdmin) {
+    if (user.role === "admin") {
       // ถ้าเป็นแอดมิน ให้ดึงฟอร์มทั้งหมด
       activityForms = await ActivityForm.find().sort({ createdAt: -1 }).exec();
     } else {

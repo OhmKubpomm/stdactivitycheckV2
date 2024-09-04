@@ -1,23 +1,20 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-unused-vars */
-// Use client-side rendering since Leaflet and Google Maps are browser APIs.
 "use client";
+
 import React, { useEffect, useRef, useState } from "react";
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import { Input } from "@/components/ui/input"; // Ensure these paths are correct
-import { Label } from "@/components/ui/label";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import L from "leaflet";
-import { MapPin, Loader2 } from "lucide-react";
+import { MapPin, X, Loader2, Navigation, Check } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,89 +26,59 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
 import { createLocation } from "@/actions/mapActions";
-
 import { useToast } from "@/components/ui/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
-const heroIcon = L.icon({
-  iconUrl: "/icon/map-marker.svg",
-  iconSize: [50, 50],
-});
-
-const LocationMarker = ({
-  position,
-  setAddress,
-}: {
-  position: number[];
-  setAddress: React.Dispatch<React.SetStateAction<string>>;
-}) => {
-  const map = useMap();
-  const [localAddress, setLocalAddress] = useState<string>(
-    "Fetching address..."
-  );
-  const markerRef = useRef<L.Marker | null>(null);
-
-  // Function to fetch and set the address and extract details
-  const updateAddress = async (latlng: number[]) => {
-    try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latlng[0]},${latlng[1]}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
-      );
-      const data = await response.json();
-      if (!data.results || data.results.length === 0)
-        throw new Error("Address not found");
-
-      const formattedAddress = data.results[0].formatted_address;
-      setAddress(formattedAddress); // Set the full address
-      setLocalAddress(formattedAddress); // Optionally, set the detailed address
-      markerRef.current?.bindPopup(formattedAddress).openPopup();
-    } catch (error) {
-      console.error(error);
-      const errorMessage = "Error fetching address";
-      setAddress(errorMessage);
-      setLocalAddress(errorMessage);
-      markerRef.current?.bindPopup(errorMessage).openPopup();
-    }
+type Position = [number, number];
+type Location = {
+  MapAddress: string;
+  Maplocation: {
+    type: string;
+    coordinates: [number, number];
   };
-
-  useEffect(() => {
-    if (!position) return;
-    if (!markerRef.current) {
-      markerRef.current = L.marker([position[0], position[1]], {
-        icon: heroIcon,
-      }).addTo(map);
-    } else {
-      markerRef.current.setLatLng([position[0], position[1]]);
-    }
-    map.setView(L.latLng(position[0], position[1]), map.getZoom());
-
-    updateAddress(position);
-
-    return () => {
-      // Cleanup the marker when component unmounts or position changes
-      if (markerRef.current) {
-        markerRef.current.remove();
-        markerRef.current = null;
-      }
-    };
-  }, [position, map, setAddress]); // Removed setLocalAddress to minimize dependencies
-
-  return null;
 };
 
-const MapLayout = () => {
-  const autocompleteInput = useRef(null);
-  const [position, setPosition] = useState([13, 100]);
+const customIcon = L.icon({
+  iconUrl: "/icon/map-marker.svg",
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
+  popupAnchor: [0, -30],
+});
+
+const LocationMarker: React.FC<{
+  position: Position;
+  setPosition: React.Dispatch<React.SetStateAction<Position>>;
+}> = ({ position, setPosition }) => {
+  const map = useMap();
+
+  useMapEvents({
+    click(e) {
+      setPosition([e.latlng.lat, e.latlng.lng]);
+    },
+  });
+
+  useEffect(() => {
+    map.setView(position, map.getZoom());
+  }, [map, position]);
+
+  return <Marker position={position} icon={customIcon} />;
+};
+
+export default function MapLayout() {
+  const autocompleteInput = useRef<HTMLInputElement>(null);
+  const [position, setPosition] = useState<Position>([13.7563, 100.5018]); // Bangkok coordinates
   const [address, setAddress] = useState<string>("");
   const { toast } = useToast();
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPopularLocations, setShowPopularLocations] = useState(false);
+  const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
 
   const API_URL = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   useEffect(() => {
-    // Function to initialize Google Places Autocomplete
     const initializeAutocomplete = () => {
-      // Ensure the input exists and the Google Places library has loaded
       if (!autocompleteInput.current || !window.google?.maps?.places) return;
 
       const autocomplete = new window.google.maps.places.Autocomplete(
@@ -119,230 +86,293 @@ const MapLayout = () => {
       );
       autocomplete.addListener("place_changed", () => {
         const place = autocomplete.getPlace();
-        if (place.geometry) {
-          const location = place.geometry.location;
-          if (location) {
-            setPosition([location.lat(), location.lng()]);
-          }
+        if (place.geometry?.location) {
+          setPosition([
+            place.geometry.location.lat(),
+            place.geometry.location.lng(),
+          ]);
+          setAddress(place.formatted_address || "");
         }
       });
     };
 
-    // Function to load the Google Maps script dynamically
     const loadGoogleMapsScript = () => {
-      // Check if the script is already loaded
       if (document.getElementById("google-maps-script") || window.google) {
-        initializeAutocomplete(); // Initialize Autocomplete if script is already loaded
+        initializeAutocomplete();
         return;
       }
 
       const script = document.createElement("script");
-
-      script.id = "google-maps-script"; // Unique identifier
-      script.type = "text/javascript";
+      script.id = "google-maps-script";
       script.src = `https://maps.googleapis.com/maps/api/js?key=${API_URL}&libraries=places`;
       script.async = true;
-      script.defer = true;
-      script.onload = initializeAutocomplete; // Execute callback after script is loaded
+      script.onload = initializeAutocomplete;
       document.head.appendChild(script);
     };
 
     loadGoogleMapsScript();
-  }, [API_URL, position]);
+  }, [API_URL]);
+
+  const updateAddress = async (latlng: Position) => {
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latlng[0]},${latlng[1]}&key=${API_URL}`
+      );
+      const data = await response.json();
+      if (!data.results || data.results.length === 0)
+        throw new Error("Address not found");
+
+      const formattedAddress = data.results[0].formatted_address;
+      setAddress(formattedAddress);
+    } catch (error) {
+      console.error(error);
+      setAddress("Error fetching address");
+    }
+  };
+
+  useEffect(() => {
+    updateAddress(position);
+  }, [position]);
 
   const locateUser = () => {
+    setIsLoading(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setPosition([position.coords.latitude, position.coords.longitude]);
+        setIsLoading(false);
         toast({
-          style: {
-            background: "green",
-            color: "white",
-            boxShadow: "0 0 10px rgba(0,0,0,0.2)",
-          },
-          title: "เพิ่มตำแหน่งแผนที่สำเร็จ",
-          description: "ตำแหน่งแผนที่ถูกเพิ่มลงในระบบของคุณแล้ว",
+          title: "ตำแหน่งปัจจุบันถูกเพิ่มแล้ว",
+          description: "แผนที่ได้รับการอัปเดตด้วยตำแหน่งของคุณ",
         });
       },
       () => {
+        setIsLoading(false);
         toast({
-          title: "Error",
-          description: "ไม่สามารถเข้าถึงตำแหน่งของคุณได้",
+          title: "ไม่สามารถระบุตำแหน่งได้",
+          description:
+            "กรุณาอนุญาตการเข้าถึงตำแหน่งของคุณหรือป้อนตำแหน่งด้วยตนเอง",
+          variant: "destructive",
         });
       }
     );
   };
+
   const handleAction = async () => {
+    setIsLoading(true);
     try {
-      const formData = {
+      const newLocation: Location = {
         MapAddress: address,
         Maplocation: {
           type: "Point",
-          coordinates: [position[1], position[0]], // [longitude, latitude] ต้องตรงกับ Schema
+          coordinates: [position[1], position[0]],
         },
       };
 
-      console.log("FormData being sent:", formData);
+      const res = await createLocation(newLocation);
 
-      const res = await createLocation(formData);
-
-      if (res.error) {
+      if ("error" in res) {
         toast({
-          title: "Error",
+          title: "เกิดข้อผิดพลาด",
           description: res.error,
+          variant: "destructive",
         });
       } else {
+        setLocations([...locations, newLocation]);
         toast({
-          style: {
-            background: "green",
-            color: "white",
-            boxShadow: "0 0 10px rgba(0,0,0,0.2)",
-          },
-          title: "เพิ่มตำแหน่งแผนที่สำเร็จ",
-          description: "ตำแหน่งแผนที่ถูกเพิ่มลงในระบบของคุณแล้ว",
+          title: "เพิ่มตำแหน่งสำเร็จ",
+          description: "ตำแหน่งใหม่ถูกบันทึกลงในระบบแล้ว",
         });
+        setIsAlertDialogOpen(false);
       }
     } catch (error) {
       console.error(error);
       toast({
-        title: "Error",
-        description: "มีบางอย่างผิดปกติ กรุณาลองใหม่อีกครั้ง",
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถเพิ่มตำแหน่งได้ กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          flexDirection: "row",
-          position: "relative",
-          gap: "20px",
-          alignItems: "flex-start",
-          flexWrap: "wrap",
-        }}
-      >
-        <form onSubmit={handleAction} className="space-y-8">
-          <Card
-            style={{
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              padding: "20px",
-              boxSizing: "border-box",
-            }}
-          >
+    <div className="container mx-auto p-4">
+      <h1 className="mb-6 text-2xl font-bold">เพิ่มตำแหน่งแผนที่</h1>
+      <div className="grid gap-6 md:grid-cols-[1fr,2fr]">
+        <div className="space-y-6">
+          <Card>
             <CardHeader>
-              <CardTitle>เพิ่มตำแหน่งแผนที่</CardTitle>
-              <CardDescription>
-                ค้นหาตำแหน่งที่ต้องการเพิ่มแผนที่
-              </CardDescription>
+              <CardTitle>ค้นหาตำแหน่ง</CardTitle>
             </CardHeader>
             <CardContent>
-              <Label htmlFor="name">ค้นหาตำแหน่ง</Label>
-
-              <div
-                style={{
-                  position: "relative",
-                  display: "flex",
-                  alignItems: "center",
-                  border: "1px solid #ccc",
-                  borderRadius: "4px",
-                }}
-              >
+              <div className="relative">
                 <Input
                   ref={autocompleteInput}
-                  name="MapAddress"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="ค้นหาตำแหน่ง"
-                  style={{
-                    flex: 1,
-                    border: "none",
-                    padding: "10px",
-                    borderRadius: "4px",
-                  }}
+                  placeholder="ป้อนที่อยู่หรือชื่อสถานที่"
+                  className="pr-10"
+                  onFocus={() => setShowPopularLocations(true)}
+                  onBlur={() =>
+                    setTimeout(() => setShowPopularLocations(false), 200)
+                  }
                 />
                 <Button
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault(); // Prevent form submission
-                    locateUser(); // Remove the argument from the locateUser function call
-                  }}
-                  style={{
-                    position: "absolute",
-                    right: "0",
-                    top: "0",
-                    bottom: "0",
-                    border: "none",
-
-                    padding: "10px",
-                  }}
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3"
+                  onClick={() => setAddress("")}
                 >
-                  <MapPin />
+                  <X className="size-4" />
+                  <span className="sr-only">ล้างการค้นหา</span>
                 </Button>
               </div>
-            </CardContent>
-
-            <CardFooter>
-              <AlertDialog>
-                <AlertDialogTrigger className=" w-full ">
-                  <Button
-                    className=" w-full bg-gradient-to-r from-primary-500 to-yellow-500 text-white "
-                    type="button"
+              <AnimatePresence>
+                {showPopularLocations && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="mt-2"
                   >
+                    <h3 className="mb-2 text-sm font-semibold">
+                      สถานที่ยอดนิยม
+                    </h3>
+                    <ul className="space-y-2">
+                      <li>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start"
+                          onClick={() => setAddress("กรุงเทพมหานคร")}
+                        >
+                          <MapPin className="mr-2 size-4" />
+                          กรุงเทพมหานคร
+                        </Button>
+                      </li>
+                      <li>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start"
+                          onClick={() => setAddress("เชียงใหม่")}
+                        >
+                          <MapPin className="mr-2 size-4" />
+                          เชียงใหม่
+                        </Button>
+                      </li>
+                    </ul>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>การดำเนินการ</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button
+                onClick={locateUser}
+                variant="outline"
+                disabled={isLoading}
+                className="w-full"
+              >
+                {isLoading ? (
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                ) : (
+                  <Navigation className="mr-2 size-4" />
+                )}
+                ระบุตำแหน่งปัจจุบัน
+              </Button>
+              <AlertDialog
+                open={isAlertDialogOpen}
+                onOpenChange={setIsAlertDialogOpen}
+              >
+                <AlertDialogTrigger asChild>
+                  <Button
+                    className="w-full bg-orange-500 text-white hover:bg-orange-600"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="mr-2 size-4 animate-spin" />
+                    ) : (
+                      <MapPin className="mr-2 size-4" />
+                    )}
                     เพิ่มตำแหน่งแผนที่
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      คุณแน่ใจหรือไม่ว่าต้องการเพิ่มตำแหน่งแผนที่
-                    </AlertDialogTitle>
+                    <AlertDialogTitle>ยืนยันการเพิ่มตำแหน่ง</AlertDialogTitle>
                     <AlertDialogDescription>
-                      การดำเนินการนี้จะเพิ่มตำแหน่งแผนที่ลงในบัญชีของคุณจากเซิร์ฟเวอร์ของเรา
+                      คุณต้องการเพิ่มตำแหน่งนี้ลงในระบบใช่หรือไม่?
                     </AlertDialogDescription>
                   </AlertDialogHeader>
+                  <Separator className="my-4" />
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">ที่อยู่ที่เลือก:</p>
+                    <p className="text-muted-foreground text-sm">{address}</p>
+                  </div>
                   <AlertDialogFooter>
                     <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
-                    <AlertDialogAction>
-                      <Button
-                        className=" w-full bg-primary-500 text-white "
-                        type="button" // Ensure it's a button to avoid form submission
-                        onClick={handleAction} // Directly call handleAction here
-                      >
-                        ตกลง
-                      </Button>
+                    <AlertDialogAction
+                      onClick={handleAction}
+                      disabled={isLoading}
+                      className="bg-orange-500 text-white hover:bg-orange-600"
+                    >
+                      {isLoading ? (
+                        <Loader2 className="mr-2 size-4 animate-spin" />
+                      ) : (
+                        <Check className="mr-2 size-4" />
+                      )}
+                      ยืนยันการเพิ่มตำแหน่ง
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-            </CardFooter>
+            </CardContent>
           </Card>
-        </form>
 
-        <MapContainer
-          center={[position[0], position[1]]}
-          zoom={13}
-          scrollWheelZoom={false}
-          style={{
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            borderRadius: "8px",
-            boxSizing: "border-box",
-            width: "80%", // Full width on smaller screens
-            height: "500px", // Fixed height, adjust as needed
-            zIndex: 1,
-          }}
-        >
-          <TileLayer
-            url="http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
-            subdomains={["mt0", "mt1", "mt2", "mt3"]}
-          />
-          <LocationMarker position={position} setAddress={setAddress} />
-        </MapContainer>
+          <Card>
+            <CardHeader>
+              <CardTitle>ตำแหน่งที่เลือก</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600">{address}</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="overflow-hidden">
+          <CardHeader>
+            <CardTitle>แผนที่</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="h-[500px] w-full">
+              <MapContainer
+                center={[position[0], position[1]]}
+                zoom={13}
+                scrollWheelZoom={false}
+                style={{
+                  width: "100%", // Full width on smaller screens
+                  height: "100%", // Fixed height, adjust as needed
+                  zIndex: 1,
+                }}
+                zoomControl={false}
+              >
+                <TileLayer
+                  url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                />
+                <LocationMarker position={position} setPosition={setPosition} />
+              </MapContainer>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </>
+    </div>
   );
-};
-
-export default MapLayout;
+}
