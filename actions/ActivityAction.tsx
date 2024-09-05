@@ -1,5 +1,5 @@
 "use server";
-import { auth } from "@/auth";
+import { auth } from "@/utils/auth";
 import ActivityForm from "@/models/ActivityForm";
 import { formSchema, formSchemaType } from "@/schemas/form";
 import connectdatabase from "@/utils/connectdatabase";

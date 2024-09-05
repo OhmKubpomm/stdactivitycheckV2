@@ -5,9 +5,11 @@ import connectDatabase from "@/utils/connectdatabase";
 import User from "@/models/Usermodel";
 import bcrypt from "bcryptjs";
 
+// Connect to the database
 connectDatabase();
 
-const authOptions = {
+// Define NextAuth configuration
+export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
@@ -20,14 +22,16 @@ const authOptions = {
         password: { label: "Password", type: "password", required: true },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
-        const typedCredentials = credentials as {
+        // Cast credentials to the correct type
+        const { email, password } = credentials as {
           email: string;
           password: string;
         };
-        return await signInwithCredentials(typedCredentials);
+
+        if (!email || !password) {
+          return null;
+        }
+        return await signInWithCredentials({ email, password });
       },
     }),
   ],
@@ -36,32 +40,30 @@ const authOptions = {
     error: "/errors",
   },
   callbacks: {
-    async signIn({ account, profile }) {
+    async signIn({ account, profile }: { account: any; profile: any }) {
       if (account?.type === "oauth") {
-        return await signInWith0Auth({ account, profile });
+        return await signInWithOAuth({ account, profile });
       }
       return true;
     },
-    async jwt({ token }) {
+    async jwt({ token }: { token: any; user?: any }) {
       const user = await getUserByEmail(token.email || "");
       if (user) {
         token.user = user;
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: any }) {
       if (token.user) {
         session.user = token.user;
       }
       return session;
     },
   },
-};
-const nextAuthHandlers = NextAuth(authOptions);
+});
 
-export const { handlers, auth, signIn, signOut } = nextAuthHandlers;
-
-async function signInWith0Auth({
+// Helper function for OAuth sign in
+async function signInWithOAuth({
   account,
   profile,
 }: {
@@ -81,13 +83,15 @@ async function signInWith0Auth({
   return true;
 }
 
+// Helper function to find user by email
 async function getUserByEmail(email: string) {
   const user = await User.findOne({ email }).select("-password");
   if (!user) return null;
   return { ...user._doc, _id: user._id.toString() };
 }
 
-async function signInwithCredentials({
+// Helper function for Credentials sign in
+async function signInWithCredentials({
   email,
   password,
 }: {

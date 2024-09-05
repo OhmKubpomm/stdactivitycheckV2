@@ -1,5 +1,5 @@
 "use server";
-import { auth } from "@/auth";
+import { auth } from "@/utils/auth";
 import User from "@/models/Usermodel";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
@@ -29,7 +29,7 @@ export async function updateUser({ name, image }) {
 
     return { msg: "อัปเดตสำเร็จ" };
   } catch (error) {
-    return handleError(error);
+    redirect(`/errors?error=${error.message}`);
   }
 }
 
@@ -54,7 +54,7 @@ export async function signUpWithCredentials(data) {
 
     return { msg: "ลงทะเบียนสำเร็จ กรุณายืนยันอีเมลของคุณ" };
   } catch (error) {
-    return handleError(error);
+    return { error: error.message };
   }
 }
 
@@ -71,7 +71,7 @@ export async function verifyWithCredentials(token) {
 
     return { msg: "ลงทะเบียนสำเร็จ" };
   } catch (error) {
-    return handleError(error);
+    redirect(`/errors?error=${error.message}`);
   }
 }
 
@@ -97,7 +97,7 @@ export async function changePasswordWithCredentials({ oldPass, newPass }) {
 
     return { msg: "เปลี่ยนรหัสผ่านสำเร็จ" };
   } catch (error) {
-    return handleError(error);
+    return { error: error.message };
   }
 }
 
@@ -122,7 +122,7 @@ export async function forgotPasswordWithCredentials({ email }) {
 
     return { msg: "กรุณาตรวจสอบอีเมลของคุณเพื่อรีเซ็ตรหัสผ่าน" };
   } catch (error) {
-    return handleError(error);
+    return { error: error.message };
   }
 }
 
@@ -136,12 +136,6 @@ export async function resetPasswordWithCredentials({ token, password }) {
 
     return { msg: "รีเซ็ตรหัสผ่านสำเร็จ" };
   } catch (error) {
-    return handleError(error);
+    return { error: error.message };
   }
-}
-
-// จัดการข้อผิดพลาด
-function handleError(error) {
-  console.error(error);
-  redirect(`/errors?error=${error.message}`);
 }
