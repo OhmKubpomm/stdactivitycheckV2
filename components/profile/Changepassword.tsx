@@ -9,14 +9,11 @@ const Changepassword = () => {
   async function handleChangepassword(formData: {
     get: (arg0: string) => any;
   }) {
-    const old_pass = formData.get("old_pass");
-    const new_pass = formData.get("new_pass");
-    const res = await changePasswordWithCredentials({ old_pass, new_pass });
+    const oldPass = formData.get("oldPass");
+    const newPass = formData.get("newPass");
+    const res = await changePasswordWithCredentials({ oldPass, newPass });
     if (res?.msg) {
       message.success(res?.msg);
-    }
-    if (res?.error) {
-      message.error(res?.error);
     }
   }
 
@@ -24,8 +21,8 @@ const Changepassword = () => {
     <div>
       <h1>Change Password</h1>
       <Form action={handleChangepassword}>
-        <input type="password" name="old_pass" placeholder="password" />
-        <input type="password" name="new_pass" placeholder="password" />
+        <input type="password" name="oldPass" placeholder="password" />
+        <input type="password" name="newPass" placeholder="password" />
         <ButtonLoad value="Change Password" htmlType={undefined} />
       </Form>
     </div>

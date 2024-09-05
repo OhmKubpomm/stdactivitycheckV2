@@ -1,9 +1,9 @@
 "use server";
-import { config } from "@/utils/authOptions";
+import { auth } from "@/auth";
 import ActivityForm from "@/models/ActivityForm";
 import { formSchema, formSchemaType } from "@/schemas/form";
 import connectdatabase from "@/utils/connectdatabase";
-import { getServerSession } from "next-auth";
+
 import { revalidatePath } from "next/cache";
 import User from "@/models/Usermodel";
 import Formsubs from "@/models/FormSubmissions";
@@ -35,7 +35,7 @@ interface IUser extends Document {
 }
 
 export async function GetFormStats() {
-  const session = await getServerSession(config);
+  const session = await auth();
 
   const userId = session?.user?._id ?? null;
   if (!userId) throw new Error("User not found");
@@ -81,7 +81,7 @@ export async function CreateForm(data: formSchemaType) {
 
     // สมมติว่า currentUser() เป็นฟังก์ชันที่คืนค่าข้อมูลผู้ใช้งานปัจจุบัน
     // หากไม่พบผู้ใช้งาน ให้โยนข้อผิดพลาด
-    const session = await getServerSession(config);
+    const session = await auth();
     if (!session) throw new Error("ไม่พบผู้ใช้งาน");
 
     // แยกค่า name และ description จาก data
@@ -113,7 +113,7 @@ export async function CreateForm(data: formSchemaType) {
 
 // ดึงฟอร์มทั้งหมด
 export async function GetForms() {
-  const session = await getServerSession(config);
+  const session = await auth();
   if (!session) throw new Error("ไม่พบผู้ใช้งาน");
 
   const user = await User.findById(session?.user?._id);
@@ -139,7 +139,7 @@ export async function GetForms() {
 // ดึงฟอร์มตาม ID
 export async function GetFormById(id: Object) {
   try {
-    const session = await getServerSession(config);
+    const session = await auth();
     if (!session) throw new Error("ไม่พบผู้ใช้งาน");
 
     const user = await User.findById(session?.user?._id);
@@ -168,7 +168,7 @@ export async function UpdateFormContent(
   endTime: Date | undefined
 ) {
   try {
-    const session = await getServerSession(config);
+    const session = await auth();
     const user = await User.findById(session?.user?._id);
     if (!session) throw new Error("User not found");
 
@@ -192,7 +192,7 @@ export async function UpdateFormContent(
 
 export async function PublishForm(id: number, endTime?: Date) {
   try {
-    const session = await getServerSession(config);
+    const session = await auth();
     const user = await User.findById(session?.user?._id);
     if (!session) throw new Error("User not found");
 
@@ -242,7 +242,7 @@ export async function GetFormContentByUrl(formUrl: string) {
 
 export async function SubmitForm(formUrl: string, content: string) {
   try {
-    const session = await getServerSession(config);
+    const session = await auth();
     const user = await User.findById(session?.user?._id);
     if (!session) throw new Error("User not found");
 
@@ -288,7 +288,7 @@ export async function SubmitForm(formUrl: string, content: string) {
 }
 
 export async function GetFormWithSubmissions(id: number) {
-  const session = await getServerSession(config);
+  const session = await auth();
   if (!session) throw new Error("ไม่พบผู้ใช้งาน");
 
   const user = await User.findById(session?.user?._id);
@@ -329,7 +329,7 @@ export async function GetFormWithSubmissions(id: number) {
 // ลบฟอร์ม
 export async function DeleteForm(id: number) {
   try {
-    const session = await getServerSession(config);
+    const session = await auth();
     const user = await User.findById(session?.user?._id);
     if (!session) throw new Error("User not found");
 

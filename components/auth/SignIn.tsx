@@ -43,9 +43,6 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
     if (res?.msg) {
       message.success(res?.msg);
     }
-    if (res?.error) {
-      message.error(res?.error);
-    }
   }
 
   const [value, setValue] = useState("");

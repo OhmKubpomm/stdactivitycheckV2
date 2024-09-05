@@ -1,7 +1,7 @@
 "use server";
-import { getServerSession } from "next-auth";
+
 import * as React from "react";
-import { config } from "@/utils/authOptions";
+import { auth } from "@/auth";
 
 import Link from "next/link";
 import SignOut from "../auth/SignOut";
@@ -11,7 +11,7 @@ import Themebutton from "./Themebutton";
 import MenuResponNav from "./MenuResponNav";
 
 const Headers = async () => {
-  const session = await getServerSession(config);
+  const session = await auth();
 
   return (
     <div className="bg-transparent p-0">

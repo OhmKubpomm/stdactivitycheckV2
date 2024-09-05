@@ -1,6 +1,6 @@
-import { withAuth } from "next-auth/middleware";
+import { auth } from "@/auth";
 
-export default withAuth(
+export default auth(
   function middleware(req) {
     const { pathname } = req.nextUrl;
     const { token } = req.nextauth;

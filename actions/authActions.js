@@ -1,43 +1,47 @@
-/* eslint-disable no-undef */
-/* eslint-disable no-unused-vars */
-/* eslint-disable camelcase */
 "use server";
-import { config } from "@/utils/authOptions";
-import { getServerSession } from "next-auth/next";
+import { auth } from "@/auth";
 import User from "@/models/Usermodel";
+import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
-import bcrypt from "bcrypt";
 import { generateToken, verifyToken } from "@/utils/token";
 import sendEmail from "@/utils/sendEmail";
 
 const BASE_URL = process.env.NEXTAUTH_URL;
+const SALT_ROUNDS = 12; // กำหนดค่าความปลอดภัยที่เหมาะสม
 
+async function getSession() {
+  const session = await auth();
+  if (!session) throw new Error("ไม่ได้รับอนุญาต");
+  return session;
+}
+
+// อัปเดตข้อมูลผู้ใช้
 export async function updateUser({ name, image }) {
-  const seesion = await getServerSession(config);
-  if (!session) throw new Error("Unauthorized");
   try {
-    const user = await User.findByIdAndUpdate(
-      session?.user?._id,
-      {
-        name,
-        image,
-      },
+    const session = await getSession();
+    const updatedUser = await User.findByIdAndUpdate(
+      session.user._id,
+      { name, image },
       { new: true }
     ).select("-password");
-    if (!user) throw new Error("Email not found");
 
-    return { msg: "Update success" };
+    if (!updatedUser) throw new Error("ไม่พบผู้ใช้");
+
+    return { msg: "อัปเดตสำเร็จ" };
   } catch (error) {
-    redirect(`/errors?error=${error.message}`);
+    return handleError(error);
   }
 }
 
+// ลงทะเบียนด้วยข้อมูลรับรอง
 export async function signUpWithCredentials(data) {
   try {
-    const user = await User.findOne({ email: data.email });
-    if (user) throw new Error("Email already exists");
+    const existingUser = await User.findOne({ email: data.email });
+    if (existingUser) throw new Error("อีเมลนี้ถูกใช้งานแล้ว");
+
     if (data.password) {
-      data.password = await bcrypt.hash(data.password, 12);
+      // เข้ารหัสรหัสผ่านด้วย bcrypt
+      data.password = await bcrypt.hash(data.password, SALT_ROUNDS);
     }
 
     const token = generateToken({ user: data });
@@ -45,88 +49,99 @@ export async function signUpWithCredentials(data) {
     await sendEmail({
       to: data.email,
       url: `${BASE_URL}/verify?token=${token}`,
-      text: "Verify your email",
+      text: "ยืนยันอีเมลของคุณ",
     });
 
-    return {
-      msg: "signup success please check your email to verify your account",
-    };
+    return { msg: "ลงทะเบียนสำเร็จ กรุณายืนยันอีเมลของคุณ" };
   } catch (error) {
-    return { error: error.message };
+    return handleError(error);
   }
 }
 
+// ยืนยันด้วย token
 export async function verifyWithCredentials(token) {
   try {
     const { user } = verifyToken(token);
-    const userExist = await User.findOne({ email: user.email });
-    if (userExist) return { msg: "Verify success" };
-    const newUser = new User(user);
+    const existingUser = await User.findOne({ email: user.email });
 
+    if (existingUser) return { msg: "ยืนยันอีเมลสำเร็จ" };
+
+    const newUser = new User(user);
     await newUser.save();
 
-    return { msg: "signup success" };
+    return { msg: "ลงทะเบียนสำเร็จ" };
   } catch (error) {
-    redirect(`/errors?error=${error.message}`);
+    return handleError(error);
   }
 }
 
-export async function changePasswordWithCredentials({ old_pass, new_pass }) {
+// เปลี่ยนรหัสผ่าน
+export async function changePasswordWithCredentials({ oldPass, newPass }) {
   try {
-    const session = await getServerSession(config);
-    if (!session) throw new Error("Unauthorized");
-    if (session?.user?.provider !== "credentials") {
+    const session = await getSession();
+
+    if (session.user.provider !== "credentials") {
       throw new Error(
-        `This account is signed in with ${session?.user?.provider}. You can't Use this feature`
+        `บัญชีนี้ใช้ ${session.user.provider}. ไม่สามารถเปลี่ยนรหัสผ่านได้`
       );
     }
-    const user = await User.findById(session?.user?._id);
-    if (!user) throw new Error("Email not found");
 
-    const compare = await bcrypt.compare(old_pass, user.password);
-    if (!compare) throw new Error("Old Password not match");
+    const user = await User.findById(session.user._id);
+    if (!user) throw new Error("ไม่พบผู้ใช้");
 
-    const newPass = await bcrypt.hash(new_pass, 12);
-    await User.findByIdAndUpdate(user._id, { password: newPass });
+    const isValidOldPass = await bcrypt.compare(oldPass, user.password);
+    if (!isValidOldPass) throw new Error("รหัสผ่านเก่าไม่ถูกต้อง");
 
-    return { msg: "Change password success" };
+    const hashedNewPass = await bcrypt.hash(newPass, SALT_ROUNDS);
+    await User.findByIdAndUpdate(user._id, { password: hashedNewPass });
+
+    return { msg: "เปลี่ยนรหัสผ่านสำเร็จ" };
   } catch (error) {
-    return { error: error.message };
+    return handleError(error);
   }
 }
+
+// ลืมรหัสผ่าน
 export async function forgotPasswordWithCredentials({ email }) {
   try {
     const user = await User.findOne({ email });
+    if (!user) throw new Error("ไม่พบผู้ใช้");
 
-    if (user?.provider !== "credentials") {
+    if (user.provider !== "credentials") {
       throw new Error(
-        `This account is signed in with ${user?.provider}. You can't Use this feature`
+        `บัญชีนี้ใช้ ${user.provider}. ไม่สามารถรีเซ็ตรหัสผ่านได้`
       );
     }
-
-    if (!user) throw new Error("Email not found");
 
     const token = generateToken({ userId: user._id });
     await sendEmail({
       to: email,
       url: `${BASE_URL}/reset_password?token=${token}`,
-      text: "Reset your password",
+      text: "รีเซ็ตรหัสผ่านของคุณ",
     });
 
-    return {
-      msg: "Success submit Please check your email to reset your password",
-    };
+    return { msg: "กรุณาตรวจสอบอีเมลของคุณเพื่อรีเซ็ตรหัสผ่าน" };
   } catch (error) {
-    return { error: error.message };
+    return handleError(error);
   }
 }
+
+// รีเซ็ตรหัสผ่าน
 export async function resetPasswordWithCredentials({ token, password }) {
   try {
     const { userId } = verifyToken(token);
-    const newPass = await bcrypt.hash(password, 12);
-    await User.findByIdAndUpdate(userId, { password: newPass });
-    return { msg: "Reset password success" };
+
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+    await User.findByIdAndUpdate(userId, { password: hashedPassword });
+
+    return { msg: "รีเซ็ตรหัสผ่านสำเร็จ" };
   } catch (error) {
-    return { error: error.message };
+    return handleError(error);
   }
+}
+
+// จัดการข้อผิดพลาด
+function handleError(error) {
+  console.error(error);
+  redirect(`/errors?error=${error.message}`);
 }

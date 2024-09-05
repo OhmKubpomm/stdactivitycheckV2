@@ -2,7 +2,7 @@
 import connectdatabase from "@/utils/connectdatabase";
 import User from "@/models/Usermodel";
 import { revalidatePath } from "next/cache";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 connectdatabase();
 export async function createUser(data) {
   try {
