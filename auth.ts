@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import connectDatabase from "@/utils/connectdatabase";
 import User from "@/models/Usermodel";
 import bcrypt from "bcryptjs";
+import authConfig from "@/auth.config";
 
 // เชื่อมต่อฐานข้อมูล
 connectDatabase();
@@ -49,10 +50,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token, user }) {
       if (session?.user) {
-        session.user.role = user.role; // ตรวจสอบให้แน่ใจว่า 'user' มีคุณสมบัติ 'role'
+        session.user.role = user.role;
       }
+
       return session;
     },
+    ...authConfig,
   },
 });
 
