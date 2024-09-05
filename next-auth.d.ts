@@ -11,6 +11,7 @@ declare module "next-auth" {
     name?: string | null;
     email?: string | null;
     image?: string | null;
+    role?: string;
   }
 
   /**
@@ -20,5 +21,6 @@ declare module "next-auth" {
   // eslint-disable-next-line no-unused-vars
   interface Session {
     user?: User;
+    role?: string;
   }
 }

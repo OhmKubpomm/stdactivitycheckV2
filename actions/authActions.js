@@ -1,5 +1,5 @@
 "use server";
-import { auth } from "@/utils/auth";
+import { auth } from "@/auth";
 import User from "@/models/Usermodel";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";

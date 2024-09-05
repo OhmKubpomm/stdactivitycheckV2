@@ -1,7 +1,7 @@
 "use server";
 
 import * as React from "react";
-import { auth } from "@/utils/auth";
+import { auth } from "@/auth";
 
 import Link from "next/link";
 import SignOut from "../auth/SignOut";

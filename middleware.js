@@ -1,4 +1,4 @@
-import { auth } from "@/utils/auth";
+import { auth } from "@/auth";
 
 export default auth(
   function middleware(req) {

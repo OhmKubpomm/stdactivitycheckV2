@@ -8,7 +8,7 @@ import Usernavbar from "@/components/profile/Usernavbar";
 import AdminaNavbar from "@/components/profile/AdminNavber";
 import { Toaster } from "@/components/ui/toaster";
 import NextToploader from "nextjs-toploader";
-import { auth } from "@/utils/auth";
+import { auth } from "@/auth";
 
 export const metadata = {
   title: "STDACTIVITYCHECK",

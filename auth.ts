@@ -1,28 +1,26 @@
+import Google from "next-auth/providers/google";
 import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import connectDatabase from "@/utils/connectdatabase";
 import User from "@/models/Usermodel";
 import bcrypt from "bcryptjs";
 
-// Connect to the database
+// เชื่อมต่อฐานข้อมูล
 connectDatabase();
 
-// Define NextAuth configuration
+// กำหนดการตั้งค่า NextAuth
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
-    GoogleProvider({
+    Google({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
     CredentialsProvider({
-      name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email", required: true },
         password: { label: "Password", type: "password", required: true },
       },
       async authorize(credentials) {
-        // Cast credentials to the correct type
         const { email, password } = credentials as {
           email: string;
           password: string;
@@ -35,34 +33,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  pages: {
-    signIn: "/Signin",
-    error: "/errors",
-  },
   callbacks: {
-    async signIn({ account, profile }: { account: any; profile: any }) {
+    async signIn({ user, account, profile, email, credentials }) {
       if (account?.type === "oauth") {
         return await signInWithOAuth({ account, profile });
       }
       return true;
     },
-    async jwt({ token }: { token: any; user?: any }) {
+    async jwt({ token }: { token: any }) {
       const user = await getUserByEmail(token.email || "");
       if (user) {
         token.user = user;
       }
       return token;
     },
-    async session({ session, token }: { session: any; token: any }) {
-      if (token.user) {
-        session.user = token.user;
+    async session({ session, token, user }) {
+      if (session?.user) {
+        session.user.role = user.role; // ตรวจสอบให้แน่ใจว่า 'user' มีคุณสมบัติ 'role'
       }
       return session;
     },
   },
 });
 
-// Helper function for OAuth sign in
+// ฟังก์ชันช่วยสำหรับ OAuth sign in
 async function signInWithOAuth({
   account,
   profile,
@@ -83,14 +77,14 @@ async function signInWithOAuth({
   return true;
 }
 
-// Helper function to find user by email
+// ฟังก์ชันช่วยสำหรับการหา user โดย email
 async function getUserByEmail(email: string) {
   const user = await User.findOne({ email }).select("-password");
   if (!user) return null;
   return { ...user._doc, _id: user._id.toString() };
 }
 
-// Helper function for Credentials sign in
+// ฟังก์ชันช่วยสำหรับการลงชื่อเข้าใช้งานด้วย Credentials
 async function signInWithCredentials({
   email,
   password,
