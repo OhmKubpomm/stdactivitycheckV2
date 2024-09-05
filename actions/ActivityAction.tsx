@@ -114,25 +114,21 @@ export async function CreateForm(data: formSchemaType) {
 // ดึงฟอร์มทั้งหมด
 export async function GetForms() {
   const session = await getServerSession(config);
-  const user = await User.findById(session?.user?._id);
   if (!session) throw new Error("ไม่พบผู้ใช้งาน");
 
-  // ดึงและคืนค่าฟอร์มกิจกรรมสำหรับผู้ใช้
+  const user = await User.findById(session?.user?._id);
+  if (!user) throw new Error("ไม่พบผู้ใช้งาน");
+
+  // ตรวจสอบว่าเป็น admin หรือไม่
+  if (user.role !== "admin") {
+    throw new Error("คุณไม่มีสิทธิ์ในการเข้าถึงข้อมูลนี้");
+  }
+
+  // ดึงและคืนค่าฟอร์มกิจกรรมทั้งหมด (ไม่กรองด้วย userId)
   try {
-    let activityForms;
-
-    if (user.role === "admin") {
-      // ถ้าเป็นแอดมิน ให้ดึงฟอร์มทั้งหมด
-      activityForms = await ActivityForm.find().sort({ createdAt: -1 }).exec();
-    } else {
-      // ถ้าไม่ใช่แอดมิน ให้ดึงฟอร์มเฉพาะของผู้ใช้นั้น
-      activityForms = await ActivityForm.find({
-        userId: user.id,
-      })
-        .sort({ createdAt: -1 })
-        .exec();
-    }
-
+    const activityForms = await ActivityForm.find()
+      .sort({ createdAt: -1 }) // เรียงจากใหม่ไปเก่า
+      .exec();
     return activityForms;
   } catch (error) {
     console.error("ไม่สามารถค้นหาฟอร์มกิจกรรมได้:", error);
@@ -144,20 +140,24 @@ export async function GetForms() {
 export async function GetFormById(id: Object) {
   try {
     const session = await getServerSession(config);
-    const userId = session?.user?._id;
-
     if (!session) throw new Error("ไม่พบผู้ใช้งาน");
 
-    // ตรวจสอบว่าผู้ใช้งานมีอยู่จริงหรือไม่
-    const userExists = await User.exists({ _id: userId });
-    if (!userExists) throw new Error("ไม่พบผู้ใช้งาน");
+    const user = await User.findById(session?.user?._id);
+    if (!user) throw new Error("ไม่พบผู้ใช้งาน");
 
-    // ใช้เลขประจำตัว id ในการค้นหาฟอร์มโดยตรง
+    // ตรวจสอบว่าเป็น admin หรือไม่
+    if (user.role !== "admin") {
+      throw new Error("คุณไม่มีสิทธิ์ในการเข้าถึงข้อมูลนี้");
+    }
+
+    // ดึงฟอร์มตาม ID โดยไม่สนใจว่าใครเป็นผู้สร้าง
     const form = await ActivityForm.findById(id);
+    if (!form) throw new Error("ไม่พบฟอร์มกิจกรรม");
+
     return { ...form._doc, _id: form._doc._id.toString() };
   } catch (error) {
     console.error("ไม่สามารถค้นหาฟอร์มกิจกรรมได้:", error);
-    return { error };
+    throw error;
   }
 }
 
@@ -289,26 +289,31 @@ export async function SubmitForm(formUrl: string, content: string) {
 
 export async function GetFormWithSubmissions(id: number) {
   const session = await getServerSession(config);
+  if (!session) throw new Error("ไม่พบผู้ใช้งาน");
+
   const user = await User.findById(session?.user?._id);
-  if (!session) throw new Error("User not found");
+  if (!user) throw new Error("ไม่พบผู้ใช้งาน");
 
-  const form = await ActivityForm.findOne({
-    _id: id,
-    userId: user?.id,
-  }).lean();
+  // ตรวจสอบว่าเป็น admin หรือไม่
+  if (user.role !== "admin") {
+    throw new Error("คุณไม่มีสิทธิ์ในการเข้าถึงข้อมูลนี้");
+  }
 
+  // ดึงฟอร์มตาม ID โดยไม่กรองด้วย userId
+  const form = await ActivityForm.findOne({ _id: id }).lean();
   if (!form) {
     return null;
   }
 
+  // ดึง submission ทั้งหมดที่เกี่ยวข้องกับฟอร์มนั้น
   const submissions = (await Formsubs.find({
     formId: form._id,
-  }).lean()) as FormSubmission[]; // ใช้ interface ที่เราสร้างขึ้น
+  }).lean()) as FormSubmission[];
 
   // ดึงชื่อผู้ใช้สำหรับแต่ละ submission
   const submissionsWithUserNames = await Promise.all(
     submissions.map(async (submission) => {
-      const user = (await User.findById(submission.userId).lean()) as IUser; // ใช้ interface ของ User
+      const user = (await User.findById(submission.userId).lean()) as IUser;
       return {
         ...submission,
         userSendName: user?.name || "Unknown User",

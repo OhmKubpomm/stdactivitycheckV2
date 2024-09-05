@@ -27,13 +27,12 @@ export async function createUser(data) {
 }
 export async function getallUser(searchParams) {
   const search = searchParams.search || "";
-
-  const limit = searchParams.limit * 1 || 5;
+  const limit = searchParams.limit * 1 || 12; // เปลี่ยนเป็น 12 หรือค่าที่มากกว่า
   const page = searchParams.page * 1 || 1;
   const skip = searchParams.skip * 1 || limit * (page - 1);
+
   try {
     const allUser = await User.find({ name: { $regex: search } })
-
       .limit(limit)
       .skip(skip);
 

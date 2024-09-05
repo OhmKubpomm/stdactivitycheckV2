@@ -3,10 +3,10 @@ import { getallUser } from "@/actions/userActions";
 import Userlist from "@/components/profile/Userlist";
 
 const cruduserpage = async ({ params, searchParams }) => {
-  const { allUser, totalPage } = await getallUser(searchParams);
+  const { allUser, count, totalPage } = await getallUser(searchParams);
   return (
     <>
-      <div>{<Userlist allUser={allUser} totalPage={totalPage} />}</div>
+      <Userlist allUser={allUser} totalCount={count} totalPage={totalPage} />
     </>
   );
 };
