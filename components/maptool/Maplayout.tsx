@@ -1,19 +1,12 @@
+/* eslint-disable tailwindcss/no-custom-classname */
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  useMap,
-  useMapEvents,
-} from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import L from "leaflet";
 import { MapPin, X, Loader2, Navigation, Check } from "lucide-react";
 import {
   AlertDialog,
@@ -26,9 +19,28 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { createLocation } from "@/actions/mapActions";
+import { createLocation, updateMap } from "@/actions/mapActions";
 import { useToast } from "@/components/ui/use-toast";
-import { motion, AnimatePresence } from "framer-motion";
+import { useMyContext } from "@/context/provider";
+
+// Import Leaflet types
+import type { LatLngExpression, Icon, Map as LeafletMap } from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { useMap, useMapEvents } from "react-leaflet";
+
+// Dynamically import Leaflet components
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+const Marker = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Marker),
+  { ssr: false }
+);
 
 type Position = [number, number];
 type Location = {
@@ -39,65 +51,99 @@ type Location = {
   };
 };
 
-const customIcon = L.icon({
-  iconUrl: "/icon/map-marker.svg",
-  iconSize: [30, 30],
-  iconAnchor: [15, 30],
-  popupAnchor: [0, -30],
-});
-
-const LocationMarker: React.FC<{
+interface LocationMarkerProps {
   position: Position;
   setPosition: React.Dispatch<React.SetStateAction<Position>>;
-}> = ({ position, setPosition }) => {
-  const map = useMap();
+  customIcon: Icon | null;
+}
+
+const LocationMarker: React.FC<LocationMarkerProps> = ({
+  position,
+  setPosition,
+  customIcon,
+}) => {
+  const map = useMap() as LeafletMap;
 
   useMapEvents({
-    click(e) {
+    click(e: { latlng: { lat: number; lng: number } }) {
       setPosition([e.latlng.lat, e.latlng.lng]);
     },
   });
 
   useEffect(() => {
-    map.setView(position, map.getZoom());
+    if (map && map.setView) {
+      map.setView(position as LatLngExpression, map.getZoom());
+    }
   }, [map, position]);
 
-  return <Marker position={position} icon={customIcon} />;
+  return customIcon ? <Marker position={position} icon={customIcon} /> : null;
 };
 
-export default function MapLayout() {
+export default function MapLayout({
+  isEditing = false,
+}: {
+  isEditing?: boolean;
+}) {
   const autocompleteInput = useRef<HTMLInputElement>(null);
   const [position, setPosition] = useState<Position>([13.7563, 100.5018]); // Bangkok coordinates
   const [address, setAddress] = useState<string>("");
   const { toast } = useToast();
-  const [locations, setLocations] = useState<Location[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showPopularLocations, setShowPopularLocations] = useState(false);
   const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
+  const { editMap, setEditMap } = useMyContext();
+  const [customIcon, setCustomIcon] = useState<Icon | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   useEffect(() => {
-    const initializeAutocomplete = () => {
-      if (!autocompleteInput.current || !window.google?.maps?.places) return;
-
-      const autocomplete = new window.google.maps.places.Autocomplete(
-        autocompleteInput.current
-      );
-      autocomplete.addListener("place_changed", () => {
-        const place = autocomplete.getPlace();
-        if (place.geometry?.location) {
-          setPosition([
-            place.geometry.location.lat(),
-            place.geometry.location.lng(),
-          ]);
-          setAddress(place.formatted_address || "");
-        }
+    if (typeof window !== "undefined") {
+      import("leaflet").then((L) => {
+        setCustomIcon(
+          L.icon({
+            iconUrl: "/icon/map-marker.svg",
+            iconSize: [30, 30],
+            iconAnchor: [15, 30],
+            popupAnchor: [0, -30],
+          })
+        );
       });
-    };
+    }
+  }, []);
 
+  useEffect(() => {
+    if (isEditing && editMap?.MapAddress) {
+      setAddress(editMap.MapAddress);
+      if (editMap.Maplocation?.coordinates) {
+        setPosition([
+          editMap.Maplocation.coordinates[1],
+          editMap.Maplocation.coordinates[0],
+        ]);
+      }
+    }
+  }, [isEditing, editMap]);
+
+  const initializeAutocomplete = useCallback(() => {
+    if (!autocompleteInput.current || !window.google?.maps?.places) return;
+
+    const autocomplete = new window.google.maps.places.Autocomplete(
+      autocompleteInput.current
+    );
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+      if (place.geometry?.location) {
+        setPosition([
+          place.geometry.location.lat(),
+          place.geometry.location.lng(),
+        ]);
+        setAddress(place.formatted_address || "");
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     const loadGoogleMapsScript = () => {
-      if (document.getElementById("google-maps-script") || window.google) {
+      if (typeof window === "undefined") return;
+      if (window.google && window.google.maps) {
         initializeAutocomplete();
         return;
       }
@@ -111,28 +157,31 @@ export default function MapLayout() {
     };
 
     loadGoogleMapsScript();
-  }, [API_URL]);
+  }, [API_URL, initializeAutocomplete]);
 
-  const updateAddress = async (latlng: Position) => {
-    try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latlng[0]},${latlng[1]}&key=${API_URL}`
-      );
-      const data = await response.json();
-      if (!data.results || data.results.length === 0)
-        throw new Error("Address not found");
+  const updateAddress = useCallback(
+    async (latlng: Position) => {
+      try {
+        const response = await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latlng[0]},${latlng[1]}&key=${API_URL}`
+        );
+        const data = await response.json();
+        if (!data.results || data.results.length === 0)
+          throw new Error("Address not found");
 
-      const formattedAddress = data.results[0].formatted_address;
-      setAddress(formattedAddress);
-    } catch (error) {
-      console.error(error);
-      setAddress("Error fetching address");
-    }
-  };
+        const formattedAddress = data.results[0].formatted_address;
+        setAddress(formattedAddress);
+      } catch (error) {
+        console.error(error);
+        setAddress("Error fetching address");
+      }
+    },
+    [API_URL]
+  );
 
   useEffect(() => {
     updateAddress(position);
-  }, [position]);
+  }, [position, updateAddress]);
 
   const locateUser = () => {
     setIsLoading(true);
@@ -160,7 +209,7 @@ export default function MapLayout() {
   const handleAction = async () => {
     setIsLoading(true);
     try {
-      const newLocation: Location = {
+      const locationData: Location = {
         MapAddress: address,
         Maplocation: {
           type: "Point",
@@ -168,7 +217,12 @@ export default function MapLayout() {
         },
       };
 
-      const res = await createLocation(newLocation);
+      let res;
+      if (isEditing) {
+        res = await updateMap({ id: editMap._id, ...locationData });
+      } else {
+        res = await createLocation(locationData);
+      }
 
       if ("error" in res) {
         toast({
@@ -177,18 +231,22 @@ export default function MapLayout() {
           variant: "destructive",
         });
       } else {
-        setLocations([...locations, newLocation]);
         toast({
-          title: "เพิ่มตำแหน่งสำเร็จ",
-          description: "ตำแหน่งใหม่ถูกบันทึกลงในระบบแล้ว",
+          title: isEditing ? "แก้ไขตำแหน่งสำเร็จ" : "เพิ่มตำแหน่งสำเร็จ",
+          description: isEditing
+            ? "ตำแหน่งแผนที่ถูกแก้ไขในระบบแล้ว"
+            : "ตำแหน่งใหม่ถูกบันทึกลงในระบบแล้ว",
         });
         setIsAlertDialogOpen(false);
+        if (isEditing && setEditMap) {
+          setEditMap({ ...editMap, ...locationData });
+        }
       }
     } catch (error) {
       console.error(error);
       toast({
         title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถเพิ่มตำแหน่งได้ กรุณาลองใหม่อีกครั้ง",
+        description: "ไม่สามารถดำเนินการได้ กรุณาลองใหม่อีกครั้ง",
         variant: "destructive",
       });
     } finally {
@@ -196,9 +254,21 @@ export default function MapLayout() {
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAddress(e.target.value);
+    if (isEditing && setEditMap) {
+      setEditMap((prevMap: any) => ({
+        ...prevMap,
+        MapAddress: e.target.value,
+      }));
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
-      <h1 className="mb-6 text-2xl font-bold">เพิ่มตำแหน่งแผนที่</h1>
+      <h1 className="mb-6 text-2xl font-bold">
+        {isEditing ? "แก้ไขตำแหน่งแผนที่" : "เพิ่มตำแหน่งแผนที่"}
+      </h1>
       <div className="grid gap-6 md:grid-cols-[1fr,2fr]">
         <div className="space-y-6">
           <Card>
@@ -210,13 +280,9 @@ export default function MapLayout() {
                 <Input
                   ref={autocompleteInput}
                   value={address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  onChange={handleInputChange}
                   placeholder="ป้อนที่อยู่หรือชื่อสถานที่"
                   className="pr-10"
-                  onFocus={() => setShowPopularLocations(true)}
-                  onBlur={() =>
-                    setTimeout(() => setShowPopularLocations(false), 200)
-                  }
                 />
                 <Button
                   type="button"
@@ -229,43 +295,6 @@ export default function MapLayout() {
                   <span className="sr-only">ล้างการค้นหา</span>
                 </Button>
               </div>
-              <AnimatePresence>
-                {showPopularLocations && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="mt-2"
-                  >
-                    <h3 className="mb-2 text-sm font-semibold">
-                      สถานที่ยอดนิยม
-                    </h3>
-                    <ul className="space-y-2">
-                      <li>
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start"
-                          onClick={() => setAddress("กรุงเทพมหานคร")}
-                        >
-                          <MapPin className="mr-2 size-4" />
-                          กรุงเทพมหานคร
-                        </Button>
-                      </li>
-                      <li>
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start"
-                          onClick={() => setAddress("เชียงใหม่")}
-                        >
-                          <MapPin className="mr-2 size-4" />
-                          เชียงใหม่
-                        </Button>
-                      </li>
-                    </ul>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </CardContent>
           </Card>
 
@@ -301,14 +330,19 @@ export default function MapLayout() {
                     ) : (
                       <MapPin className="mr-2 size-4" />
                     )}
-                    เพิ่มตำแหน่งแผนที่
+                    {isEditing ? "แก้ไขตำแหน่งแผนที่" : "เพิ่มตำแหน่งแผนที่"}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>ยืนยันการเพิ่มตำแหน่ง</AlertDialogTitle>
+                    <AlertDialogTitle>
+                      {isEditing
+                        ? "ยืนยันการแก้ไขตำแหน่ง"
+                        : "ยืนยันการเพิ่มตำแหน่ง"}
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
-                      คุณต้องการเพิ่มตำแหน่งนี้ลงในระบบใช่หรือไม่?
+                      คุณต้องการ{isEditing ? "แก้ไข" : "เพิ่ม"}
+                      ตำแหน่งนี้ลงในระบบใช่หรือไม่?
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <Separator className="my-4" />
@@ -328,7 +362,7 @@ export default function MapLayout() {
                       ) : (
                         <Check className="mr-2 size-4" />
                       )}
-                      ยืนยันการเพิ่มตำแหน่ง
+                      ยืนยัน{isEditing ? "การแก้ไข" : "การเพิ่ม"}ตำแหน่ง
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -352,23 +386,29 @@ export default function MapLayout() {
           </CardHeader>
           <CardContent className="p-0">
             <div className="h-[500px] w-full">
-              <MapContainer
-                center={[position[0], position[1]]}
-                zoom={13}
-                scrollWheelZoom={false}
-                style={{
-                  width: "100%", // Full width on smaller screens
-                  height: "100%", // Fixed height, adjust as needed
-                  zIndex: 1,
-                }}
-                zoomControl={false}
-              >
-                <TileLayer
-                  url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                />
-                <LocationMarker position={position} setPosition={setPosition} />
-              </MapContainer>
+              {customIcon && (
+                <MapContainer
+                  center={position}
+                  zoom={13}
+                  scrollWheelZoom={false}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    zIndex: 1,
+                  }}
+                  zoomControl={false}
+                >
+                  <TileLayer
+                    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                  />
+                  <LocationMarker
+                    position={position}
+                    setPosition={setPosition}
+                    customIcon={customIcon}
+                  />
+                </MapContainer>
+              )}
             </div>
           </CardContent>
         </Card>
