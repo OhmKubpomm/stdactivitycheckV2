@@ -162,44 +162,13 @@ export async function GetFormById(id: Object) {
 }
 
 // Update form content
-export async function UpdateFormContent(
-  id: number,
-  jsonContent: string,
-  endTime: Date | undefined
-) {
+export async function UpdateFormContent(id: number, jsonContent: string) {
   try {
     const session = await auth();
     const user = await User.findById(session?.user?._id);
     if (!session) throw new Error("User not found");
 
     const updateData: any = { ActivityContent: jsonContent };
-    if (endTime) {
-      updateData.endTime = endTime;
-    }
-
-    const updatedForm = await ActivityForm.findOneAndUpdate(
-      { _id: id, userId: user._id }, // Match the form by its ID and the user's ID
-      updateData, // Update the content field and endTime if provided
-      { new: true } // Return the updated document
-    );
-
-    return { ...updatedForm._doc, _id: updatedForm._doc._id.toString() };
-  } catch (error) {
-    console.error("Failed to find activity forms:", error);
-    throw error;
-  }
-}
-
-export async function PublishForm(id: number, endTime?: Date) {
-  try {
-    const session = await auth();
-    const user = await User.findById(session?.user?._id);
-    if (!session) throw new Error("User not found");
-
-    const updateData: any = { published: true };
-    if (endTime) {
-      updateData.endTime = endTime; // บันทึก endTime ลงในฐานข้อมูล
-    }
 
     const updatedForm = await ActivityForm.findOneAndUpdate(
       { _id: id, userId: user._id },
@@ -210,6 +179,39 @@ export async function PublishForm(id: number, endTime?: Date) {
     return { ...updatedForm._doc, _id: updatedForm._doc._id.toString() };
   } catch (error) {
     console.error("Failed to find activity forms:", error);
+    throw error;
+  }
+}
+
+export async function PublishForm(
+  id: number,
+  startTime: string,
+  endTime: string,
+  activityType: string
+) {
+  try {
+    const session = await auth();
+    const user = await User.findById(session?.user?._id);
+    if (!session) throw new Error("User not found");
+
+    const updateData = {
+      published: true,
+      startTime: new Date(startTime),
+      endTime: new Date(endTime),
+      ActivityType: activityType,
+    };
+
+    console.log(updateData);
+
+    const updatedForm = await ActivityForm.findOneAndUpdate(
+      { _id: id, userId: user._id },
+      updateData,
+      { new: true }
+    );
+
+    return { ...updatedForm._doc, _id: updatedForm._doc._id.toString() };
+  } catch (error) {
+    console.error("Failed to update activity form:", error);
     throw error;
   }
 }
@@ -342,5 +344,71 @@ export async function DeleteForm(id: number) {
   } catch (error) {
     console.error("Failed to find activity forms:", error);
     throw error;
+  }
+}
+
+// --
+async function getUserId() {
+  const session = await auth();
+  if (!session || !session.user) {
+    throw new Error("User not authenticated");
+  }
+  return session.user.id;
+}
+
+export async function getActivities() {
+  try {
+    const activities = await ActivityForm.find({ published: true }).sort({
+      startTime: 1,
+    });
+    return activities;
+  } catch (error) {
+    console.error("Failed to fetch activities:", error);
+    throw new Error("Failed to fetch activities");
+  }
+}
+
+export async function getUserStats() {
+  try {
+    const userId = await getUserId();
+    const user = await User.findById(userId).populate("activitiesParticipated");
+    const totalActivities = await ActivityForm.countDocuments({
+      published: true,
+    });
+    const mandatoryActivities = await ActivityForm.countDocuments({
+      published: true,
+      ActivityType: "mandatory",
+    });
+    const optionalActivities = totalActivities - mandatoryActivities;
+
+    return {
+      participatedActivities: user.activitiesParticipated.length,
+      totalActivities,
+      mandatoryActivities,
+      optionalActivities,
+    };
+  } catch (error) {
+    console.error("Failed to fetch user stats:", error);
+    throw new Error("Failed to fetch user stats");
+  }
+}
+
+export async function participateInActivity(activityId: string) {
+  try {
+    const userId = await getUserId();
+    await User.findByIdAndUpdate(userId, {
+      $addToSet: { activitiesParticipated: activityId },
+    });
+    await ActivityForm.findByIdAndUpdate(activityId, {
+      $inc: { ActivitySubmissions: 1 },
+    });
+    revalidatePath("/dashboard");
+    return {
+      success: true,
+      message: "Successfully participated in the activity",
+    };
+  } catch (error) {
+    console.error("Failed to participate in activity:", error);
+    return { success: false, message: "Failed to participate in the activity" };
   }
 }

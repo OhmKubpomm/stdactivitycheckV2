@@ -35,8 +35,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile, email, credentials }) {
-      if (account?.type === "oauth") {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
         return await signInWithOAuth({ account, profile });
       }
       return true;
@@ -74,6 +74,7 @@ async function signInWithOAuth({
     email: profile.email,
     image: profile.picture,
     provider: account.provider,
+    role: "user",
   });
   await newUser.save();
   return true;

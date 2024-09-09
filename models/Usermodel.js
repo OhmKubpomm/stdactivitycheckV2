@@ -36,10 +36,17 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "user",
     },
+
     provider: {
       type: String,
       default: "credentials",
     },
+    activitiesParticipated: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ActivityForms",
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -8,39 +8,34 @@ import { FaSpinner } from "react-icons/fa";
 
 function SaveFormBtn({ id }: { id: number }) {
   const { elements } = useDesigner();
-  const [loading, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
 
   const updateFormContent = async () => {
+    if (!elements || elements.length === 0) {
+      toast({
+        title: "ผิดพลาด",
+        description: "ไม่พบข้อมูลฟอร์มที่จะบันทึก",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      if (!elements) {
-        console.error("Elements is undefined");
-        return;
-      }
-
       const jsonElements = JSON.stringify(elements);
-      const dateFieldElement = elements.find((el) => el.type === "DateField");
 
-      if (!dateFieldElement || !dateFieldElement.extraAttributes) {
-        console.error("DateField element or its extraAttributes are not found");
-        return;
-      }
-
-      const endTime = dateFieldElement.extraAttributes.endTime;
-
-      if (!jsonElements) {
-        console.error("No form elements to save", jsonElements);
-        return;
-      }
-
-      await UpdateFormContent(id, jsonElements, endTime);
+      await UpdateFormContent(id, jsonElements);
       toast({
         title: "สำเร็จ",
         description: "ฟอร์มได้รับการบันทึกแล้ว",
       });
     } catch (error) {
+      console.error("Error saving form:", error);
       toast({
         title: "ผิดพลาด",
-        description: "มีบางอย่างผิดปกติในการบันทึกฟอร์ม",
+        description:
+          error instanceof Error
+            ? error.message
+            : "มีบางอย่างผิดปกติในการบันทึกฟอร์ม",
         variant: "destructive",
       });
     }
@@ -50,14 +45,16 @@ function SaveFormBtn({ id }: { id: number }) {
     <Button
       variant={"outline"}
       className="gap-2"
-      disabled={loading}
+      disabled={isPending}
       onClick={() => {
-        startTransition(updateFormContent);
+        startTransition(() => {
+          updateFormContent();
+        });
       }}
     >
       <HiSaveAs className="size-4" />
       บันทึก
-      {loading && <FaSpinner className="animate-spin" />}
+      {isPending && <FaSpinner className="animate-spin" />}
     </Button>
   );
 }

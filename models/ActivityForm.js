@@ -26,7 +26,9 @@ const ActivityFormSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-
+    ActivityType: {
+      type: String,
+    },
     ActivityShareurl: { type: String, default: uuidv4, unique: true }, // ใช้ uuidv4 สำหรับค่าเริ่มต้น
     ActivitySubmissions: {
       type: Number,
@@ -36,6 +38,9 @@ const ActivityFormSchema = new mongoose.Schema(
     FormSubmissions: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Formsubs" },
     ],
+    startTime: {
+      type: Date,
+    },
     endTime: {
       type: Date,
     },

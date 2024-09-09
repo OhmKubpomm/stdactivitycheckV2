@@ -8,7 +8,7 @@ const FormsubSchema = new mongoose.Schema(
     },
     formId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Form",
+      ref: "ActivityForms",
       required: true,
     },
     createdAt: {
