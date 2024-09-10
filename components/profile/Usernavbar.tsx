@@ -13,39 +13,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Separator } from "@/components/ui/separator";
-import {
-  Users,
-  CalendarDays,
-  Map,
-  Search,
-  BarChart,
-  FolderClosed,
-  Settings,
-  Menu,
-  ChevronLast,
-  Activity,
-  LogOut,
-  AlignJustify,
-  Home,
-} from "lucide-react";
+
+import { Users, Menu, ChevronLast, AlignJustify, Home } from "lucide-react";
 
 const menus = [
   { name: "หน้าหลัก", icon: Home, link: "/dashboard/cruduser/Dashboard" },
   { name: "ข้อมูลกิจกรรม", icon: Users, link: "/dashboard/cruduser/Dashboard" },
-  {
-    name: "จัดการข้อมูลกิจกรรมนักศึกษา",
-    icon: Activity,
-    link: "/dashboard/crudactivityform",
-  },
-  { name: "จัดการข้อมูลแผนที่", icon: Map, link: "/dashboard/crudmap" },
-  { name: "ตารางเวลา", icon: CalendarDays, link: "/dashboard/schedule" },
-  { name: "ค้นหา", icon: Search, link: "/dashboard/search" },
-  { name: "วิเคราะห์", icon: BarChart, link: "/dashboard/analytics" },
-  { name: "ไฟล์", icon: FolderClosed, link: "/dashboard/files" },
 ];
 
-const AdminNavbar = () => {
+const Usernavbar = () => {
   const [open, setOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -151,49 +127,6 @@ const AdminNavbar = () => {
           ))}
         </nav>
       </ScrollArea>
-      <div className="space-y-2 p-4">
-        <Separator />
-        <div className="flex gap-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="flex-1 transition-colors duration-300 hover:bg-orange-100 hover:text-orange-500"
-                >
-                  <Settings className="size-5" />
-                  {(open || isMobileView) && (
-                    <span className="ml-2">ตั้งค่า</span>
-                  )}
-                </Button>
-              </TooltipTrigger>
-              {!open && !isMobileView && (
-                <TooltipContent side="top">ตั้งค่า</TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="flex-1 transition-colors duration-300 hover:bg-red-600"
-                >
-                  <LogOut className="size-5" />
-                  {(open || isMobileView) && (
-                    <span className="ml-2">ออกจากระบบ</span>
-                  )}
-                </Button>
-              </TooltipTrigger>
-              {!open && !isMobileView && (
-                <TooltipContent side="top">ออกจากระบบ</TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
     </motion.div>
   );
 
@@ -227,4 +160,4 @@ const AdminNavbar = () => {
   );
 };
 
-export default AdminNavbar;
+export default Usernavbar;

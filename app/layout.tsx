@@ -46,15 +46,17 @@ export default async function RootLayout({
         >
           <Provider>
             <NextToploader />
-            <header>
-              <Headers />
-            </header>
-            <div className="flex min-h-screen">
-              {role === "admin" && <AdminaNavbar />}
-              {role === "user" && <Usernavbar />}
-              <main className="flex-1 overflow-hidden max-md:pb-14 sm:px-6">
-                {children}
-              </main>
+            <div className="flex min-h-screen flex-col">
+              <header>
+                <Headers />
+              </header>
+              <div className="flex flex-1">
+                {role === "admin" && <AdminaNavbar />}
+                {role === "user" && <Usernavbar />}
+                <main className="flex-1 overflow-auto p-4 lg:p-6">
+                  {children}
+                </main>
+              </div>
             </div>
             <Toaster />
           </Provider>
