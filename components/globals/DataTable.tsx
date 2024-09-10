@@ -64,15 +64,21 @@ interface User {
   role: string;
 }
 
-interface DataTableProps {
+interface DataTableProps<T> {
   columns: Column[];
-  data: User[];
+  data: T[];
   itemsPerPage?: number;
   totalCount: number; // Add totalCount to the prop types
   totalPage: number;
+  showActions?: boolean;
 }
 
-export function DataTable({ columns, data, itemsPerPage = 5 }: DataTableProps) {
+export function DataTable<T extends Record<string, any>>({
+  columns,
+  data,
+  itemsPerPage = 5,
+  showActions = false,
+}: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortColumn, setSortColumn] = useState("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -189,14 +195,17 @@ export function DataTable({ columns, data, itemsPerPage = 5 }: DataTableProps) {
                   </div>
                 </TableHead>
               ))}
-              <TableHead>การดำเนินการ</TableHead>
+              {showActions && <TableHead>การดำเนินการ</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedData.map((item) => (
-              <TableRow key={item._id}>
+            {paginatedData.map((item, index) => (
+              <TableRow key={item._id || index}>
                 {columns.map((column) => (
-                  <TableCell key={column.key}>
+                  <TableCell
+                    key={`${item._id || index}-${column.key}`}
+                    className="whitespace-nowrap"
+                  >
                     {column.key === "image" ? (
                       item[column.key] ? (
                         <TooltipProvider>
@@ -241,49 +250,53 @@ export function DataTable({ columns, data, itemsPerPage = 5 }: DataTableProps) {
                     )}
                   </TableCell>
                 ))}
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <Link href="/dashboard/cruduser/EditUser">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setEditUser(item)}
-                        className="bg-blue-500 text-white hover:bg-blue-600"
-                      >
-                        <Pencil className="size-4" />
-                      </Button>
-                    </Link>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
+                {showActions && (
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Link href="/dashboard/cruduser/EditUser">
                         <Button
                           variant="outline"
                           size="icon"
-                          className="bg-red-500 text-white hover:bg-red-600"
+                          onClick={() => setEditUser(item)}
+                          className="bg-blue-500 text-white hover:bg-blue-600"
                         >
-                          <Trash2 className="size-4" />
+                          <Pencil className="size-4" />
                         </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>ยืนยันการลบข้อมูล</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            คุณแน่ใจหรือไม่ที่ต้องการลบข้อมูลผู้ใช้นี้?
-                            การกระทำนี้ไม่สามารถย้อนกลับได้
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(item._id, item.image)}
+                      </Link>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
                             className="bg-red-500 text-white hover:bg-red-600"
                           >
-                            ลบข้อมูล
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </TableCell>
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              ยืนยันการลบข้อมูล
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              คุณแน่ใจหรือไม่ที่ต้องการลบข้อมูลผู้ใช้นี้?
+                              การกระทำนี้ไม่สามารถย้อนกลับได้
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(item._id, item.image)}
+                              className="bg-red-500 text-white hover:bg-red-600"
+                            >
+                              ลบข้อมูล
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>

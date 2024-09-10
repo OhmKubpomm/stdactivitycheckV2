@@ -1,5 +1,5 @@
 /* eslint-disable tailwindcss/no-custom-classname */
-import { GetFormStats, GetForms } from "@/actions/ActivityAction";
+import { GetFormStats, GetForms, CloneForm } from "@/actions/ActivityAction";
 import {
   Card,
   CardContent,
@@ -29,9 +29,9 @@ import {
   PenLine,
   ArrowRightCircle,
   Eye,
+  Copy,
 } from "lucide-react";
 import DeleteBtn from "@/components/Activityform/DeleteBtn";
-
 connectdatabase();
 
 export default function Home() {
@@ -196,11 +196,11 @@ function FormCard({ form }: { form: typeof ActivityForm }) {
       <CardContent className="text-muted-foreground h-[20px] truncate text-sm">
         {form.ActivityDescription || "ไม่มีคำอธิบาย"}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col gap-2">
         {form.published && (
           <Button
             asChild
-            className="text-md mt-2 w-full gap-4 bg-gradient-to-r from-primary-500 to-yellow-500 text-white"
+            className="text-md w-full gap-4 bg-gradient-to-r from-primary-500 to-yellow-500 text-white"
           >
             <Link href={`/dashboard/crudactivityform/forms/${form.id}`}>
               ดูแบบฟอร์ม <ArrowRightCircle />
@@ -211,14 +211,23 @@ function FormCard({ form }: { form: typeof ActivityForm }) {
           <Button
             variant={"secondary"}
             asChild
-            className="text-md mt-2 w-full gap-4  bg-gradient-to-r from-primary-500 to-yellow-500 text-white"
+            className="text-md w-full gap-4  bg-gradient-to-r from-primary-500 to-yellow-500 text-white"
           >
             <Link href={`/dashboard/crudactivityform/builder/${form.id}`}>
               แก้ไขแบบฟอร์มนี้ <PenLine />
             </Link>
           </Button>
         )}
-        <DeleteBtn formId={form.id} />
+        <div className="flex w-full gap-2">
+          <DeleteBtn formId={form.id} />
+          <form action={CloneForm}>
+            <input type="hidden" name="formId" value={form.id} />
+            <Button type="submit" variant="outline" className="w-full">
+              <Copy className="mr-2 size-4" />
+              Clone
+            </Button>
+          </form>
+        </div>
       </CardFooter>
     </Card>
   );

@@ -245,8 +245,10 @@ export async function GetFormContentByUrl(formUrl: string) {
 export async function SubmitForm(formUrl: string, content: string) {
   try {
     const session = await auth();
-    const user = await User.findById(session?.user?._id);
     if (!session) throw new Error("User not found");
+
+    const user = await User.findById(session?.user?._id);
+    if (!user) throw new Error("User not found");
 
     const form = await ActivityForm.findOne({
       ActivityShareurl: formUrl,
@@ -274,8 +276,15 @@ export async function SubmitForm(formUrl: string, content: string) {
 
     // บันทึก submission ใหม่
     await formSubmission.save();
+
     // บันทึกการเปลี่ยนแปลงฟอร์ม
     await form.save();
+
+    // อัปเดตจำนวนกิจกรรมที่ user เข้าร่วม
+    if (!user.activitiesParticipated.includes(form._id)) {
+      user.activitiesParticipated.push(form._id);
+      await user.save(); // บันทึกการเปลี่ยนแปลงของ user
+    }
 
     return {
       ...formSubmission._doc,
@@ -347,68 +356,48 @@ export async function DeleteForm(id: number) {
   }
 }
 
-// --
-async function getUserId() {
-  const session = await auth();
-  if (!session || !session.user) {
-    throw new Error("User not authenticated");
-  }
-  return session.user.id;
-}
-
-export async function getActivities() {
+// โคลนDASHBOARD
+export async function CloneForm(formData: FormData) {
   try {
-    const activities = await ActivityForm.find({ published: true }).sort({
-      startTime: 1,
-    });
-    return activities;
-  } catch (error) {
-    console.error("Failed to fetch activities:", error);
-    throw new Error("Failed to fetch activities");
-  }
-}
+    const session = await auth();
+    const user = await User.findById(session?.user?._id);
+    if (!session) throw new Error("User not found");
 
-export async function getUserStats() {
-  try {
-    const userId = await getUserId();
-    const user = await User.findById(userId).populate("activitiesParticipated");
-    const totalActivities = await ActivityForm.countDocuments({
-      published: true,
+    const formId = formData.get("formId");
+    if (!formId) throw new Error("Form ID is required");
+
+    // Find the original form
+    const originalForm = await ActivityForm.findOne({
+      _id: formId,
+      userId: user._id,
     });
-    const mandatoryActivities = await ActivityForm.countDocuments({
-      published: true,
-      ActivityType: "mandatory",
+    if (!originalForm) throw new Error("Form not found");
+
+    // Create a new form object with the same data as the original
+    const clonedForm = new ActivityForm({
+      userId: user._id,
+      ActivityFormname: `${originalForm.ActivityFormname} (Clone)`,
+      ActivityDescription: originalForm.ActivityDescription,
+      ActivityContent: originalForm.ActivityContent,
+      ActivityType: originalForm.ActivityType,
+      published: false, // Set to false as it's a new draft
+      ActivityVisits: 0,
+      ActivitySubmissions: 0,
+      startTime: originalForm.startTime,
+      endTime: originalForm.endTime,
     });
-    const optionalActivities = totalActivities - mandatoryActivities;
+
+    // Save the cloned form
+    await clonedForm.save();
+
+    revalidatePath("/");
 
     return {
-      participatedActivities: user.activitiesParticipated.length,
-      totalActivities,
-      mandatoryActivities,
-      optionalActivities,
+      ...clonedForm._doc,
+      _id: clonedForm._id.toString(),
     };
   } catch (error) {
-    console.error("Failed to fetch user stats:", error);
-    throw new Error("Failed to fetch user stats");
-  }
-}
-
-export async function participateInActivity(activityId: string) {
-  try {
-    const userId = await getUserId();
-    await User.findByIdAndUpdate(userId, {
-      $addToSet: { activitiesParticipated: activityId },
-    });
-    await ActivityForm.findByIdAndUpdate(activityId, {
-      $inc: { ActivitySubmissions: 1 },
-    });
-    revalidatePath("/dashboard");
-    return {
-      success: true,
-      message: "Successfully participated in the activity",
-    };
-  } catch (error) {
-    console.error("Failed to participate in activity:", error);
-    return { success: false, message: "Failed to participate in the activity" };
+    console.error("Failed to clone form:", error);
+    throw error;
   }
 }

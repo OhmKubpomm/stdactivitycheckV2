@@ -1,3 +1,4 @@
+/* eslint-disable tailwindcss/no-custom-classname */
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
@@ -26,15 +27,11 @@ import {
   Award,
   Star,
   QrCode,
+  CheckCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { Progress } from "@/components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -50,6 +47,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { DataTable } from "@/components/globals/DataTable";
 
 const isValidDate = (date: string | Date | null | undefined): boolean => {
   return date ? !isNaN(new Date(date).getTime()) : false;
@@ -71,6 +69,8 @@ const Userdashboard = () => {
     useState<DashboardActivityType | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [isLoading, setIsLoading] = useState(true);
+  const [showAllCompleted, setShowAllCompleted] = useState(false);
+  const [showAllRemaining, setShowAllRemaining] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -215,7 +215,7 @@ const Userdashboard = () => {
                 activity.type === "mandatory" ? "bg-red-500" : "bg-green-500"
               } text-white`}
             >
-              {activity.type === "mandatory" ? "กิจกรรมบังคับ" : "กิจกรรมเลือก"}
+              {activity.type}
             </Badge>
             <div className="mt-4">
               <p className="mb-1 text-sm text-gray-600">จำนวนผู้เข้าร่วม</p>
@@ -299,11 +299,21 @@ const Userdashboard = () => {
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, 3);
 
-  const remainingActivities = activities.filter(
-    (activity) =>
-      !ongoingActivities.includes(activity) &&
-      !upcomingActivities.includes(activity)
+  const completedActivities = activities.filter(
+    (activity) => user.activitiesParticipated.includes(activity.id) // ตรวจสอบว่า activity.id อยู่ใน array
   );
+
+  const remainingActivities = activities.filter(
+    (activity) => !user.activitiesParticipated.includes(activity.id) // ตรวจสอบว่า activity.id ไม่อยู่ใน array
+  );
+
+  const columns = [
+    { key: "name", label: "ชื่อกิจกรรม" },
+    { key: "date", label: "วันที่" },
+    { key: "time", label: "เวลา" },
+    { key: "type", label: "ประเภท" },
+    { key: "participants", label: "ผู้เข้าร่วม" },
+  ];
 
   return (
     <TooltipProvider>
@@ -326,7 +336,7 @@ const Userdashboard = () => {
           >
             <StatCard
               title="กิจกรรมที่เข้าร่วม"
-              value={user.activitiesParticipated}
+              value={user.activitiesParticipated.length}
               icon={Activity}
               color="500"
             />
@@ -339,7 +349,7 @@ const Userdashboard = () => {
             <StatCard
               title="อัตราการเข้าร่วม"
               value={`${Math.round(
-                (user.activitiesParticipated / activities.length) * 100
+                (user.activitiesParticipated.length / activities.length) * 100
               )}%`}
               icon={Star}
               color="700"
@@ -361,49 +371,53 @@ const Userdashboard = () => {
                 <CardContent>
                   <ScrollArea className="h-[300px] pr-4 sm:h-[400px]">
                     <AnimatePresence>
-                      {ongoingActivities.map((activity) => (
-                        <motion.div
-                          key={activity.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          transition={{ duration: 0.3 }}
-                          className="mb-4 rounded-lg bg-gray-50 p-4 transition-all duration-300 hover:bg-gray-100 hover:shadow-md"
-                        >
-                          <h3 className="mb-2 text-lg font-semibold text-gray-800">
-                            {activity.name}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            {isValidDate(activity.date)
-                              ? format(parseISO(activity.date), "dd/MM/yyyy")
-                              : "ไม่ระบุวันที่"}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {activity.time}
-                          </p>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button className="mt-2 bg-gray-600 text-white hover:bg-gray-700">
-                                <QrCode className="mr-2 size-4" />
-                                QR Code
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="flex flex-col items-center rounded-lg bg-white p-6 shadow-md">
-                              <DialogTitle className="mb-4 text-xl font-bold text-gray-800">
-                                QR Code สำหรับกิจกรรม
-                              </DialogTitle>
-                              <QRCode
-                                value={`${window.location.origin}/submit/${activity.shareUrl}`}
-                                size={200}
-                                className="rounded-lg"
-                              />
-                              <DialogDescription className="mt-4 text-gray-600">
-                                แสกนเพื่อเข้าร่วมกิจกรรมนี้
-                              </DialogDescription>
-                            </DialogContent>
-                          </Dialog>
-                        </motion.div>
-                      ))}
+                      {ongoingActivities.map((activity) =>
+                        user.activitiesParticipated.includes(
+                          activity.id
+                        ) ? null : (
+                          <motion.div
+                            key={activity.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.3 }}
+                            className="mb-4 rounded-lg bg-gray-50 p-4 transition-all duration-300 hover:bg-gray-100 hover:shadow-md"
+                          >
+                            <h3 className="mb-2 text-lg font-semibold text-gray-800">
+                              {activity.name}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              {isValidDate(activity.date)
+                                ? format(parseISO(activity.date), "dd/MM/yyyy")
+                                : "ไม่ระบุวันที่"}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {activity.time}
+                            </p>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button className="mt-2 bg-gray-600 text-white hover:bg-gray-700">
+                                  <QrCode className="mr-2 size-4" />
+                                  QR Code
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="flex flex-col items-center rounded-lg bg-white p-6 shadow-md">
+                                <DialogTitle className="mb-4 text-xl font-bold text-gray-800">
+                                  QR Code สำหรับกิจกรรม
+                                </DialogTitle>
+                                <QRCode
+                                  value={`${window.location.origin}/submit/${activity.shareUrl}`}
+                                  size={200}
+                                  className="rounded-lg"
+                                />
+                                <DialogDescription className="mt-4 text-gray-600">
+                                  แสกนเพื่อเข้าร่วมกิจกรรมนี้
+                                </DialogDescription>
+                              </DialogContent>
+                            </Dialog>
+                          </motion.div>
+                        )
+                      )}
                     </AnimatePresence>
                   </ScrollArea>
                 </CardContent>
@@ -498,9 +512,7 @@ const Userdashboard = () => {
                                   : "bg-green-500"
                               } text-white`}
                             >
-                              {selectedActivity.type === "mandatory"
-                                ? "กิจกรรมบังคับ"
-                                : "กิจกรรมเลือก"}
+                              {selectedActivity.type}
                             </Badge>
                             <Dialog>
                               <DialogTrigger asChild>
@@ -573,10 +585,13 @@ const Userdashboard = () => {
             <Card className="border-none bg-white shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-xl text-gray-800 sm:text-2xl">
-                  กิจกรรมที่เหลือ
+                  กิจกรรมที่เสร็จสิ้นแล้ว
                 </CardTitle>
-                <Tooltip>
-                  <TooltipTrigger asChild>
+                <Dialog
+                  open={showAllCompleted}
+                  onOpenChange={setShowAllCompleted}
+                >
+                  <DialogTrigger asChild>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -584,16 +599,27 @@ const Userdashboard = () => {
                     >
                       ดูทั้งหมด <ChevronRight className="ml-2 size-4" />
                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>คลิกเพื่อดูกิจกรรมทั้งหมด</p>
-                  </TooltipContent>
-                </Tooltip>
+                  </DialogTrigger>
+                  <DialogContent className="w-full max-w-lg sm:max-w-2xl lg:max-w-4xl">
+                    <DialogTitle>กิจกรรมที่เสร็จสิ้นแล้วทั้งหมด</DialogTitle>
+                    <DialogDescription>
+                      รายการกิจกรรมทั้งหมดที่คุณได้เข้าร่วมและเสร็จสิ้นแล้ว
+                    </DialogDescription>
+                    <DataTable
+                      columns={columns}
+                      data={completedActivities}
+                      showActions={false}
+                      itemsPerPage={10}
+                      totalCount={completedActivities.length}
+                      totalPage={Math.ceil(completedActivities.length / 10)}
+                    />
+                  </DialogContent>
+                </Dialog>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <AnimatePresence>
-                    {remainingActivities.slice(0, 4).map((activity) => (
+                    {completedActivities.slice(0, 3).map((activity) => (
                       <motion.div
                         key={activity.id}
                         initial={{ opacity: 0, x: -20 }}
@@ -626,31 +652,95 @@ const Userdashboard = () => {
                                 : "bg-green-500"
                             } text-white`}
                           >
-                            {activity.type === "mandatory"
-                              ? "กิจกรรมบังคับ"
-                              : "กิจกรรมเลือก"}
+                            {activity.type}
                           </Badge>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button className="bg-gray-600 text-white hover:bg-gray-700">
-                                <QrCode className="mr-2 size-4" />
-                                QR Code
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="flex flex-col items-center rounded-lg bg-white p-6 shadow-md">
-                              <DialogTitle className="mb-4 text-xl font-bold text-gray-800">
-                                QR Code สำหรับกิจกรรม
-                              </DialogTitle>
-                              <QRCode
-                                value={`${window.location.origin}/submit/${activity.shareUrl}`}
-                                size={200}
-                                className="rounded-lg"
-                              />
-                              <DialogDescription className="mt-4 text-gray-600">
-                                แสกนเพื่อเข้าร่วมกิจกรรมนี้
-                              </DialogDescription>
-                            </DialogContent>
-                          </Dialog>
+                          <CheckCircle className="size-5 text-green-500" />
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 1.2 }}
+          >
+            <Card className="border-none bg-white shadow-lg">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-xl text-gray-800 sm:text-2xl">
+                  กิจกรรมที่เหลือ
+                </CardTitle>
+                <Dialog
+                  open={showAllRemaining}
+                  onOpenChange={setShowAllRemaining}
+                >
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-gray-600 hover:bg-gray-200 hover:text-gray-800"
+                    >
+                      ดูทั้งหมด <ChevronRight className="ml-2 size-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="w-full max-w-lg sm:max-w-2xl lg:max-w-4xl">
+                    <DialogTitle>กิจกรรมที่เหลือทั้งหมด</DialogTitle>
+                    <DialogDescription>
+                      รายการกิจกรรมทั้งหมดที่คุณยังไม่ได้เข้าร่วม
+                    </DialogDescription>
+                    <DataTable
+                      columns={columns}
+                      data={remainingActivities}
+                      showActions={false}
+                      itemsPerPage={10}
+                      totalCount={remainingActivities.length}
+                      totalPage={Math.ceil(remainingActivities.length / 10)}
+                    />
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <AnimatePresence>
+                    {remainingActivities.slice(0, 3).map((activity) => (
+                      <motion.div
+                        key={activity.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ duration: 0.3 }}
+                        className="flex flex-col justify-between rounded-lg bg-gray-50 p-4 transition-all duration-300 hover:bg-gray-100 hover:shadow-md sm:flex-row sm:items-center"
+                      >
+                        <div>
+                          <h3 className="font-semibold text-gray-800">
+                            {activity.name}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {isValidDate(activity.date)
+                              ? format(parseISO(activity.date), "dd/MM/yyyy")
+                              : "ไม่ระบุวันที่"}{" "}
+                            | {activity.time}
+                          </p>
+                        </div>
+                        <div className="mt-2 flex items-center space-x-2 sm:mt-0">
+                          <Badge
+                            variant={
+                              activity.type === "mandatory"
+                                ? "destructive"
+                                : "secondary"
+                            }
+                            className={`${
+                              activity.type === "mandatory"
+                                ? "bg-red-500"
+                                : "bg-green-500"
+                            } text-white`}
+                          >
+                            {activity.type}
+                          </Badge>
                         </div>
                       </motion.div>
                     ))}

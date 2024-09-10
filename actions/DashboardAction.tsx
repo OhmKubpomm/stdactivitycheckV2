@@ -54,7 +54,7 @@ export interface DashboardDataType {
   user: {
     name: string;
     email: string;
-    activitiesParticipated: number;
+    activitiesParticipated: string[];
   };
   activities: DashboardActivityType[];
 }
@@ -88,7 +88,9 @@ export async function getDashboardData(): Promise<DashboardDataType> {
     user: {
       name: user.name,
       email: user.email,
-      activitiesParticipated: user.activitiesParticipated.length,
+      activitiesParticipated: user.activitiesParticipated.map((activity) =>
+        activity._id.toString()
+      ),
     },
     activities: await Promise.all(
       activities.map(async (activity: ActivityType) => {

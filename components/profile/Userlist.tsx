@@ -62,6 +62,7 @@ const Userlist: React.FC<UserlistProps> = ({
           itemsPerPage={5}
           totalCount={totalCount}
           totalPage={totalPage}
+          showActions={true}
         />
       </CardContent>
     </Card>
