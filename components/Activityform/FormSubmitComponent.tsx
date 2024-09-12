@@ -16,15 +16,17 @@ import { HiCursorClick } from "react-icons/hi";
 import { toast } from "@/components/ui/use-toast";
 import { ImSpinner2 } from "react-icons/im";
 import { SubmitForm } from "@/actions/ActivityAction";
-import { checkUserWithinRange } from "@/actions/mapActions"; // Import Server Action นี้
+import { checkUserWithinRange } from "@/actions/mapActions";
 
 function FormSubmitComponent({
   formUrl,
   content,
+  startTime,
   endTime,
 }: {
   content: FormElementInstance[];
   formUrl: string;
+  startTime?: string;
   endTime?: string;
 }) {
   const formValues = useRef<{ [key: string]: string }>({});
@@ -33,42 +35,52 @@ function FormSubmitComponent({
   const [submitted, setSubmitted] = useState(false);
   const [pending, startTransition] = useTransition();
   const [isExpired, setIsExpired] = useState(false);
+  const [isNotStarted, setIsNotStarted] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [isWithinRange, setIsWithinRange] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (endTime) {
-      const updateTimeLeft = () => {
-        const currentTime = new Date().getTime();
-        const endTimeDate = new Date(endTime).getTime();
-        const timeDifference = endTimeDate - currentTime;
+    const updateTimeStatus = () => {
+      const currentTime = new Date().getTime();
+      const startTimeDate = startTime ? new Date(startTime).getTime() : 0;
+      const endTimeDate = endTime ? new Date(endTime).getTime() : Infinity;
 
-        if (timeDifference <= 0) {
-          setIsExpired(true);
-          setTimeLeft("หมดเวลาแล้ว");
-        } else {
-          const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-          const hours = Math.floor(
-            (timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-          );
-          const minutes = Math.floor(
-            (timeDifference % (1000 * 60 * 60)) / (1000 * 60)
-          );
-          const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+      if (currentTime < startTimeDate) {
+        setIsNotStarted(true);
+        setTimeLeft(
+          `เริ่มในอีก ${formatTimeLeft(startTimeDate - currentTime)}`
+        );
+      } else if (currentTime > endTimeDate) {
+        setIsExpired(true);
+        setTimeLeft("หมดเวลาแล้ว");
+      } else {
+        setIsNotStarted(false);
+        setIsExpired(false);
+        setTimeLeft(
+          `เหลือเวลาอีก ${formatTimeLeft(endTimeDate - currentTime)}`
+        );
+      }
+    };
 
-          setTimeLeft(
-            `${days} วัน ${hours} ชั่วโมง ${minutes} นาที ${seconds} วินาที`
-          );
-        }
-      };
-      updateTimeLeft();
-      const timer = setInterval(updateTimeLeft, 1000);
+    updateTimeStatus();
+    const timer = setInterval(updateTimeStatus, 1000);
 
-      return () => clearInterval(timer);
-    }
-  }, [endTime]);
+    return () => clearInterval(timer);
+  }, [startTime, endTime]);
 
-  // ฟังก์ชันตรวจสอบตำแหน่งของผู้ใช้เมื่อโหลดฟอร์ม
+  const formatTimeLeft = (timeDifference: number) => {
+    const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(
+      (timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
+    const minutes = Math.floor(
+      (timeDifference % (1000 * 60 * 60)) / (1000 * 60)
+    );
+    const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+    return `${days} วัน ${hours} ชั่วโมง ${minutes} นาที ${seconds} วินาที`;
+  };
+
   useEffect(() => {
     const checkUserLocation = async () => {
       navigator.geolocation.getCurrentPosition(
@@ -80,7 +92,7 @@ function FormSubmitComponent({
 
           const { isWithinRange } = await checkUserWithinRange(
             userLocation,
-            100 // ระยะทางในเมตร
+            100
           );
 
           setIsWithinRange(isWithinRange ?? false);
@@ -109,20 +121,18 @@ function FormSubmitComponent({
   }, []);
 
   const validateForm: () => boolean = useCallback(() => {
+    let isValid = true;
     for (const field of content) {
       const actualValue = formValues.current[field.id] || "";
       const valid = FormElements[field.type].validate(field, actualValue);
 
       if (!valid) {
         formErrors.current[field.id] = true;
+        isValid = false;
       }
     }
 
-    if (Object.keys(formErrors.current).length > 0) {
-      return false;
-    }
-
-    return true;
+    return isValid;
   }, [content]);
 
   const submitValue = useCallback((key: string, value: string) => {
@@ -134,6 +144,15 @@ function FormSubmitComponent({
       toast({
         title: "ฟอร์มหมดเวลาแล้ว",
         description: "ไม่สามารถส่งแบบฟอร์มได้ เนื่องจากฟอร์มนี้หมดเวลาแล้ว",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isNotStarted) {
+      toast({
+        title: "ฟอร์มยังไม่เปิดให้ทำ",
+        description: "กรุณารอจนกว่าจะถึงเวลาเริ่มต้นของฟอร์ม",
         variant: "destructive",
       });
       return;
@@ -155,21 +174,31 @@ function FormSubmitComponent({
       const jsonContent = JSON.stringify(formValues.current);
       await SubmitForm(formUrl, jsonContent);
       setSubmitted(true);
+      toast({
+        title: "ส่งแบบฟอร์มสำเร็จ",
+        description: "ขอบคุณสำหรับการส่งแบบฟอร์ม",
+        variant: "default",
+      });
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes("Form submission period has ended")
-      ) {
-        toast({
-          title: "ฟอร์มหมดเวลาแล้ว",
-          description: "ไม่สามารถส่งแบบฟอร์มได้ เนื่องจากฟอร์มนี้หมดเวลาแล้ว",
-          variant: "destructive",
-        });
-        setIsExpired(true);
+      if (error instanceof Error) {
+        if (error.message.includes("Form submission period has ended")) {
+          toast({
+            title: "ฟอร์มหมดเวลาแล้ว",
+            description: "ไม่สามารถส่งแบบฟอร์มได้ เนื่องจากฟอร์มนี้หมดเวลาแล้ว",
+            variant: "destructive",
+          });
+          setIsExpired(true);
+        } else {
+          toast({
+            title: "ข้อผิดพลาด",
+            description: error.message || "เกิดข้อผิดพลาดบางอย่าง",
+            variant: "destructive",
+          });
+        }
       } else {
         toast({
           title: "ข้อผิดพลาด",
-          description: "เกิดข้อผิดพลาดบางอย่าง",
+          description: "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ",
           variant: "destructive",
         });
       }
@@ -208,6 +237,36 @@ function FormSubmitComponent({
             ฟอร์มนี้หมดเวลาแล้ว
           </h1>
           <p>คุณไม่สามารถส่งแบบฟอร์มนี้ได้เนื่องจากฟอร์มหมดเวลาแล้ว</p>
+          {endTime && (
+            <p>
+              หมดเวลาเมื่อ:{" "}
+              {new Date(endTime).toLocaleString("th-TH", {
+                timeZone: "Asia/Bangkok",
+              })}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (isNotStarted) {
+    return (
+      <div className="flex size-full items-center justify-center p-8">
+        <div className="flex w-full max-w-[620px] grow flex-col gap-4 overflow-y-auto rounded border bg-background p-8 shadow-xl shadow-blue-700">
+          <h1 className="text-2xl font-bold text-yellow-500">
+            ฟอร์มนี้ยังไม่เปิดให้ทำ
+          </h1>
+          <p>กรุณารอจนกว่าจะถึงเวลาเริ่มต้นของฟอร์ม</p>
+          {startTime && (
+            <p>
+              เริ่มเวลา:{" "}
+              {new Date(startTime).toLocaleString("th-TH", {
+                timeZone: "Asia/Bangkok",
+              })}
+            </p>
+          )}
+          <p className="text-lg font-bold">{timeLeft}</p>
         </div>
       </div>
     );
@@ -230,11 +289,7 @@ function FormSubmitComponent({
         key={renderKey}
         className="flex w-full max-w-[620px] grow flex-col gap-4 overflow-y-auto rounded border bg-background p-8 shadow-xl shadow-blue-700"
       >
-        {endTime && (
-          <div className="mb-4 text-lg font-bold text-red-500">
-            เวลาที่เหลือ: {timeLeft}
-          </div>
-        )}
+        <div className="mb-4 text-lg font-bold text-blue-500">{timeLeft}</div>
         {content.map((element) => {
           const FormElement = FormElements[element.type].formComponent;
           return (
@@ -252,7 +307,7 @@ function FormSubmitComponent({
           onClick={() => {
             startTransition(submitForm);
           }}
-          disabled={pending || isExpired}
+          disabled={pending || isExpired || isNotStarted}
         >
           {!pending && (
             <>

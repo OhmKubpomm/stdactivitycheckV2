@@ -3,7 +3,6 @@ import { auth } from "@/auth";
 import ActivityForm from "@/models/ActivityForm";
 import { formSchema, formSchemaType } from "@/schemas/form";
 import connectdatabase from "@/utils/connectdatabase";
-
 import { revalidatePath } from "next/cache";
 import User from "@/models/Usermodel";
 import Formsubs from "@/models/FormSubmissions";
@@ -34,152 +33,135 @@ interface IUser extends Document {
   provider: string;
 }
 
-export async function GetFormStats() {
-  const session = await auth();
-
-  const userId = session?.user?._id ?? null;
-  if (!userId) throw new Error("User not found");
-  const stats = await ActivityForm.aggregate([
-    { $match: { userId } },
-    {
-      $group: {
-        _id: null,
-        visits: { $sum: "$ActivityVisits" },
-        submissions: { $sum: "$ActivitySubmissions" },
-      },
-    },
-  ]);
-
-  const visits = stats[0]?.visits || 0;
-  const submissions = stats[0]?.submissions || 0;
-
-  let submissionRate = 0;
-
-  if (visits > 0) {
-    submissionRate = (submissions / visits) * 100;
-  }
-
-  const bounceRate = 100 - submissionRate;
-
-  return {
-    visits,
-    submissions,
-    submissionRate,
-    bounceRate,
-  };
-}
-
-// สร้างฟอร์มใหม่
-export async function CreateForm(data: formSchemaType) {
-  try {
-    // สมมติว่า formSchema.safeParse(data) เป็นฟังก์ชันที่ใช้สำหรับการตรวจสอบความถูกต้องของฟอร์ม และคืนค่าออบเจ็กต์ที่มีคุณสมบัติ success
-    // หากฟอร์มไม่ถูกต้อง ให้โยนข้อผิดพลาด
-    const validation = formSchema.safeParse(data);
-    if (!validation.success) {
-      throw new Error("ฟอร์มไม่ถูกต้อง");
-    }
-
-    // สมมติว่า currentUser() เป็นฟังก์ชันที่คืนค่าข้อมูลผู้ใช้งานปัจจุบัน
-    // หากไม่พบผู้ใช้งาน ให้โยนข้อผิดพลาด
-    const session = await auth();
-    if (!session) throw new Error("ไม่พบผู้ใช้งาน");
-
-    // แยกค่า name และ description จาก data
-    const { ActivityFormname, ActivityDescription } = data;
-
-    // สร้างออบเจ็กต์ฟอร์มใหม่ด้วยข้อมูลที่ให้มา
-    const newActivityForm = new ActivityForm({
-      userId: session?.user?._id, // สมมติว่า user.id เป็น ID ของผู้ใช้งาน
-      ActivityFormname,
-      ActivityDescription,
-    });
-
-    // บันทึกฟอร์มใหม่ลงใน MongoDB
-    await newActivityForm.save();
-
-    // สมมติว่า revalidatePath("/") เป็นฟังก์ชันที่ใช้ในการรีเฟรชหน้าหรือทำการอื่น ๆ
-    // นี่เป็นตัวอย่างเพื่อแสดงตัวอย่างการใช้งานหลังจากบันทึกฟอร์ม
-    revalidatePath("/");
-
-    // คืนค่าข้อมูลฟอร์มใหม่พร้อมแปลง _id เป็นสตริง
-    return {
-      ...newActivityForm._doc,
-      _id: newActivityForm._id.toString(),
-    };
-  } catch (Error) {
-    // คืนค่าข้อความของข้อผิดพลาด
-  }
-}
-
-// ดึงฟอร์มทั้งหมด
-export async function GetForms() {
+// ฟังก์ชันตรวจสอบสิทธิ์แอดมิน
+async function checkAdminPermission() {
   const session = await auth();
   if (!session) throw new Error("ไม่พบผู้ใช้งาน");
 
   const user = await User.findById(session?.user?._id);
   if (!user) throw new Error("ไม่พบผู้ใช้งาน");
 
-  // ตรวจสอบว่าเป็น admin หรือไม่
   if (user.role !== "admin") {
     throw new Error("คุณไม่มีสิทธิ์ในการเข้าถึงข้อมูลนี้");
   }
 
-  // ดึงและคืนค่าฟอร์มกิจกรรมทั้งหมด (ไม่กรองด้วย userId)
+  return user;
+}
+
+export async function GetFormStats() {
   try {
-    const activityForms = await ActivityForm.find()
-      .sort({ createdAt: -1 }) // เรียงจากใหม่ไปเก่า
-      .exec();
-    return activityForms;
+    await checkAdminPermission();
+
+    const stats = await ActivityForm.aggregate([
+      {
+        $group: {
+          _id: null,
+          visits: { $sum: "$ActivityVisits" },
+          submissions: { $sum: "$ActivitySubmissions" },
+        },
+      },
+    ]);
+
+    const visits = stats[0]?.visits || 0;
+    const submissions = stats[0]?.submissions || 0;
+
+    let submissionRate = 0;
+
+    if (visits > 0) {
+      submissionRate = (submissions / visits) * 100;
+    }
+
+    const bounceRate = 100 - submissionRate;
+
+    return {
+      visits,
+      submissions,
+      submissionRate,
+      bounceRate,
+    };
   } catch (error) {
-    console.error("ไม่สามารถค้นหาฟอร์มกิจกรรมได้:", error);
-    throw error;
+    console.error("เกิดข้อผิดพลาดในการดึงสถิติฟอร์ม:", error);
+    throw new Error("ไม่สามารถดึงสถิติฟอร์มได้");
   }
 }
 
-// ดึงฟอร์มตาม ID
-export async function GetFormById(id: Object) {
+export async function CreateForm(data: formSchemaType) {
   try {
-    const session = await auth();
-    if (!session) throw new Error("ไม่พบผู้ใช้งาน");
+    const user = await checkAdminPermission();
 
-    const user = await User.findById(session?.user?._id);
-    if (!user) throw new Error("ไม่พบผู้ใช้งาน");
-
-    // ตรวจสอบว่าเป็น admin หรือไม่
-    if (user.role !== "admin") {
-      throw new Error("คุณไม่มีสิทธิ์ในการเข้าถึงข้อมูลนี้");
+    const validation = formSchema.safeParse(data);
+    if (!validation.success) {
+      throw new Error("ข้อมูลฟอร์มไม่ถูกต้อง");
     }
 
-    // ดึงฟอร์มตาม ID โดยไม่สนใจว่าใครเป็นผู้สร้าง
+    const { ActivityFormname, ActivityDescription } = data;
+
+    const newActivityForm = new ActivityForm({
+      userId: user._id,
+      ActivityFormname,
+      ActivityDescription,
+    });
+
+    await newActivityForm.save();
+
+    revalidatePath("/");
+
+    return {
+      ...newActivityForm._doc,
+      _id: newActivityForm._id.toString(),
+    };
+  } catch (error) {
+    console.error("เกิดข้อผิดพลาดในการสร้างฟอร์ม:", error);
+    throw new Error("ไม่สามารถสร้างฟอร์มได้");
+  }
+}
+
+export async function GetForms() {
+  try {
+    await checkAdminPermission();
+
+    const activityForms = await ActivityForm.find()
+      .sort({ createdAt: -1 })
+      .exec();
+    return activityForms;
+  } catch (error) {
+    console.error("เกิดข้อผิดพลาดในการดึงฟอร์มทั้งหมด:", error);
+    throw new Error("ไม่สามารถดึงฟอร์มทั้งหมดได้");
+  }
+}
+
+export async function GetFormById(id: Object) {
+  try {
+    await checkAdminPermission();
+
     const form = await ActivityForm.findById(id);
     if (!form) throw new Error("ไม่พบฟอร์มกิจกรรม");
 
     return { ...form._doc, _id: form._doc._id.toString() };
   } catch (error) {
-    console.error("ไม่สามารถค้นหาฟอร์มกิจกรรมได้:", error);
-    throw error;
+    console.error("เกิดข้อผิดพลาดในการดึงฟอร์มตาม ID:", error);
+    throw new Error("ไม่สามารถดึงฟอร์มตาม ID ได้");
   }
 }
 
-// Update form content
 export async function UpdateFormContent(id: number, jsonContent: string) {
   try {
-    const session = await auth();
-    const user = await User.findById(session?.user?._id);
-    if (!session) throw new Error("User not found");
+    await checkAdminPermission();
 
     const updateData: any = { ActivityContent: jsonContent };
 
     const updatedForm = await ActivityForm.findOneAndUpdate(
-      { _id: id, userId: user._id },
+      { _id: id },
       updateData,
       { new: true }
     );
 
+    if (!updatedForm) throw new Error("ไม่พบฟอร์มที่ต้องการอัปเดต");
+
     return { ...updatedForm._doc, _id: updatedForm._doc._id.toString() };
   } catch (error) {
-    console.error("Failed to find activity forms:", error);
-    throw error;
+    console.error("เกิดข้อผิดพลาดในการอัปเดตเนื้อหาฟอร์ม:", error);
+    throw new Error("ไม่สามารถอัปเดตเนื้อหาฟอร์มได้");
   }
 }
 
@@ -190,9 +172,7 @@ export async function PublishForm(
   activityType: string
 ) {
   try {
-    const session = await auth();
-    const user = await User.findById(session?.user?._id);
-    if (!session) throw new Error("User not found");
+    await checkAdminPermission();
 
     const updateData = {
       published: true,
@@ -201,54 +181,51 @@ export async function PublishForm(
       ActivityType: activityType,
     };
 
-    console.log(updateData);
-
     const updatedForm = await ActivityForm.findOneAndUpdate(
-      { _id: id, userId: user._id },
+      { _id: id },
       updateData,
       { new: true }
     );
 
+    if (!updatedForm) throw new Error("ไม่พบฟอร์มที่ต้องการเผยแพร่");
+
     return { ...updatedForm._doc, _id: updatedForm._doc._id.toString() };
   } catch (error) {
-    console.error("Failed to update activity form:", error);
-    throw error;
+    console.error("เกิดข้อผิดพลาดในการเผยแพร่ฟอร์ม:", error);
+    throw new Error("ไม่สามารถเผยแพร่ฟอร์มได้");
   }
 }
 
 export async function GetFormContentByUrl(formUrl: string) {
   try {
-    // ดึงข้อมูล `endTime` และ `ActivityContent` จากฐานข้อมูล
     const form = await ActivityForm.findOneAndUpdate(
-      { ActivityShareurl: formUrl }, // Match document by shared URL
-      { $inc: { ActivityVisits: 1 } }, // Increment visits counter
-      { new: true } // Return updated document
+      { ActivityShareurl: formUrl },
+      { $inc: { ActivityVisits: 1 } },
+      { new: true }
     );
 
-    // ตรวจสอบว่ามีฟอร์มหรือไม่
     if (!form) {
-      console.error("No form found with the given URL:", formUrl);
-      return { ActivityContent: null, endTime: null }; // ส่งกลับ endTime เป็น null
+      throw new Error("ไม่พบฟอร์มที่ต้องการ");
     }
 
-    // ส่ง `ActivityContent` และ `endTime` กลับไป
     return {
       ActivityContent: form.ActivityContent,
-      endTime: form.endTime, // ดึง `endTime` มาจากฐานข้อมูล
+      startTime: form.startTime,
+      endTime: form.endTime,
     };
   } catch (error) {
-    console.error("Error updating form visits:", error);
-    throw error;
+    console.error("เกิดข้อผิดพลาดในการดึงเนื้อหาฟอร์มตาม URL:", error);
+    throw new Error("ไม่สามารถดึงเนื้อหาฟอร์มตาม URL ได้");
   }
 }
 
 export async function SubmitForm(formUrl: string, content: string) {
   try {
     const session = await auth();
-    if (!session) throw new Error("User not found");
+    if (!session) throw new Error("ไม่พบผู้ใช้งาน");
 
     const user = await User.findById(session?.user?._id);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error("ไม่พบผู้ใช้งาน");
 
     const form = await ActivityForm.findOne({
       ActivityShareurl: formUrl,
@@ -256,34 +233,27 @@ export async function SubmitForm(formUrl: string, content: string) {
     });
 
     if (!form) {
-      throw new Error("Form not found");
+      throw new Error("ไม่พบฟอร์มที่ต้องการส่ง");
     }
 
-    // Check if ActivitySubmissions is a valid number
     if (isNaN(form.ActivitySubmissions)) {
       form.ActivitySubmissions = 0;
     }
 
-    // Increment submissions count
     form.ActivitySubmissions += 1;
 
-    // สร้าง submission ใหม่
     const formSubmission = new Formsubs({
       Formsubcontent: content,
       formId: form._id,
       userId: user._id,
     });
 
-    // บันทึก submission ใหม่
     await formSubmission.save();
-
-    // บันทึกการเปลี่ยนแปลงฟอร์ม
     await form.save();
 
-    // อัปเดตจำนวนกิจกรรมที่ user เข้าร่วม
     if (!user.activitiesParticipated.includes(form._id)) {
       user.activitiesParticipated.push(form._id);
-      await user.save(); // บันทึกการเปลี่ยนแปลงของ user
+      await user.save();
     }
 
     return {
@@ -293,101 +263,81 @@ export async function SubmitForm(formUrl: string, content: string) {
       formId: formSubmission.formId.toString(),
     };
   } catch (error) {
-    console.error("Error submitting form:", error);
-    throw error;
+    console.error("เกิดข้อผิดพลาดในการส่งฟอร์ม:", error);
+    throw new Error("ไม่สามารถส่งฟอร์มได้");
   }
 }
 
 export async function GetFormWithSubmissions(id: number) {
-  const session = await auth();
-  if (!session) throw new Error("ไม่พบผู้ใช้งาน");
+  try {
+    await checkAdminPermission();
 
-  const user = await User.findById(session?.user?._id);
-  if (!user) throw new Error("ไม่พบผู้ใช้งาน");
+    const form = await ActivityForm.findOne({ _id: id }).lean();
+    if (!form) {
+      throw new Error("ไม่พบฟอร์มที่ต้องการ");
+    }
 
-  // ตรวจสอบว่าเป็น admin หรือไม่
-  if (user.role !== "admin") {
-    throw new Error("คุณไม่มีสิทธิ์ในการเข้าถึงข้อมูลนี้");
+    const submissions = (await Formsubs.find({
+      formId: form._id,
+    }).lean()) as FormSubmission[];
+
+    const submissionsWithUserNames = await Promise.all(
+      submissions.map(async (submission) => {
+        const user = (await User.findById(submission.userId).lean()) as IUser;
+        return {
+          ...submission,
+          userSendName: user?.name || "ไม่ทราบชื่อผู้ใช้",
+        };
+      })
+    );
+
+    form.FormSubmissions = submissionsWithUserNames;
+
+    return { ...form };
+  } catch (error) {
+    console.error("เกิดข้อผิดพลาดในการดึงฟอร์มพร้อมการส่ง:", error);
+    throw new Error("ไม่สามารถดึงฟอร์มพร้อมการส่งได้");
   }
-
-  // ดึงฟอร์มตาม ID โดยไม่กรองด้วย userId
-  const form = await ActivityForm.findOne({ _id: id }).lean();
-  if (!form) {
-    return null;
-  }
-
-  // ดึง submission ทั้งหมดที่เกี่ยวข้องกับฟอร์มนั้น
-  const submissions = (await Formsubs.find({
-    formId: form._id,
-  }).lean()) as FormSubmission[];
-
-  // ดึงชื่อผู้ใช้สำหรับแต่ละ submission
-  const submissionsWithUserNames = await Promise.all(
-    submissions.map(async (submission) => {
-      const user = (await User.findById(submission.userId).lean()) as IUser;
-      return {
-        ...submission,
-        userSendName: user?.name || "Unknown User",
-      };
-    })
-  );
-
-  form.FormSubmissions = submissionsWithUserNames;
-
-  return { ...form };
 }
 
-// ลบฟอร์ม
 export async function DeleteForm(id: number) {
   try {
-    const session = await auth();
-    const user = await User.findById(session?.user?._id);
-    if (!session) throw new Error("User not found");
+    await checkAdminPermission();
 
-    const deletedForm = await ActivityForm.findOneAndDelete({
-      _id: id,
-      userId: user._id,
-    });
+    const deletedForm = await ActivityForm.findOneAndDelete({ _id: id });
+
+    if (!deletedForm) throw new Error("ไม่พบฟอร์มที่ต้องการลบ");
 
     return { ...deletedForm._doc, _id: deletedForm._doc._id.toString() };
   } catch (error) {
-    console.error("Failed to find activity forms:", error);
-    throw error;
+    console.error("เกิดข้อผิดพลาดในการลบฟอร์ม:", error);
+    throw new Error("ไม่สามารถลบฟอร์มได้");
   }
 }
 
-// โคลนDASHBOARD
 export async function CloneForm(formData: FormData) {
   try {
-    const session = await auth();
-    const user = await User.findById(session?.user?._id);
-    if (!session) throw new Error("User not found");
+    const user = await checkAdminPermission();
 
     const formId = formData.get("formId");
-    if (!formId) throw new Error("Form ID is required");
+    if (!formId) throw new Error("ไม่พบ ID ของฟอร์ม");
 
-    // Find the original form
-    const originalForm = await ActivityForm.findOne({
-      _id: formId,
-      userId: user._id,
-    });
-    if (!originalForm) throw new Error("Form not found");
+    const originalForm = await ActivityForm.findOne({ _id: formId });
+    if (!originalForm) throw new Error("ไม่พบฟอร์มต้นฉบับ");
 
-    // Create a new form object with the same data as the original
     const clonedForm = new ActivityForm({
       userId: user._id,
-      ActivityFormname: `${originalForm.ActivityFormname} (Clone)`,
+      ActivityFormname: `${originalForm.ActivityFormname} (สำเนา)`,
       ActivityDescription: originalForm.ActivityDescription,
       ActivityContent: originalForm.ActivityContent,
       ActivityType: originalForm.ActivityType,
-      published: false, // Set to false as it's a new draft
+      published: false,
       ActivityVisits: 0,
       ActivitySubmissions: 0,
       startTime: originalForm.startTime,
       endTime: originalForm.endTime,
     });
 
-    // Save the cloned form
     await clonedForm.save();
 
     revalidatePath("/");
@@ -397,7 +347,7 @@ export async function CloneForm(formData: FormData) {
       _id: clonedForm._id.toString(),
     };
   } catch (error) {
-    console.error("Failed to clone form:", error);
-    throw error;
+    console.error("เกิดข้อผิดพลาดในการโคลนฟอร์ม:", error);
+    throw new Error("ไม่สามารถโคลนฟอร์มได้");
   }
 }

@@ -13,10 +13,6 @@ async function SubmitPage({
   // ดึงข้อมูลฟอร์มจาก API
   const form = await GetFormContentByUrl(params.formUrl);
 
-  if (!form || !form.ActivityContent) {
-    throw new Error("form not found");
-  }
-
   // แปลง JSON ที่เก็บอยู่ใน `ActivityContent` ให้เป็น JavaScript Object
   const formContent = JSON.parse(form.ActivityContent) as FormElementInstance[];
 
@@ -24,13 +20,16 @@ async function SubmitPage({
   const endTime = form.endTime
     ? new Date(form.endTime).toISOString()
     : undefined;
-
+  const startTime = form.startTime
+    ? new Date(form.startTime).toISOString()
+    : undefined;
   // ส่งข้อมูลไปยังคอมโพเนนต์
   return (
     <FormSubmitComponent
       formUrl={params.formUrl}
       content={formContent}
-      endTime={endTime} // ส่ง `endTime` ไปยัง FormSubmitComponent
+      endTime={endTime}
+      startTime={startTime}
     />
   );
 }
