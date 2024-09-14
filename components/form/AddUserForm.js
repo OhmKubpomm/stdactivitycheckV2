@@ -100,7 +100,6 @@ const AddUserForm = () => {
       Telephone,
       image: imageUrls,
     });
-    console.log(res);
 
     if (res?.msg) {
       message.success(res?.msg);

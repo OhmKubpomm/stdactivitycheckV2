@@ -19,6 +19,11 @@ import { Users, Menu, ChevronLast, AlignJustify, Home } from "lucide-react";
 const menus = [
   { name: "หน้าหลัก", icon: Home, link: "/dashboard/cruduser/Dashboard" },
   { name: "ข้อมูลกิจกรรม", icon: Users, link: "/dashboard/cruduser/Dashboard" },
+  {
+    name: "ข้อเสนอแนะกิจกรรม",
+    icon: Users,
+    link: "/dashboard/crudfeedback",
+  },
 ];
 
 const Usernavbar = () => {

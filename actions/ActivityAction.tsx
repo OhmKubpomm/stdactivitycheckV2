@@ -18,6 +18,15 @@ interface FormSubmission extends Document {
   Formsubcontent: string;
 }
 
+// Interface สำหรับ Activity
+export interface Activity {
+  _id: string;
+  ActivityFormname: string;
+  ActivityDescription?: string;
+  ActivityType?: string;
+  startTime?: Date;
+  endTime?: Date;
+}
 // Interface สำหรับ User
 interface IUser extends Document {
   name: string;

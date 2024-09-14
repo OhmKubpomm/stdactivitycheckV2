@@ -28,6 +28,7 @@ import {
   Star,
   QrCode,
   CheckCircle,
+  Link as LinkIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -241,21 +242,43 @@ const Userdashboard = () => {
                   <DialogTrigger asChild>
                     <Button className="bg-gray-600 text-white hover:bg-gray-700">
                       <QrCode className="mr-2 size-4" />
-                      QR Code
+                      เข้าร่วมกิจกรรม
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="flex flex-col items-center rounded-lg bg-white p-6 shadow-md">
+                  <DialogContent className="flex flex-col items-center rounded-lg bg-white p-6 shadow-md sm:max-w-md">
                     <DialogTitle className="mb-4 text-xl font-bold text-gray-800">
-                      QR Code สำหรับกิจกรรม
+                      เข้าร่วมกิจกรรม: {activity.name}
                     </DialogTitle>
-                    <QRCode
-                      value={shareLink}
-                      size={200}
-                      className="rounded-lg"
-                    />
-                    <DialogDescription className="mt-4 text-gray-600">
-                      แสกนเพื่อเข้าร่วมกิจกรรมนี้
-                    </DialogDescription>
+                    <div className="flex w-full flex-col items-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
+                      <div className="flex flex-col items-center">
+                        <QRCode
+                          value={shareLink}
+                          size={150}
+                          className="rounded-lg"
+                        />
+                        <DialogDescription className="mt-2 text-center text-sm text-gray-600">
+                          แสกนเพื่อเข้าร่วมกิจกรรมนี้
+                        </DialogDescription>
+                      </div>
+                      <div className="flex flex-col items-center space-y-2">
+                        <Button
+                          className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                          onClick={() => window.open(shareLink, "_blank")}
+                        >
+                          <LinkIcon className="mr-2 size-4" />
+                          เปิดลิงก์เข้าร่วม
+                        </Button>
+                        <Button
+                          className="w-full"
+                          variant="outline"
+                          onClick={() =>
+                            navigator.clipboard.writeText(shareLink)
+                          }
+                        >
+                          คัดลอกลิงก์
+                        </Button>
+                      </div>
+                    </div>
                   </DialogContent>
                 </Dialog>
               </motion.div>
@@ -398,21 +421,50 @@ const Userdashboard = () => {
                               <DialogTrigger asChild>
                                 <Button className="mt-2 bg-gray-600 text-white hover:bg-gray-700">
                                   <QrCode className="mr-2 size-4" />
-                                  QR Code
+                                  เข้าร่วมกิจกรรม
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent className="flex flex-col items-center rounded-lg bg-white p-6 shadow-md">
+                              <DialogContent className="flex flex-col items-center rounded-lg bg-white p-6 shadow-md sm:max-w-md">
                                 <DialogTitle className="mb-4 text-xl font-bold text-gray-800">
-                                  QR Code สำหรับกิจกรรม
+                                  เข้าร่วมกิจกรรม: {activity.name}
                                 </DialogTitle>
-                                <QRCode
-                                  value={`${window.location.origin}/submit/${activity.shareUrl}`}
-                                  size={200}
-                                  className="rounded-lg"
-                                />
-                                <DialogDescription className="mt-4 text-gray-600">
-                                  แสกนเพื่อเข้าร่วมกิจกรรมนี้
-                                </DialogDescription>
+                                <div className="flex w-full flex-col items-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
+                                  <div className="flex flex-col items-center">
+                                    <QRCode
+                                      value={`${window.location.origin}/submit/${activity.shareUrl}`}
+                                      size={150}
+                                      className="rounded-lg"
+                                    />
+                                    <DialogDescription className="mt-2 text-center text-sm text-gray-600">
+                                      แสกนเพื่อเข้าร่วมกิจกรรมนี้
+                                    </DialogDescription>
+                                  </div>
+                                  <div className="flex flex-col items-center space-y-2">
+                                    <Button
+                                      className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                                      onClick={() =>
+                                        window.open(
+                                          `${window.location.origin}/submit/${activity.shareUrl}`,
+                                          "_blank"
+                                        )
+                                      }
+                                    >
+                                      <LinkIcon className="mr-2 size-4" />
+                                      เปิดลิงก์เข้าร่วม
+                                    </Button>
+                                    <Button
+                                      className="w-full"
+                                      variant="outline"
+                                      onClick={() =>
+                                        navigator.clipboard.writeText(
+                                          `${window.location.origin}/submit/${activity.shareUrl}`
+                                        )
+                                      }
+                                    >
+                                      คัดลอกลิงก์
+                                    </Button>
+                                  </div>
+                                </div>
                               </DialogContent>
                             </Dialog>
                           </motion.div>
@@ -518,21 +570,50 @@ const Userdashboard = () => {
                               <DialogTrigger asChild>
                                 <Button className="mt-2 bg-gray-600 text-white hover:bg-gray-700">
                                   <QrCode className="mr-2 size-4" />
-                                  QR Code
+                                  เข้าร่วมกิจกรรม
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent className="flex flex-col items-center rounded-lg bg-white p-6 shadow-md">
+                              <DialogContent className="flex flex-col items-center rounded-lg bg-white p-6 shadow-md sm:max-w-md">
                                 <DialogTitle className="mb-4 text-xl font-bold text-gray-800">
-                                  QR Code สำหรับกิจกรรม
+                                  เข้าร่วมกิจกรรม: {selectedActivity.name}
                                 </DialogTitle>
-                                <QRCode
-                                  value={`${window.location.origin}/submit/${selectedActivity.shareUrl}`}
-                                  size={200}
-                                  className="rounded-lg"
-                                />
-                                <DialogDescription className="mt-4 text-gray-600">
-                                  แสกนเพื่อเข้าร่วมกิจกรรมนี้
-                                </DialogDescription>
+                                <div className="flex w-full flex-col items-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
+                                  <div className="flex flex-col items-center">
+                                    <QRCode
+                                      value={`${window.location.origin}/submit/${selectedActivity.shareUrl}`}
+                                      size={150}
+                                      className="rounded-lg"
+                                    />
+                                    <DialogDescription className="mt-2 text-center text-sm text-gray-600">
+                                      แสกนเพื่อเข้าร่วมกิจกรรมนี้
+                                    </DialogDescription>
+                                  </div>
+                                  <div className="flex flex-col items-center space-y-2">
+                                    <Button
+                                      className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                                      onClick={() =>
+                                        window.open(
+                                          `${window.location.origin}/submit/${selectedActivity.shareUrl}`,
+                                          "_blank"
+                                        )
+                                      }
+                                    >
+                                      <LinkIcon className="mr-2 size-4" />
+                                      เปิดลิงก์เข้าร่วม
+                                    </Button>
+                                    <Button
+                                      className="w-full"
+                                      variant="outline"
+                                      onClick={() =>
+                                        navigator.clipboard.writeText(
+                                          `${window.location.origin}/submit/${selectedActivity.shareUrl}`
+                                        )
+                                      }
+                                    >
+                                      คัดลอกลิงก์
+                                    </Button>
+                                  </div>
+                                </div>
                               </DialogContent>
                             </Dialog>
                           </motion.div>
@@ -672,7 +753,7 @@ const Userdashboard = () => {
             <Card className="border-none bg-white shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-xl text-gray-800 sm:text-2xl">
-                  กิจกรรมที่เหลือ
+                  กิจกรรมที่ยังไม่ดำเนินการ
                 </CardTitle>
                 <Dialog
                   open={showAllRemaining}
@@ -688,7 +769,7 @@ const Userdashboard = () => {
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="w-full max-w-lg sm:max-w-2xl lg:max-w-4xl">
-                    <DialogTitle>กิจกรรมที่เหลือทั้งหมด</DialogTitle>
+                    <DialogTitle>กิจกรรมที่ยังไม่ดำเนินการทั้งหมด</DialogTitle>
                     <DialogDescription>
                       รายการกิจกรรมทั้งหมดที่คุณยังไม่ได้เข้าร่วม
                     </DialogDescription>

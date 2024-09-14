@@ -38,7 +38,7 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
 
   async function handleForgotPassword(formData: any) {
     const email = formData.get("email");
-    console.log({ email });
+
     const res = await forgotPasswordWithCredentials({ email });
     if (res?.msg) {
       message.success(res?.msg);
