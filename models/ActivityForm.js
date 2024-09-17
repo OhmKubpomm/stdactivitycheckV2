@@ -38,6 +38,9 @@ const ActivityFormSchema = new mongoose.Schema(
     FormSubmissions: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Formsubs" },
     ],
+    ActivityLocation: {
+      type: String,
+    },
     startTime: {
       type: Date,
     },

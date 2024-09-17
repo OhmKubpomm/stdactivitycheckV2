@@ -1,3 +1,4 @@
+/* eslint-disable tailwindcss/no-custom-classname */
 "use client";
 
 import { PublishForm } from "@/actions/ActivityAction";
@@ -20,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -36,10 +38,11 @@ function PublishFormBtn({ id }: { id: number }) {
   const [activityType, setActivityType] = useState<string>("");
   const [startTime, setStartTime] = useState<Date>();
   const [endTime, setEndTime] = useState<Date>();
+  const [activityLocation, setActivityLocation] = useState<string>("");
 
   async function publishForm() {
     try {
-      if (!startTime || !endTime || !activityType) {
+      if (!startTime || !endTime || !activityType || !activityLocation) {
         toast({
           title: "ข้อมูลไม่ครบถ้วน",
           description: "กรุณากรอกข้อมูลให้ครบทุกช่อง",
@@ -52,7 +55,8 @@ function PublishFormBtn({ id }: { id: number }) {
         id,
         startTime.toISOString(),
         endTime.toISOString(),
-        activityType
+        activityType,
+        activityLocation
       );
       toast({
         title: "สำเร็จ",
@@ -250,6 +254,15 @@ function PublishFormBtn({ id }: { id: number }) {
               </div>
             </RadioGroup>
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="activityLocation">สถานที่จัดกิจกรรม</Label>
+            <Input
+              id="activityLocation"
+              placeholder="ระบุสถานที่จัดกิจกรรม"
+              value={activityLocation}
+              onChange={(e) => setActivityLocation(e.target.value)}
+            />
+          </div>
           <DateTimePicker
             value={startTime}
             onChange={setStartTime}
@@ -264,7 +277,13 @@ function PublishFormBtn({ id }: { id: number }) {
         <AlertDialogFooter>
           <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
           <AlertDialogAction
-            disabled={loading || !activityType || !startTime || !endTime}
+            disabled={
+              loading ||
+              !activityType ||
+              !startTime ||
+              !endTime ||
+              !activityLocation
+            }
             onClick={(e) => {
               e.preventDefault();
               startTransition(publishForm);

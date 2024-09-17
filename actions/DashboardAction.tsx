@@ -23,6 +23,7 @@ interface ActivityType {
   ActivityVisits: number;
   ActivityType: string;
   ActivityShareurl: string;
+  ActivityLocation: string;
 }
 
 interface MapType {
@@ -112,7 +113,7 @@ export async function getDashboardData(): Promise<DashboardDataType> {
           visits: activity.ActivityVisits,
           type: activity.ActivityType,
           shareUrl: activity.ActivityShareurl,
-          location: activityMap ? activityMap.MapAddress : "ไม่ระบุสถานที่",
+          location: activity.ActivityLocation,
           time: `${formatThaiTime(activity.startTime)} - ${formatThaiTime(
             activity.endTime
           )}`,

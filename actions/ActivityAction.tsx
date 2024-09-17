@@ -178,7 +178,8 @@ export async function PublishForm(
   id: number,
   startTime: string,
   endTime: string,
-  activityType: string
+  activityType: string,
+  activityLocation: string
 ) {
   try {
     await checkAdminPermission();
@@ -188,6 +189,7 @@ export async function PublishForm(
       startTime: new Date(startTime),
       endTime: new Date(endTime),
       ActivityType: activityType,
+      ActivityLocation: activityLocation,
     };
 
     const updatedForm = await ActivityForm.findOneAndUpdate(
