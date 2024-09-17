@@ -4,12 +4,10 @@ const FeedbackSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
   },
   activityId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "ActivityForms",
-    required: true,
   },
   rating: {
     type: Number,

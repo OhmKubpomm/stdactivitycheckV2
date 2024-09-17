@@ -20,9 +20,9 @@ const menus = [
   { name: "หน้าหลัก", icon: Home, link: "/dashboard/cruduser/Dashboard" },
   { name: "ข้อมูลกิจกรรม", icon: Users, link: "/dashboard/cruduser/Dashboard" },
   {
-    name: "ข้อเสนอแนะกิจกรรม",
+    name: "ทำแบบสอบถามกิจกรรม",
     icon: Users,
-    link: "/dashboard/crudfeedback",
+    link: "/dashboard/crudfeedback/AddFeedback",
   },
 ];
 

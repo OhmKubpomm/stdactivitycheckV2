@@ -1,25 +1,27 @@
 import React from "react";
-import { FeedbackForm } from "@/components/form/FeedbackForm";
+import { getFeedbacks } from "@/actions/feedbackActions";
 
-import { getDashboardData } from "@/actions/DashboardAction";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-export default async function NewFeedbackPage() {
-  const { activities = [] } = await getDashboardData();
-  // ตรวจสอบว่า activities เป็น array หรือไม่
-  const validActivities = Array.isArray(activities) ? activities : [];
-  return (
-    <div className="container mx-auto py-10">
-      <Card className="mx-auto max-w-md">
-        <CardHeader>
-          <CardTitle className="text-center text-2xl font-bold">
-            เพิ่มข้อเสนอแนะสำหรับกิจกรรม
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <FeedbackForm activities={validActivities} />
-        </CardContent>
-      </Card>
-    </div>
-  );
+import { FeedbackList } from "@/components/profile/FeedbackList";
+interface SearchParams {
+  page?: string;
+  limit?: string;
 }
+
+const FeedbackPage = async ({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) => {
+  const { feedbacks, count, totalPage } = await getFeedbacks(searchParams);
+
+  return (
+    <FeedbackList
+      feedbacks={feedbacks}
+      itemsPerPage={10}
+      totalCount={count}
+      totalPage={totalPage}
+    />
+  );
+};
+
+export default FeedbackPage;
