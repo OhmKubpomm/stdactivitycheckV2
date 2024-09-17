@@ -69,7 +69,7 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                     className="to-primary-gradient gap-1 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-500 via-teal-500 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl"
                     animate={{ scale: [1, 1.05, 1] }}
                   >
-                    Welcome!
+                    ยินดีต้อนรับ!
                   </motion.h2>
 
                   <Image
@@ -99,12 +99,12 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                       style={{ margin: 10 }}
                       className="text-gray-500 dark:text-gray-300"
                     >
-                      Login
+                      เข้าสู่ระบบ
                     </Typography.Title>
                   </div>
 
                   <p className="mt-3 text-gray-500 dark:text-gray-300">
-                    Need an account? <Link href="/signup">Register</Link>
+                    ต้องการสมัครสมาชิก? <Link href="/signup">สมัครสมาชิก</Link>
                   </p>
                 </div>
                 {/* sign in with email-pass */}
@@ -115,7 +115,7 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                   >
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
-                        Email Address
+                        อีเมลล์
                       </label>
                       <Tooltip
                         title="Use you previous register email"
@@ -123,7 +123,7 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                       >
                         <Input
                           size="large"
-                          placeholder=" Enter your email"
+                          placeholder="ใส่อีเมลล์ของคุณ"
                           prefix={
                             <MailOutlined className="site-form-item-icon" />
                           }
@@ -136,7 +136,7 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
-                        Password
+                        รหัสผ่าน
                       </label>
                       <Tooltip
                         title="Use a mix of letters, numbers, and symbols to create a hard-to-crack password."
@@ -144,7 +144,7 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                       >
                         <Input.Password
                           size="large"
-                          placeholder="Enter your password"
+                          placeholder="ใส่รหัสผ่าน"
                           prefix={
                             <LockOutlined className="site-form-item-icon" />
                           }
@@ -160,7 +160,7 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                     {/* forgot password */}
 
                     <Modal
-                      title="Forgot Password"
+                      title="กรอกอีเมลของคุณเพื่อรับลิงก์รีเซ็ตรหัสผ่าน"
                       open={isModalVisible}
                       onCancel={() => setIsModalVisible(false)}
                       footer={null}
@@ -168,15 +168,15 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                       <Form action={handleForgotPassword}>
                         <div className="mb-4">
                           <label className="mb-1 block text-sm text-gray-600 dark:text-gray-200">
-                            Email Address
+                            อีเมลล์
                           </label>
                           <Tooltip
-                            title="Use you previous register email"
+                            title="โปรดใช้อีเมลล์ที่สมัคร"
                             placement="right"
                           >
                             <Input
                               size="large"
-                              placeholder="Enter your email"
+                              placeholder="ใส่อีเมลล์ของคุณ"
                               prefix={
                                 <MailOutlined className="site-form-item-icon" />
                               }
@@ -194,7 +194,7 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                         >
                           <ButtonLoad
                             htmlType={undefined}
-                            value="Submit"
+                            value="ยืนยัน"
                             className="w-full rounded-lg bg-blue-500 px-4 py-2 tracking-wide text-white transition-colors duration-300 hover:bg-blue-400 focus:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-50"
                           />
                         </motion.div>
@@ -206,7 +206,7 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                       style={{ textAlign: "right", cursor: "pointer" }}
                     >
                       <Text onClick={() => setIsModalVisible(true)}>
-                        Forgot Password?
+                        ลืมรหัสผ่าน?
                       </Text>
                     </Text>
 
@@ -220,7 +220,7 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                         value="Login"
                         className="w-full rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                       >
-                        Login
+                        เข้าสู่ระบบ
                       </ButtonLoad>
                     </motion.div>
                   </Form>
@@ -230,7 +230,7 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                     <span className="w-1/5 border-b dark:border-gray-600 md:w-1/4"></span>
 
                     <p className="text-xs uppercase text-gray-500 hover:underline dark:text-gray-400">
-                      or sign in with
+                      หรือเข้าสู่ระบบโดย
                     </p>
 
                     <span className="w-1/5 border-b dark:border-gray-600 md:w-1/4"></span>
@@ -240,7 +240,7 @@ const SignIn = ({ callbackUrl }: { callbackUrl: string }) => {
                   <ButtonLoad
                     htmlType={undefined}
                     icon={<GoogleOutlined />}
-                    value="Login with Google"
+                    value="เข้าสู่ระบบโดย Google"
                     variant="contained"
                     onClick={() => signIn("google", { callbackUrl })}
                     className="mt-4 inline-flex w-full items-center justify-center rounded bg-white px-4 py-2 font-bold text-black shadow-md transition hover:scale-105 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"

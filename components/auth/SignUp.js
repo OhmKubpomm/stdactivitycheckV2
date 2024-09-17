@@ -31,10 +31,10 @@ const SignUp = () => {
   const { Text } = Typography;
 
   const requirements = [
-    { re: /[0-9]/, label: "Includes number" },
-    { re: /[a-z]/, label: "Includes lowercase letter" },
-    { re: /[A-Z]/, label: "Includes uppercase letter" },
-    { re: /[$&+,:;=?@#|'<>.^*()%!-]/, label: "Includes special symbol" },
+    { re: /[0-9]/, label: "รวมตัวเลข" },
+    { re: /[a-z]/, label: "รวมตัวอักษรพิมพ์เล็ก" },
+    { re: /[A-Z]/, label: "รวมตัวอักษรพิมพ์ใหญ่" },
+    { re: /[$&+,:;=?@#|'<>.^*()%!-]/, label: "รวมสัญลักษณ์พิเศษ" },
   ];
 
   function getStrength(password) {
@@ -164,7 +164,7 @@ const SignUp = () => {
                     <Tooltip title="Use a mix of letters, numbers and symbols to create a hard-to-crack password.">
                       <Input.Password
                         size="large"
-                        placeholder="Enter your password"
+                        placeholder="กรุณาใส่รหัสผ่าน"
                         prefix={
                           <LockOutlined className="site-form-item-icon" />
                         }
@@ -193,7 +193,7 @@ const SignUp = () => {
                           <CloseCircleOutlined style={{ color: "red" }} />
                         )}
                         <Text className="ml-2 text-sm text-gray-600 dark:text-gray-200">
-                          Has at least 6 characters
+                          มีอย่างน้อย 6 ตัวอักษร
                         </Text>
                       </List.Item>
                       {checks}

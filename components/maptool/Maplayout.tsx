@@ -100,7 +100,7 @@ export default function MapLayout({
       import("leaflet").then((L) => {
         setCustomIcon(
           L.icon({
-            iconUrl: "/icon/map-marker.svg",
+            iconUrl: "/Icon/map-marker.svg",
             iconSize: [30, 30],
             iconAnchor: [15, 30],
             popupAnchor: [0, -30],

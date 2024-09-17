@@ -18,9 +18,6 @@ import {
   Users,
   CalendarDays,
   Map,
-  Search,
-  BarChart,
-  FolderClosed,
   Menu,
   ChevronLast,
   Activity,
@@ -29,7 +26,7 @@ import {
 } from "lucide-react";
 
 const menus = [
-  { name: "หน้าหลัก", icon: Home, link: "/dashboard" },
+  { name: "หน้าหลัก", icon: Home, link: "/dashboard/cruduser" },
   { name: "จัดการข้อมูลผู้ใช้งาน", icon: Users, link: "/dashboard/cruduser" },
   {
     name: "จัดการข้อมูลกิจกรรมนักศึกษา",
@@ -42,9 +39,6 @@ const menus = [
     icon: CalendarDays,
     link: "/dashboard/crudfeedback",
   },
-  { name: "ค้นหา", icon: Search, link: "/dashboard/search" },
-  { name: "วิเคราะห์", icon: BarChart, link: "/dashboard/analytics" },
-  { name: "ไฟล์", icon: FolderClosed, link: "/dashboard/files" },
 ];
 
 const AdminNavbar = () => {

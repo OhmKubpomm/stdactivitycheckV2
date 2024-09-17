@@ -43,7 +43,6 @@ const extraAttributes = {
   label: "ฟิลด์วันที่",
   helperText: "เลือกเวลา",
   required: false,
-  endTime: undefined as Date | undefined, // เพิ่มตัวแปรสำหรับกำหนดเวลาหมดอายุ
 };
 
 const propertiesSchema = z.object({
@@ -165,7 +164,7 @@ function FormComponent({
   }
 
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="flex w-full flex-col gap-2 bg-background p-0">
       <Label className={cn(error && "text-red-500")}>
         {label}
         {required && "*"}
@@ -181,10 +180,10 @@ function FormComponent({
             )}
           >
             <CalendarDays className="mr-2 size-4" />
-            {date ? format(date, "PPP") : <span>Pick a date</span>}
+            {date ? format(date, "PPP") : <span>เลือกวันที่</span>}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto bg-background  p-0" align="start">
           <Calendar
             mode="single"
             selected={date}
@@ -240,14 +239,13 @@ function PropertiesComponent({
   }, [element, form]);
 
   function applyChanges(values: propertiesFormSchemaType) {
-    const { label, helperText, required, endTime } = values;
+    const { label, helperText, required } = values;
     updateElement(element.id, {
       ...element,
       extraAttributes: {
         label,
         helperText,
         required,
-        endTime, // บันทึกเวลาหมดอายุ
       },
     });
   }
@@ -305,28 +303,7 @@ function PropertiesComponent({
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="endTime"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>เวลาหมดอายุ</FormLabel>
-              <FormControl>
-                <Input
-                  type="datetime-local"
-                  value={
-                    field.value
-                      ? format(new Date(field.value), "yyyy-MM-dd'T'HH:mm")
-                      : ""
-                  }
-                  onChange={(e) => field.onChange(new Date(e.target.value))}
-                />
-              </FormControl>
-              <FormDescription>กำหนดเวลาหมดอายุสำหรับฟอร์มนี้</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
         <FormField
           control={form.control}
           name="required"

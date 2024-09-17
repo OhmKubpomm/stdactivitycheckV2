@@ -1,3 +1,4 @@
+/* eslint-disable tailwindcss/no-custom-classname */
 "use server";
 
 import * as React from "react";
@@ -14,50 +15,35 @@ const Headers = async () => {
   const session = await auth();
 
   return (
-    <div className="bg-transparent p-0">
-      <nav className="flex flex-wrap items-center justify-between p-4 ">
-        <div className="mr-6 flex shrink-0 items-center text-2xl">
-          <Link href="/">
-            <button className="glass-button px-4 py-2 hover:text-blue-800">
-              StdActivitycheck
-            </button>
+    <div className="sticky top-0 z-50 w-full border-b bg-background/95 shadow-sm backdrop-blur transition-all duration-300 supports-[backdrop-filter]:bg-background/60">
+      <nav className="container mx-auto flex items-center justify-between p-4">
+        <div className="flex items-center space-x-4">
+          <Link
+            href="/"
+            className="hover:text-primary/90 items-start text-left text-2xl font-bold transition-colors duration-300"
+          >
+            ระบบกิจกรรมนักศึกษา
           </Link>
         </div>
-        <div className="block lg:hidden">
+        <div className="lg:hidden">
           <MenuResponNav />
         </div>
-        <div
-          id="menu-links"
-          className="hidden w-full lg:flex lg:w-auto lg:items-center"
-        >
-          <div className="text-sm lg:grow">
-            {session ? (
-              <>
-                {(session.user as { role: string }).role === "admin" ? (
-                  <>{/* Links for Admin */}</>
-                ) : (
-                  <>{/* Links for Users */}</>
-                )}
-                <div className="flex items-center space-x-4">
-                  <div>
-                    <Themebutton />
-                  </div>
-                  <div>
-                    <SignOut User={session?.user} />
-                  </div>
-                </div>
-              </>
-            ) : null}
-          </div>
+        <div className="hidden items-center space-x-4 lg:flex">
+          {session ? (
+            <>
+              <div className="flex items-center space-x-4">
+                <Themebutton />
+                <SignOut User={session?.user} />
+              </div>
+            </>
+          ) : null}
           {!session && (
-            <div>
-              <Link
-                href="/Signin"
-                className="inline-block rounded border-2 border-red-500 px-4 py-2 text-sm font-semibold text-red-500 hover:text-red-800"
-              >
-                Sign In
-              </Link>
-            </div>
+            <Link
+              href="/Signin"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+            >
+              เข้าสู่ระบบ
+            </Link>
           )}
         </div>
       </nav>
