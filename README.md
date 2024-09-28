@@ -1,8 +1,30 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Student Activity Recording System
+
+The Student Activity Recording System is a web-based educational platform developed for university use. It enables students and administrators to efficiently track and record student participation in various activities. This system enhances the management of activity data, making it easier and more streamlined for all users involved.
+
+## Technologies Used
+
+- [Next.js](https://nextjs.org/) - A React framework for server-side rendering (SSR) and static site generation.
+- [ShadCN UI](https://ui.shadcn.com/) - A modern UI toolkit used to build user-friendly and sleek interfaces.
+- [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for quickly building custom designs.
 
 ## Getting Started
 
-First, run the development server:
+To begin working with this project, follow the steps below:
+
+### Install Dependencies
+
+Start by installing the necessary dependencies:
+
+````bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+
+Run in Development Mode
+To start the development server, use the following command:
 
 ```bash
 npm run dev
@@ -10,25 +32,29 @@ npm run dev
 yarn dev
 # or
 pnpm dev
-```
+Once the server is running, open your browser and navigate to http://localhost:3000 to view the application.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Editing Pages
+You can begin editing the pages by modifying app/page.tsx. The page will automatically update as you make changes.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Key Features
+Student activity recording and tracking system
+University-level activity management
+Summary report generation for activity participation
+University-Level Usage
+This project is designed to enhance activity management at the university level. It provides a standardized approach to tracking student participation across various departments and programs, ensuring a streamlined process for administrators and students alike.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Learn More
+To learn more about the technologies used in this project, check out the following resources:
 
-## Learn More
+Next.js Documentation - Learn more about Next.js features and API.
+Learn Next.js - An interactive Next.js tutorial.
+Deployment
+The easiest way to deploy your Next.js application is with Vercel, the platform built by the creators of Next.js.
 
-To learn more about Next.js, take a look at the following resources:
+Check out the Next.js deployment documentation for more details on how to deploy your application.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+This format adheres to the proper syntax for a `README.md` file and will render correctly on GitHub and other markdown readers.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+````
