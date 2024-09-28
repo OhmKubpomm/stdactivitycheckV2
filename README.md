@@ -16,23 +16,26 @@ To begin working with this project, follow the steps below:
 
 Start by installing the necessary dependencies:
 
-````bash
+```bash
 npm install
 # or
 yarn install
 # or
 pnpm install
+```
 
 Run in Development Mode
 To start the development server, use the following command:
-```
+
+````
+
 ```bash
 npm run dev
 # or
 yarn dev
 # or
 pnpm dev
-```
+````
 
 Once the server is running, open your browser and navigate to http://localhost:3000 to view the application.
 
@@ -56,7 +59,4 @@ The easiest way to deploy your Next.js application is with Vercel, the platform 
 
 Check out the Next.js deployment documentation for more details on how to deploy your application.
 
-
 This format adheres to the proper syntax for a `README.md` file and will render correctly on GitHub and other markdown readers.
-
-````
