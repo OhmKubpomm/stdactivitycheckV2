@@ -25,13 +25,15 @@ pnpm install
 
 Run in Development Mode
 To start the development server, use the following command:
-
+```
 ```bash
 npm run dev
 # or
 yarn dev
 # or
 pnpm dev
+```
+
 Once the server is running, open your browser and navigate to http://localhost:3000 to view the application.
 
 Editing Pages
