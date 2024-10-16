@@ -332,10 +332,8 @@ const Userdashboard = () => {
 
   const columns = [
     { key: "name", label: "ชื่อกิจกรรม" },
-    { key: "date", label: "วันที่" },
-    { key: "time", label: "เวลา" },
+
     { key: "type", label: "ประเภท" },
-    { key: "participants", label: "ผู้เข้าร่วม" },
   ];
 
   return (
@@ -370,12 +368,14 @@ const Userdashboard = () => {
               color="600"
             />
             <StatCard
-              title="อัตราการเข้าร่วม"
-              value={`${Math.round(
-                (user.activitiesParticipated.length / activities.length) * 100
-              )}%`}
+              title="กิจกรรมที่ยังไม่ได้ทำ"
+              value={
+                remainingActivities.length > 0
+                  ? `${remainingActivities.length} กิจกรรม`
+                  : "ไม่มีกิจกรรมที่เหลือ"
+              }
               icon={Star}
-              color="700"
+              color="600"
             />
           </motion.div>
 
@@ -666,7 +666,7 @@ const Userdashboard = () => {
             <Card className="border-none bg-white shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-xl text-gray-800 sm:text-2xl">
-                  กิจกรรมที่เสร็จสิ้นแล้ว
+                  กิจกรรมที่ผู้ใช้ทำทั้งหมด
                 </CardTitle>
                 <Dialog
                   open={showAllCompleted}
@@ -682,9 +682,9 @@ const Userdashboard = () => {
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="w-full max-w-lg sm:max-w-2xl lg:max-w-4xl">
-                    <DialogTitle>กิจกรรมที่เสร็จสิ้นแล้วทั้งหมด</DialogTitle>
+                    <DialogTitle>กิจกรรมที่ผู้ใช้ทำทั้งหมด</DialogTitle>
                     <DialogDescription>
-                      รายการกิจกรรมทั้งหมดที่คุณได้เข้าร่วมและเสร็จสิ้นแล้ว
+                      รายการกิจกรรมทั้งหมดที่คุณได้ทำ
                     </DialogDescription>
                     <DataTable
                       columns={columns}
@@ -753,7 +753,7 @@ const Userdashboard = () => {
             <Card className="border-none bg-white shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-xl text-gray-800 sm:text-2xl">
-                  กิจกรรมที่ยังไม่ดำเนินการ
+                  กิจกรรมที่ยังไม่ได้ทำ
                 </CardTitle>
                 <Dialog
                   open={showAllRemaining}
@@ -769,9 +769,9 @@ const Userdashboard = () => {
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="w-full max-w-lg sm:max-w-2xl lg:max-w-4xl">
-                    <DialogTitle>กิจกรรมที่ยังไม่ดำเนินการทั้งหมด</DialogTitle>
+                    <DialogTitle>กิจกรรมที่ยังไม่ได้ทำ</DialogTitle>
                     <DialogDescription>
-                      รายการกิจกรรมทั้งหมดที่คุณยังไม่ได้เข้าร่วม
+                      รายการกิจกรรมทั้งหมดที่คุณยังไม่ได้ทำ
                     </DialogDescription>
                     <DataTable
                       columns={columns}

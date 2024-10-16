@@ -1,9 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, MoreHorizontal, Plus } from "lucide-react";
+import {
+  ArrowUpDown,
+  MoreHorizontal,
+  TrendingUp,
+  Users,
+  Star,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,12 +18,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import { FeedbackDataTable } from "@/components/globals/feedback-datatable";
-
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import Link from "next/link";
 
 export type Feedback = {
   _id: string;
@@ -32,37 +35,26 @@ export type Feedback = {
   createdAt: string;
 };
 
+export type ChartData = {
+  date: string;
+  count: number;
+  averageRating: number;
+};
+
 export function FeedbackList({
   feedbacks,
   itemsPerPage,
   totalCount,
   totalPage,
+  chartData,
 }: {
   feedbacks: Feedback[];
   itemsPerPage: number;
   totalCount: number;
   totalPage: number;
+  chartData: ChartData[];
 }) {
   const columns: ColumnDef<Feedback>[] = [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="เลือกทั้งหมด"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="เลือกแถว"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
     {
       accessorKey: "userId.name",
       header: ({ column }) => {
@@ -71,7 +63,7 @@ export function FeedbackList({
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            ผู้ใช้
+            ผู้ให้แบบสอบถาม
             <ArrowUpDown className="ml-2 size-4" />
           </Button>
         );
@@ -86,12 +78,8 @@ export function FeedbackList({
       header: "คะแนน",
     },
     {
-      accessorKey: "comment",
-      header: "ความคิดเห็น",
-    },
-    {
       accessorKey: "createdAt",
-      header: "วันที่สร้าง",
+      header: "วันที่ให้แบบสอบถาม",
       cell: ({ row }) => {
         return format(new Date(row.getValue("createdAt")), "dd/MM/yyyy HH:mm");
       },
@@ -120,7 +108,6 @@ export function FeedbackList({
                 คัดลอกรหัสแบบสอบถาม
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-
               <DropdownMenuItem onClick={() => meta.handleDelete(feedback._id)}>
                 ลบแบบสอบถาม
               </DropdownMenuItem>
@@ -131,25 +118,64 @@ export function FeedbackList({
     },
   ];
 
+  const averageRating = useMemo(() => {
+    const totalRating = feedbacks.reduce(
+      (sum, feedback) => sum + feedback.rating,
+      0
+    );
+    return totalRating / feedbacks.length || 0;
+  }, [feedbacks]);
+
   return (
-    <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle>จัดการข้อมูลแบบสอบถาม</CardTitle>
-        <Link href="/dashboard/crudfeedback/AddFeedback" passHref>
-          <Button className="bg-orange-500 text-white hover:bg-orange-600">
-            <Plus className="mr-2 size-4" /> เพิ่มข้อมูล
-          </Button>
-        </Link>
-      </CardHeader>
-      <CardContent>
-        <FeedbackDataTable
-          columns={columns}
-          data={feedbacks}
-          itemsPerPage={itemsPerPage}
-          totalCount={totalCount}
-          totalPage={totalPage}
-        />
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              จำนวนแบบสอบถามทั้งหมด
+            </CardTitle>
+            <TrendingUp className="text-muted-foreground size-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalCount}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              จำนวนผู้ให้แบบสอบถาม
+            </CardTitle>
+            <Users className="text-muted-foreground size-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{feedbacks.length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">คะแนนเฉลี่ย</CardTitle>
+            <Star className="text-muted-foreground size-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{averageRating.toFixed(2)}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="w-full">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle>จัดการแบบสอบถาม</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FeedbackDataTable
+            columns={columns}
+            data={feedbacks}
+            itemsPerPage={itemsPerPage}
+            totalCount={totalCount}
+            totalPage={totalPage}
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 }

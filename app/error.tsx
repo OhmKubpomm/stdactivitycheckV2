@@ -44,7 +44,7 @@ const page = () => {
               variant="contained"
               onClick={() => router.back()}
             >
-              Go Back
+              ย้อนกลับ
             </MuiButton>
           </div>
         </div>

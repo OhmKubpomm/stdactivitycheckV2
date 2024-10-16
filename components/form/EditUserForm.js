@@ -178,7 +178,7 @@ const EditUserForm = () => {
           <div className="flex space-x-4">
             <ButtonLoad
               htmlType="submit"
-              value="Submit"
+              value="ยืนยัน"
               className="rounded bg-blue-500 px-4 py-2 text-white"
             />
           </div>
@@ -203,7 +203,7 @@ const EditUserForm = () => {
 
               <ButtonLoad
                 onClick={handleDelete}
-                value="Delete"
+                value="ลบรูปภาพ"
                 className="rounded bg-red-500 px-4 py-2 text-white"
               />
             </div>
@@ -230,7 +230,7 @@ const EditUserForm = () => {
                 return false;
               }}
             >
-              {files.length >= 8 ? null : <div>Upload</div>}
+              {files.length >= 8 ? null : <div>เพิ่มรูปภาพ</div>}
             </Upload>
 
             {/* Preview Modal */}
@@ -255,7 +255,7 @@ const EditUserForm = () => {
           <Form.Item>
             <ButtonLoad
               icon={UploadOutlined}
-              value="upload"
+              value="เพิ่มรูปภาพ"
               className="rounded bg-gray-300 px-4 py-2"
             />
           </Form.Item>
@@ -264,7 +264,7 @@ const EditUserForm = () => {
 
         <ButtonLoad
           onClick={() => router.back()}
-          value="go back"
+          value="ย้อนกลับ"
           className="rounded bg-gray-300 px-4 py-2"
         />
       </Card>

@@ -224,13 +224,13 @@ const AddUserForm = () => {
           <div className="flex space-x-4">
             <ButtonLoad
               htmlType="submit"
-              value="Submit"
+              value="ยืนยัน"
               className="rounded bg-blue-500 px-4 py-2 text-white"
             />
             <ButtonLoad
               htmlType="button"
               onClick={onReset}
-              value="Reset"
+              value="รีเซ็ต"
               className="rounded bg-blue-300 px-4 py-2"
             />
           </div>
@@ -240,7 +240,7 @@ const AddUserForm = () => {
       <div className="flex space-x-4 ">
         <ButtonLoad
           onClick={() => router.back()}
-          value="Go Back"
+          value="ย้อนกลับ"
           className="btn glass-button px-4 py-2 hover:text-blue-800"
         />
       </div>

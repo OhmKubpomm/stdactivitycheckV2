@@ -1,9 +1,10 @@
-/* eslint-disable tailwindcss/no-custom-classname */
+/* eslint-disable camelcase */
+/* eslint-disable no-undef */
 "use client";
 
 import { PublishForm } from "@/actions/ActivityAction";
 import { useRouter } from "next/navigation";
-import { useState, useTransition, useRef, useEffect } from "react";
+import React, { useState, useTransition, useRef, useEffect } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { MdOutlinePublish } from "react-icons/md";
 import {
@@ -31,6 +32,16 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
+import {
+  useLoadScript,
+  GoogleMap,
+  Marker,
+  Libraries,
+} from "@react-google-maps/api";
+import usePlacesAutocomplete, {
+  getGeocode,
+  getLatLng,
+} from "use-places-autocomplete";
 
 function PublishFormBtn({ id }: { id: number }) {
   const [loading, startTransition] = useTransition();
@@ -39,10 +50,85 @@ function PublishFormBtn({ id }: { id: number }) {
   const [startTime, setStartTime] = useState<Date>();
   const [endTime, setEndTime] = useState<Date>();
   const [activityLocation, setActivityLocation] = useState<string>("");
+  const [mapLocation, setMapLocation] = useState<{ lat: number; lng: number }>({
+    lat: 13.7563,
+    lng: 100.5018,
+  }); // Default to Bangkok
+  const [isCustomLocation, setIsCustomLocation] = useState(false);
+
+  const mapRef = useRef<google.maps.Map | null>(null);
+
+  const libraries: Libraries = ["places"];
+
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
+    libraries,
+  });
+
+  const {
+    suggestions: { status, data },
+    setValue,
+    clearSuggestions,
+  } = usePlacesAutocomplete({
+    requestOptions: {
+      componentRestrictions: { country: "th" }, // Restrict to Thailand
+      types: ["establishment", "geocode"],
+    },
+    debounce: 300,
+  });
+
+  const handleSelect = async (address: string) => {
+    setValue(address, false);
+    clearSuggestions();
+
+    try {
+      const results = await getGeocode({ address });
+      const { lat, lng } = await getLatLng(results[0]);
+      setActivityLocation(address); // ใช้ชื่อที่ผู้ใช้เลือกจาก suggestions
+      setMapLocation({ lat, lng });
+      setIsCustomLocation(false);
+      if (mapRef.current) {
+        mapRef.current.panTo({ lat, lng });
+        mapRef.current.setZoom(15);
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+    }
+  };
+
+  const handleMapClick = async (e: google.maps.MapMouseEvent) => {
+    if (e.latLng) {
+      const lat = e.latLng.lat();
+      const lng = e.latLng.lng();
+      setMapLocation({ lat, lng });
+
+      // ไม่เปลี่ยนชื่อสถานที่เมื่อคลิกบนแผนที่
+      // แต่ถ้า activityLocation ว่างเปล่า ให้ใส่ข้อความแจ้งเตือน
+      if (!activityLocation) {
+        setActivityLocation(`กรุณาระบุชื่อสถานที่สำหรับตำแหน่งนี้`);
+        toast({
+          title: "กรุณาระบุชื่อสถานที่",
+          description: "โปรดป้อนชื่อสถานที่สำหรับตำแหน่งที่เลือก",
+        });
+      }
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setActivityLocation(newValue);
+    setValue(newValue); // อัปเดต value สำหรับ usePlacesAutocomplete
+  };
 
   async function publishForm() {
     try {
-      if (!startTime || !endTime || !activityType || !activityLocation) {
+      if (
+        !startTime ||
+        !endTime ||
+        !activityType ||
+        !activityLocation ||
+        !mapLocation
+      ) {
         toast({
           title: "ข้อมูลไม่ครบถ้วน",
           description: "กรุณากรอกข้อมูลให้ครบทุกช่อง",
@@ -51,22 +137,32 @@ function PublishFormBtn({ id }: { id: number }) {
         return;
       }
 
-      await PublishForm(
+      const result = await PublishForm(
         id,
         startTime.toISOString(),
         endTime.toISOString(),
         activityType,
-        activityLocation
+        activityLocation,
+        mapLocation.lng,
+        mapLocation.lat
       );
-      toast({
-        title: "สำเร็จ",
-        description: "กิจกรรมของคุณได้รับการเผยแพร่แล้ว",
-      });
-      router.refresh();
+
+      if (result.success) {
+        toast({
+          title: "สำเร็จ",
+          description: "กิจกรรมของคุณได้รับการเผยแพร่แล้ว",
+        });
+        router.refresh();
+      } else {
+        throw new Error(result.error);
+      }
     } catch (error) {
       toast({
         title: "ข้อผิดพลาด",
-        description: "เกิดข้อผิดพลาดในการเผยแพร่กิจกรรม",
+        description:
+          error instanceof Error
+            ? error.message
+            : "เกิดข้อผิดพลาดในการเผยแพร่กิจกรรม",
         variant: "destructive",
       });
     }
@@ -217,6 +313,8 @@ function PublishFormBtn({ id }: { id: number }) {
     );
   };
 
+  if (!isLoaded) return <div>Loading...</div>;
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -256,12 +354,43 @@ function PublishFormBtn({ id }: { id: number }) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="activityLocation">สถานที่จัดกิจกรรม</Label>
-            <Input
-              id="activityLocation"
-              placeholder="ระบุสถานที่จัดกิจกรรม"
-              value={activityLocation}
-              onChange={(e) => setActivityLocation(e.target.value)}
-            />
+            <div className="flex space-x-2">
+              <Input
+                id="activityLocation"
+                placeholder="ระบุสถานที่จัดกิจกรรม"
+                value={activityLocation}
+                onChange={handleInputChange}
+              />
+              <Button onClick={() => handleSelect(activityLocation)}>
+                ยืนยันตำแหน่ง
+              </Button>
+            </div>
+            {status === "OK" && !isCustomLocation && (
+              <ul className="mt-2 max-h-48 overflow-auto rounded-md border border-gray-200 bg-white">
+                {data.map(({ place_id, description }) => (
+                  <li
+                    key={place_id}
+                    className="cursor-pointer p-2 hover:bg-gray-100"
+                    onClick={() => handleSelect(description)}
+                  >
+                    {description}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="h-64 w-full">
+            <GoogleMap
+              center={mapLocation}
+              zoom={15}
+              mapContainerStyle={{ width: "100%", height: "100%" }}
+              onClick={handleMapClick}
+              onLoad={(map) => {
+                mapRef.current = map;
+              }}
+            >
+              <Marker position={mapLocation} />
+            </GoogleMap>
           </div>
           <DateTimePicker
             value={startTime}
@@ -282,7 +411,8 @@ function PublishFormBtn({ id }: { id: number }) {
               !activityType ||
               !startTime ||
               !endTime ||
-              !activityLocation
+              !activityLocation ||
+              !mapLocation
             }
             onClick={(e) => {
               e.preventDefault();

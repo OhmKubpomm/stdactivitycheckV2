@@ -89,7 +89,16 @@ export async function updateUser({
 
 export async function deleteUser(userId) {
   try {
-    const user = await User.findByIdAndDelete(userId, { new: true });
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { role: "inactive" },
+      { new: true }
+    );
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
     revalidatePath("/");
 
     return { ...user._doc, _id: user._id.toString() };

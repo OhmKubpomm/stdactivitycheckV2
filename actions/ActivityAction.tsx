@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import User from "@/models/Usermodel";
 import Formsubs from "@/models/FormSubmissions";
 import { Document, ObjectId } from "mongoose";
+import Map from "@/models/Mapmodel";
 
 connectdatabase();
 
@@ -179,10 +180,13 @@ export async function PublishForm(
   startTime: string,
   endTime: string,
   activityType: string,
-  activityLocation: string
+  activityLocation: string,
+  longitude: number,
+  latitude: number
 ) {
   try {
-    await checkAdminPermission();
+    const session = await auth();
+    if (!session) throw new Error("ไม่พบผู้ใช้งาน");
 
     const updateData = {
       published: true,
@@ -200,10 +204,25 @@ export async function PublishForm(
 
     if (!updatedForm) throw new Error("ไม่พบฟอร์มที่ต้องการเผยแพร่");
 
-    return { ...updatedForm._doc, _id: updatedForm._doc._id.toString() };
+    // Create a new Map entry
+    const newMap = new Map({
+      name: updatedForm.ActivityFormname,
+      MapName: activityLocation,
+      MapAddress: activityLocation,
+      Maplocation: {
+        type: "Point",
+        coordinates: [longitude, latitude],
+      },
+    });
+
+    await newMap.save();
+
+    revalidatePath("/");
+
+    return { success: true, data: updatedForm };
   } catch (error) {
     console.error("เกิดข้อผิดพลาดในการเผยแพร่ฟอร์ม:", error);
-    throw new Error("ไม่สามารถเผยแพร่ฟอร์มได้");
+    return { success: false, error: "ไม่สามารถเผยแพร่ฟอร์มได้" };
   }
 }
 

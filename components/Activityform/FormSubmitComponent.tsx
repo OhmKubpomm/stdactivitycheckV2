@@ -92,7 +92,7 @@ function FormSubmitComponent({
 
           const { isWithinRange } = await checkUserWithinRange(
             userLocation,
-            100
+            20
           );
 
           setIsWithinRange(isWithinRange ?? false);

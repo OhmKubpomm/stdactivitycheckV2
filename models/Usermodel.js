@@ -47,6 +47,10 @@ const UserSchema = new mongoose.Schema(
         ref: "ActivityForms",
       },
     ],
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

@@ -276,10 +276,10 @@ export function DataTable<T extends Record<string, any>>({
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>
-                              ยืนยันการลบข้อมูล
+                              ยืนยันการเปลี่ยนสถานะ
                             </AlertDialogTitle>
                             <AlertDialogDescription>
-                              คุณแน่ใจหรือไม่ที่ต้องการลบข้อมูลผู้ใช้นี้?
+                              คุณแน่ใจหรือไม่ที่ต้องการเปลี่ยนสถานะผู้ใช้นี้?
                               การกระทำนี้ไม่สามารถย้อนกลับได้
                             </AlertDialogDescription>
                           </AlertDialogHeader>
@@ -289,7 +289,7 @@ export function DataTable<T extends Record<string, any>>({
                               onClick={() => handleDelete(item._id, item.image)}
                               className="bg-red-500 text-white hover:bg-red-600"
                             >
-                              ลบข้อมูล
+                              เปลี่ยนสถานะ
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

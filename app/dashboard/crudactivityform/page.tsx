@@ -75,8 +75,8 @@ function StatsCards(props: StatsCardProps) {
       <StatsCard
         title="จำนวนการเข้าชมทั้งหมด"
         icon={<Users className="text-orange-600" />}
-        helperText="จำนวนการเข้าชมแบบฟอร์มทั้งหมด"
-        value={data?.visits.toLocaleString() || ""}
+        helperText={`จำนวนผู้เข้าชมทั้งหมดจากทุกแบบฟอร์ม`}
+        value={data?.visits?.toLocaleString() || "ไม่มีข้อมูล"}
         loading={loading}
         className="shadow-md shadow-orange-600"
       />
@@ -84,26 +84,30 @@ function StatsCards(props: StatsCardProps) {
       <StatsCard
         title="จำนวนการส่งแบบฟอร์มทั้งหมด"
         icon={<CheckCircle className="text-yellow-600" />}
-        helperText="จำนวนการส่งแบบฟอร์มทั้งหมด"
-        value={data?.submissions.toLocaleString() || ""}
+        helperText={`จำนวนการส่งแบบฟอร์มสำเร็จทั้งหมดจากทุกแบบฟอร์ม`}
+        value={data?.submissions?.toLocaleString() || "ไม่มีข้อมูล"}
         loading={loading}
         className="shadow-md shadow-yellow-600"
       />
 
       <StatsCard
-        title="อัตราการส่งแบบฟอร์ม"
+        title="จำนวนผู้ใช้งานที่ทำแบบฟอร์มแล้ว"
         icon={<MousePointerSquareDashed className="text-green-600" />}
-        helperText="จำนวนการเข้าชมที่ส่งแบบฟอร์ม"
-        value={data?.submissionRate.toLocaleString() + "%" || ""}
+        helperText={`มีผู้ทำแบบฟอร์มแล้วจำนวน ${data?.submissions} คน จากผู้เข้าชมทั้งหมด ${data?.visits} คน`}
+        value={`${data?.submissions?.toLocaleString() || "ไม่มีข้อมูล"} คน`}
         loading={loading}
         className="shadow-md shadow-green-600"
       />
 
       <StatsCard
-        title="อัตราการออกจากแบบฟอร์ม"
+        title="จำนวนผู้ใช้ที่ออกจากแบบฟอร์ม"
         icon={<LogOut className="text-red-600" />}
-        helperText="จำนวนการเข้าชมที่ออกจากแบบฟอร์ม"
-        value={data?.submissionRate.toLocaleString() + "%" || ""}
+        helperText={`มีผู้ใช้จำนวน ${
+          data?.visits - data?.submissions
+        } คน ที่ออกจากหน้าแบบฟอร์มโดยไม่ส่ง`}
+        value={`${
+          (data?.visits - data?.submissions)?.toLocaleString() || "ไม่มีข้อมูล"
+        } คน`}
         loading={loading}
         className="shadow-md shadow-red-600"
       />
@@ -224,7 +228,7 @@ function FormCard({ form }: { form: typeof ActivityForm }) {
             <input type="hidden" name="formId" value={form.id} />
             <Button type="submit" variant="outline" className="w-full">
               <Copy className="mr-2 size-4" />
-              Clone
+              คัดลอกแบบฟอร์มนี้
             </Button>
           </form>
         </div>

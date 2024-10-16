@@ -12,14 +12,17 @@ const FeedbackPage = async ({
 }: {
   searchParams: SearchParams;
 }) => {
-  const { feedbacks, count, totalPage } = await getFeedbacks(searchParams);
+  const { feedbacks, count, totalPage, chartData } = await getFeedbacks(
+    searchParams
+  );
 
   return (
     <FeedbackList
       feedbacks={feedbacks}
-      itemsPerPage={10}
+      itemsPerPage={parseInt(searchParams.limit || "10")}
       totalCount={count}
       totalPage={totalPage}
+      chartData={chartData}
     />
   );
 };

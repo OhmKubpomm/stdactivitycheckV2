@@ -39,10 +39,40 @@ export async function getFeedbacks(searchParams: SearchParams) {
     const count = await Feedback.countDocuments();
     const totalPage = Math.ceil(count / limit);
 
+    // Calculate chart data
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const chartData = await Feedback.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: sixMonthsAgo },
+        },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 },
+          averageRating: { $avg: "$rating" },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+      {
+        $project: {
+          date: "$_id",
+          count: 1,
+          averageRating: { $round: ["$averageRating", 2] },
+        },
+      },
+    ]);
+
     return {
       feedbacks: JSON.parse(JSON.stringify(feedbacks)),
       count,
       totalPage,
+      chartData,
     };
   } catch (error) {
     console.error("Error fetching feedbacks:", error);

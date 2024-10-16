@@ -72,14 +72,7 @@ const AdminNavbar = () => {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
               className="flex items-center gap-3"
-            >
-              <div className="flex flex-col">
-                <span className="text-lg font-semibold">แผงควบคุม</span>
-                <span className="text-muted-foreground text-sm">
-                  ยินดีต้อนรับกลับ!
-                </span>
-              </div>
-            </motion.div>
+            ></motion.div>
           )}
         </AnimatePresence>
         {!isMobile && !isMobileView && (

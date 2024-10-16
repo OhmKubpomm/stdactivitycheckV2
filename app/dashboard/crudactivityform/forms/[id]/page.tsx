@@ -38,14 +38,6 @@ async function FormDetailPage({
 
   const { ActivityVisits, ActivitySubmissions } = form;
 
-  let submissionRate = 0;
-
-  if (ActivityVisits > 0) {
-    submissionRate = (ActivitySubmissions / ActivityVisits) * 100;
-  }
-
-  const bounceRate = 100 - submissionRate;
-
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="bg-white shadow">
@@ -65,10 +57,10 @@ async function FormDetailPage({
       <div className="container mx-auto py-8">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           <StatsCard
-            title="จำนวนการเข้าชม"
+            title="จำนวนการเข้าชมแบบฟอร์ม"
             icon={<LuView className="text-2xl text-blue-600" />}
-            helperText="จำนวนการเข้าชมแบบฟอร์มทั้งหมด"
-            value={ActivityVisits?.toLocaleString() || "0"}
+            helperText={`ผู้เข้าชมทั้งหมด: ${ActivityVisits?.toLocaleString()} คน`}
+            value={`${ActivityVisits?.toLocaleString() || "0"} คน`}
             loading={false}
             className="rounded-xl bg-white shadow-lg transition-shadow hover:shadow-xl"
           />
@@ -76,26 +68,28 @@ async function FormDetailPage({
           <StatsCard
             title="จำนวนการส่งแบบฟอร์ม"
             icon={<FaWpforms className="text-2xl text-yellow-600" />}
-            helperText="จำนวนการส่งแบบฟอร์มทั้งหมด"
-            value={ActivitySubmissions?.toLocaleString() || "0"}
+            helperText={`มี ${ActivitySubmissions?.toLocaleString()} คน จากผู้เข้าชมทั้งหมด ${ActivityVisits?.toLocaleString()} คน ที่ส่งแบบฟอร์ม`}
+            value={`${ActivitySubmissions?.toLocaleString() || "0"} คน`}
             loading={false}
             className="rounded-xl bg-white shadow-lg transition-shadow hover:shadow-xl"
           />
 
           <StatsCard
-            title="อัตราการส่งแบบฟอร์ม"
-            icon={<HiCursorClick className="text-2xl text-green-600" />}
-            helperText="เปอร์เซ็นต์ของผู้เข้าชมที่ส่งแบบฟอร์ม"
-            value={submissionRate.toFixed(2) + "%"}
-            loading={false}
-            className="rounded-xl bg-white shadow-lg transition-shadow hover:shadow-xl"
-          />
-
-          <StatsCard
-            title="อัตราการออกจากหน้า"
+            title="จำนวนผู้ที่ออกจากหน้าโดยไม่ส่งแบบฟอร์ม"
             icon={<LogOut className="text-2xl text-red-600" />}
-            helperText="เปอร์เซ็นต์ของผู้เข้าชมที่ออกโดยไม่ส่งแบบฟอร์ม"
-            value={bounceRate.toFixed(2) + "%"}
+            helperText={`มี ${
+              ActivityVisits - ActivitySubmissions
+            } คน จากผู้เข้าชมทั้งหมด ${ActivityVisits} คน ออกจากหน้าโดยไม่ส่งแบบฟอร์ม`}
+            value={`${ActivityVisits - ActivitySubmissions} คน`}
+            loading={false}
+            className="rounded-xl bg-white shadow-lg transition-shadow hover:shadow-xl"
+          />
+
+          <StatsCard
+            title="จำนวนผู้ใช้งานที่ทำแบบฟอร์มแล้ว"
+            icon={<HiCursorClick className="text-2xl text-green-600" />}
+            helperText={`มีผู้ทำแบบฟอร์มแล้ว ${ActivitySubmissions} คน จากผู้เข้าชมทั้งหมด ${ActivityVisits} คน`}
+            value={`ทำแล้ว ${ActivitySubmissions} ครั้ง`}
             loading={false}
             className="rounded-xl bg-white shadow-lg transition-shadow hover:shadow-xl"
           />
