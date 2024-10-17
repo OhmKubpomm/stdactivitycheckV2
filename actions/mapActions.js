@@ -68,23 +68,41 @@ export async function deleteMap(mapId) {
   }
 }
 
-export async function checkUserWithinRange(userLocation, maxDistanceInMeters) {
+export async function checkUserWithinRange(
+  userLocation,
+  maxDistanceInMeters,
+  activityLocation
+) {
   try {
-    const locations = await Map.aggregate([
+    // ค้นหาตำแหน่งที่เชื่อมโยงกับชื่อสถานที่ของกิจกรรมใน Map โดยใช้ MapName
+    const mapData = await Map.findOne({ MapName: activityLocation });
+    console.log(mapData);
+
+    if (!mapData || !mapData.Maplocation) {
+      throw new Error("ไม่พบตำแหน่งสำหรับสถานที่นี้");
+    }
+
+    // ตรวจสอบว่าผู้ใช้ใกล้กับตำแหน่งใน Maplocation หรือไม่
+    const result = await Map.aggregate([
       {
         $geoNear: {
           near: {
             type: "Point",
-            coordinates: [userLocation.lng, userLocation.lat],
+            coordinates: [userLocation.lng, userLocation.lat], // ตำแหน่งของผู้ใช้
           },
-          distanceField: "distance",
-          maxDistance: maxDistanceInMeters,
-          spherical: true,
+          distanceField: "distance", // ระยะห่างระหว่างผู้ใช้กับตำแหน่งใน Map
+          maxDistance: maxDistanceInMeters, // ระยะทางสูงสุดที่ต้องการตรวจสอบ (เช่น 20 เมตร)
+          spherical: true, // ใช้ spherical geolocation เพื่อความแม่นยำ
+        },
+      },
+      {
+        $match: {
+          _id: mapData._id, // กรองข้อมูลให้ตรงกับ Map ที่ค้นพบตามชื่อกิจกรรม (MapName)
         },
       },
     ]);
 
-    const isWithinRange = locations.length > 0;
+    const isWithinRange = result.length > 0; // ถ้ามีข้อมูลแสดงว่าผู้ใช้อยู่ในระยะที่กำหนด
     return { isWithinRange };
   } catch (error) {
     console.error("Error checking user location:", error);

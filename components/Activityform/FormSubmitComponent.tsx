@@ -23,11 +23,13 @@ function FormSubmitComponent({
   content,
   startTime,
   endTime,
+  activityLocation,
 }: {
   content: FormElementInstance[];
   formUrl: string;
   startTime?: string;
   endTime?: string;
+  activityLocation: string;
 }) {
   const formValues = useRef<{ [key: string]: string }>({});
   const formErrors = useRef<{ [key: string]: boolean }>({});
@@ -90,9 +92,11 @@ function FormSubmitComponent({
             lng: position.coords.longitude,
           };
 
+          // ส่ง ActivityLocation ไปยัง API
           const { isWithinRange } = await checkUserWithinRange(
             userLocation,
-            20
+            100, // ระยะที่ต้องการตรวจสอบ
+            activityLocation // ส่ง ActivityLocation ที่ได้รับจาก props
           );
 
           setIsWithinRange(isWithinRange ?? false);
@@ -118,7 +122,7 @@ function FormSubmitComponent({
     };
 
     checkUserLocation();
-  }, []);
+  }, [activityLocation]);
 
   const validateForm: () => boolean = useCallback(() => {
     let isValid = true;

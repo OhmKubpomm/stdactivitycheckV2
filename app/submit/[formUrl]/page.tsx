@@ -15,6 +15,7 @@ async function SubmitPage({
 
   // แปลง JSON ที่เก็บอยู่ใน `ActivityContent` ให้เป็น JavaScript Object
   const formContent = JSON.parse(form.ActivityContent) as FormElementInstance[];
+  const activityLocation = form.ActivityLocation;
 
   // แปลง `endTime` ให้เป็น ISO string ถ้ามีค่า
   const endTime = form.endTime
@@ -30,6 +31,7 @@ async function SubmitPage({
       content={formContent}
       endTime={endTime}
       startTime={startTime}
+      activityLocation={activityLocation}
     />
   );
 }

@@ -242,6 +242,7 @@ export async function GetFormContentByUrl(formUrl: string) {
       ActivityContent: form.ActivityContent,
       startTime: form.startTime,
       endTime: form.endTime,
+      ActivityLocation: form.ActivityLocation,
     };
   } catch (error) {
     console.error("เกิดข้อผิดพลาดในการดึงเนื้อหาฟอร์มตาม URL:", error);
