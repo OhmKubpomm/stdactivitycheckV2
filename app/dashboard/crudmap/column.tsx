@@ -30,7 +30,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 export type Map = {
   _id: string;
-  MapAddress: string;
+  MapName: string;
 };
 
 const ActionCell = ({ Map }: { Map: any }) => {
@@ -161,8 +161,8 @@ export const columns: ColumnDef<Map>[] = [
     },
   },
   {
-    accessorKey: "MapAddress",
-    header: "ตำแหน่งแผนที่",
+    accessorKey: "MapName",
+    header: "ชื่อตำแหน่ง",
   },
 
   {

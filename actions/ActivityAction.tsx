@@ -7,7 +7,6 @@ import { revalidatePath } from "next/cache";
 import User from "@/models/Usermodel";
 import Formsubs from "@/models/FormSubmissions";
 import { Document, ObjectId } from "mongoose";
-import Map from "@/models/Mapmodel";
 
 connectdatabase();
 
@@ -203,19 +202,6 @@ export async function PublishForm(
     );
 
     if (!updatedForm) throw new Error("ไม่พบฟอร์มที่ต้องการเผยแพร่");
-
-    // Create a new Map entry
-    const newMap = new Map({
-      name: updatedForm.ActivityFormname,
-      MapName: activityLocation,
-      MapAddress: activityLocation,
-      Maplocation: {
-        type: "Point",
-        coordinates: [longitude, latitude],
-      },
-    });
-
-    await newMap.save();
 
     revalidatePath("/");
 

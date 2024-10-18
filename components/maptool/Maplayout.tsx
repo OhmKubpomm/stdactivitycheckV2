@@ -1,8 +1,9 @@
 /* eslint-disable tailwindcss/no-custom-classname */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import dynamic from "next/dynamic";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,28 +23,15 @@ import {
 import { createLocation, updateMap } from "@/actions/mapActions";
 import { useToast } from "@/components/ui/use-toast";
 import { useMyContext } from "@/context/provider";
+import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
 
-// Import Leaflet types
-import type { LatLngExpression, Icon, Map as LeafletMap } from "leaflet";
-import "leaflet/dist/leaflet.css";
-import { useMap, useMapEvents } from "react-leaflet";
+type Position = {
+  lat: number;
+  lng: number;
+};
 
-// Dynamically import Leaflet components
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.MapContainer),
-  { ssr: false }
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.TileLayer),
-  { ssr: false }
-);
-const Marker = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Marker),
-  { ssr: false }
-);
-
-type Position = [number, number];
 type Location = {
+  MapName: string;
   MapAddress: string;
   Maplocation: {
     type: string;
@@ -51,76 +39,56 @@ type Location = {
   };
 };
 
-interface LocationMarkerProps {
-  position: Position;
-  setPosition: React.Dispatch<React.SetStateAction<Position>>;
-  customIcon: Icon | null;
-}
-
-const LocationMarker: React.FC<LocationMarkerProps> = ({
-  position,
-  setPosition,
-  customIcon,
-}) => {
-  const map = useMap() as LeafletMap;
-
-  useMapEvents({
-    click(e: { latlng: { lat: number; lng: number } }) {
-      setPosition([e.latlng.lat, e.latlng.lng]);
-    },
-  });
-
-  useEffect(() => {
-    if (map && map.setView) {
-      map.setView(position as LatLngExpression, map.getZoom());
-    }
-  }, [map, position]);
-
-  return customIcon ? <Marker position={position} icon={customIcon} /> : null;
+const mapContainerStyle = {
+  width: "100%",
+  height: "500px",
 };
+
+const libraries: "places"[] = ["places"];
 
 export default function MapLayout({
   isEditing = false,
 }: {
   isEditing?: boolean;
 }) {
-  const autocompleteInput = useRef<HTMLInputElement>(null);
-  const [position, setPosition] = useState<Position>([13.7563, 100.5018]); // Bangkok coordinates
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+    libraries,
+  });
+
+  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [position, setPosition] = useState<Position>({
+    lat: 13.7563,
+    lng: 100.5018,
+  });
   const [address, setAddress] = useState<string>("");
+  const [placeName, setPlaceName] = useState<string>("");
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
   const { editMap, setEditMap } = useMyContext();
-  const [customIcon, setCustomIcon] = useState<Icon | null>(null);
-
-  const API_URL = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      import("leaflet").then((L) => {
-        setCustomIcon(
-          L.icon({
-            iconUrl: "/Icon/map-marker.svg",
-            iconSize: [30, 30],
-            iconAnchor: [15, 30],
-            popupAnchor: [0, -30],
-          })
-        );
-      });
-    }
-  }, []);
+  const autocompleteInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isEditing && editMap?.MapAddress) {
       setAddress(editMap.MapAddress);
+      setPlaceName(editMap.MapName || "");
       if (editMap.Maplocation?.coordinates) {
-        setPosition([
-          editMap.Maplocation.coordinates[1],
-          editMap.Maplocation.coordinates[0],
-        ]);
+        setPosition({
+          lat: editMap.Maplocation.coordinates[1],
+          lng: editMap.Maplocation.coordinates[0],
+        });
       }
     }
   }, [isEditing, editMap]);
+
+  const onLoad = useCallback((map: google.maps.Map) => {
+    setMap(map);
+  }, []);
+
+  const onUnmount = useCallback(() => {
+    setMap(null);
+  }, []);
 
   const initializeAutocomplete = useCallback(() => {
     if (!autocompleteInput.current || !window.google?.maps?.places) return;
@@ -131,52 +99,36 @@ export default function MapLayout({
     autocomplete.addListener("place_changed", () => {
       const place = autocomplete.getPlace();
       if (place.geometry?.location) {
-        setPosition([
-          place.geometry.location.lat(),
-          place.geometry.location.lng(),
-        ]);
+        setPosition({
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+        });
         setAddress(place.formatted_address || "");
+        setPlaceName(place.name || "");
       }
     });
   }, []);
 
   useEffect(() => {
-    const loadGoogleMapsScript = () => {
-      if (typeof window === "undefined") return;
-      if (window.google && window.google.maps) {
-        initializeAutocomplete();
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.id = "google-maps-script";
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${API_URL}&libraries=places`;
-      script.async = true;
-      script.onload = initializeAutocomplete;
-      document.head.appendChild(script);
-    };
-
-    loadGoogleMapsScript();
-  }, [API_URL, initializeAutocomplete]);
+    if (isLoaded) {
+      initializeAutocomplete();
+    }
+  }, [isLoaded, initializeAutocomplete]);
 
   const updateAddress = useCallback(
     async (latlng: Position) => {
-      try {
-        const response = await fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latlng[0]},${latlng[1]}&key=${API_URL}`
-        );
-        const data = await response.json();
-        if (!data.results || data.results.length === 0)
-          throw new Error("Address not found");
+      if (!isLoaded) return;
 
-        const formattedAddress = data.results[0].formatted_address;
-        setAddress(formattedAddress);
-      } catch (error) {
-        console.error(error);
-        setAddress("Error fetching address");
-      }
+      const geocoder = new window.google.maps.Geocoder();
+      geocoder.geocode({ location: latlng }, (results, status) => {
+        if (status === "OK" && results?.[0]) {
+          setAddress(results[0].formatted_address);
+        } else {
+          setAddress("Error fetching address");
+        }
+      });
     },
-    [API_URL]
+    [isLoaded]
   );
 
   useEffect(() => {
@@ -187,7 +139,10 @@ export default function MapLayout({
     setIsLoading(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setPosition([position.coords.latitude, position.coords.longitude]);
+        setPosition({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
         setIsLoading(false);
         toast({
           title: "ตำแหน่งปัจจุบันถูกเพิ่มแล้ว",
@@ -209,11 +164,15 @@ export default function MapLayout({
   const handleAction = async () => {
     setIsLoading(true);
     try {
+      if (!placeName) {
+        throw new Error("กรุณาระบุชื่อสถานที่");
+      }
       const locationData: Location = {
+        MapName: placeName,
         MapAddress: address,
         Maplocation: {
           type: "Point",
-          coordinates: [position[1], position[0]],
+          coordinates: [position.lng, position.lat],
         },
       };
 
@@ -246,7 +205,10 @@ export default function MapLayout({
       console.error(error);
       toast({
         title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถดำเนินการได้ กรุณาลองใหม่อีกครั้ง",
+        description:
+          error instanceof Error
+            ? error.message
+            : "ไม่สามารถดำเนินการได้ กรุณาลองใหม่อีกครั้ง",
         variant: "destructive",
       });
     } finally {
@@ -254,15 +216,8 @@ export default function MapLayout({
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAddress(e.target.value);
-    if (isEditing && setEditMap) {
-      setEditMap((prevMap: any) => ({
-        ...prevMap,
-        MapAddress: e.target.value,
-      }));
-    }
-  };
+  if (loadError) return <div>Error loading maps</div>;
+  if (!isLoaded) return <div>Loading maps</div>;
 
   return (
     <div className="container mx-auto p-4">
@@ -273,27 +228,39 @@ export default function MapLayout({
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>ค้นหาตำแหน่ง</CardTitle>
+              <CardTitle>ข้อมูลสถานที่</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="relative">
-                <Input
-                  ref={autocompleteInput}
-                  value={address}
-                  onChange={handleInputChange}
-                  placeholder="ป้อนที่อยู่หรือชื่อสถานที่"
-                  className="pr-10"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3"
-                  onClick={() => setAddress("")}
+            <CardContent className="space-y-4">
+              <div>
+                <label
+                  htmlFor="placeName"
+                  className="mb-2 block text-sm font-medium"
                 >
-                  <X className="size-4" />
-                  <span className="sr-only">ล้างการค้นหา</span>
-                </Button>
+                  ชื่อสถานที่
+                </label>
+                <div className="relative">
+                  <Input
+                    id="placeName"
+                    ref={autocompleteInput}
+                    value={placeName}
+                    onChange={(e) => setPlaceName(e.target.value)}
+                    placeholder="ป้อนชื่อสถานที่หรือที่อยู่"
+                    className="pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3"
+                    onClick={() => {
+                      setPlaceName("");
+                      setAddress("");
+                    }}
+                  >
+                    <X className="size-4" />
+                    <span className="sr-only">ล้างการค้นหา</span>
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -323,7 +290,7 @@ export default function MapLayout({
                 <AlertDialogTrigger asChild>
                   <Button
                     className="w-full bg-orange-500 text-white hover:bg-orange-600"
-                    disabled={isLoading}
+                    disabled={isLoading || !placeName || !address}
                   >
                     {isLoading ? (
                       <Loader2 className="mr-2 size-4 animate-spin" />
@@ -347,6 +314,8 @@ export default function MapLayout({
                   </AlertDialogHeader>
                   <Separator className="my-4" />
                   <div className="space-y-2">
+                    <p className="text-sm font-medium">ชื่อสถานที่:</p>
+                    <p className="text-muted-foreground text-sm">{placeName}</p>
                     <p className="text-sm font-medium">ที่อยู่ที่เลือก:</p>
                     <p className="text-muted-foreground text-sm">{address}</p>
                   </div>
@@ -375,7 +344,9 @@ export default function MapLayout({
               <CardTitle>ตำแหน่งที่เลือก</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-600">{address}</p>
+              <p className="text-sm text-gray-600">
+                {address || "กรุณาเลือกตำแหน่งบนแผนที่"}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -385,30 +356,24 @@ export default function MapLayout({
             <CardTitle>แผนที่</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="h-[500px] w-full">
-              {customIcon && (
-                <MapContainer
-                  center={position}
-                  zoom={13}
-                  scrollWheelZoom={false}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    zIndex: 1,
-                  }}
-                  zoomControl={false}
-                >
-                  <TileLayer
-                    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                  />
-                  <LocationMarker
-                    position={position}
-                    setPosition={setPosition}
-                    customIcon={customIcon}
-                  />
-                </MapContainer>
-              )}
+            <div id="map" className="h-[500px] w-full">
+              <GoogleMap
+                mapContainerStyle={mapContainerStyle}
+                center={position}
+                zoom={13}
+                onLoad={onLoad}
+                onUnmount={onUnmount}
+                onClick={(e) => {
+                  if (e.latLng) {
+                    setPosition({
+                      lat: e.latLng.lat(),
+                      lng: e.latLng.lng(),
+                    });
+                  }
+                }}
+              >
+                <Marker position={position} />
+              </GoogleMap>
             </div>
           </CardContent>
         </Card>
