@@ -16,8 +16,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, UserCircle, LogOut } from "lucide-react";
-
+import { useRouter } from "next/navigation";
 const SignOut = ({ User }) => {
+  const router = useRouter();
+
+  const handleSignOut = () => {
+    sessionStorage.clear();
+    signOut({ redirect: false }).then(() => {
+      router.push("/Signin"); // redirect ไปหน้า /
+      router.refresh();
+    });
+  };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -53,7 +62,7 @@ const SignOut = ({ User }) => {
         </DropdownMenuGroup>
 
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => signOut()}>
+        <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 size-4" />
           <span>ออกจากระบบ</span>
         </DropdownMenuItem>
