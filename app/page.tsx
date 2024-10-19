@@ -1,6 +1,13 @@
-import React from "react";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
-const page = () => {
-  return <div></div>;
-};
-export default page;
+export default async function Home() {
+  const session = await auth();
+
+  if (!session) {
+    redirect("/Signin");
+  }
+
+  // This return statement will never be reached, but is needed to satisfy TypeScript
+  return null;
+}

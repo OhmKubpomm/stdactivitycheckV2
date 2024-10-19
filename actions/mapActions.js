@@ -24,6 +24,19 @@ export async function createLocation(data) {
   }
 }
 
+export async function getMapLocations() {
+  try {
+    const locations = await Map.find({}, "MapName");
+    return locations.map((location) => ({
+      value: location._id.toString(), // แปลง ObjectId เป็น string
+      label: location.MapName,
+    }));
+  } catch (error) {
+    console.error("Error fetching map locations:", error);
+    throw new Error("ไม่สามารถดึงข้อมูลสถานที่ได้");
+  }
+}
+
 export async function getallMap() {
   try {
     const allMap = await Map.find();
@@ -76,7 +89,6 @@ export async function checkUserWithinRange(
   try {
     // ค้นหาตำแหน่งที่เชื่อมโยงกับชื่อสถานที่ของกิจกรรมใน Map โดยใช้ MapName
     const mapData = await Map.findOne({ MapName: activityLocation });
-    console.log(mapData);
 
     if (!mapData || !mapData.Maplocation) {
       throw new Error("ไม่พบตำแหน่งสำหรับสถานที่นี้");

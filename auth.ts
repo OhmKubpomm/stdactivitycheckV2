@@ -11,6 +11,9 @@ connectDatabase();
 
 // กำหนดการตั้งค่า NextAuth
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  pages: {
+    signIn: "/Signin",
+  },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
@@ -22,15 +25,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password", required: true },
       },
       async authorize(credentials) {
-        const { email, password } = credentials as {
-          email: string;
-          password: string;
-        };
+        try {
+          const { email, password } = credentials as {
+            email: string;
+            password: string;
+          };
 
-        if (!email || !password) {
+          if (!email || !password) {
+            console.error("Missing email or password");
+            return null;
+          }
+          const result = await signInWithCredentials({ email, password });
+          if (!result) {
+            console.error(`Login failed for email: ${email}`);
+          }
+          return result;
+        } catch (error) {
+          console.error("Error in authorize function:", error);
           return null;
         }
-        return await signInWithCredentials({ email, password });
       },
     }),
   ],
@@ -51,6 +64,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }: { session: any; token: any }) {
       if (token.user) {
         session.user = token.user;
+      } else if (session.user?.email) {
+        // ถ้าไม่มีข้อมูลใน token ให้ดึงข้อมูลจากฐานข้อมูลอีกครั้ง
+        const user = await getUserByEmail(session.user.email);
+        if (user) {
+          session.user = user;
+        }
       }
       return session;
     },
