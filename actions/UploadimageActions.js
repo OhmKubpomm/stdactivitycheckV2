@@ -34,7 +34,6 @@ async function uploadphotoToCloud(formData) {
             console.error("Upload to Cloudinary error:", error);
             reject(new Error("Failed to upload image to Cloudinary"));
           } else {
-            console.log("Upload result:", result);
             resolve([result]); // Return an array with a single object for consistency
           }
         }
@@ -57,7 +56,7 @@ export async function uploadPhoto(formData, userId) {
     // Update photo URL in MongoDB
     const newPhotos = photos.map((photo) => {
       const newPhoto = { image: photo.secure_url };
-      console.log("newphoto:", newPhoto);
+
       return newPhoto;
     });
 

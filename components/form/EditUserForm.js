@@ -9,6 +9,14 @@ import { useRouter } from "next/navigation";
 import { Form, Input, message, Upload, Modal } from "antd";
 import { Title, Card } from "@tremor/react";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { UploadOutlined } from "@ant-design/icons";
 import Image from "next/image";
 const EditUserForm = () => {
@@ -84,6 +92,7 @@ const EditUserForm = () => {
       Address,
       Telephone,
       image,
+      userType,
     } = formData1;
 
     const resupdate = await updateUser({
@@ -96,6 +105,7 @@ const EditUserForm = () => {
       Address,
       Telephone,
       image,
+      userType,
       id: editUser._id,
     });
 
@@ -124,6 +134,7 @@ const EditUserForm = () => {
             Date: editUser?.Date,
             Address: editUser?.Address,
             Telephone: editUser?.Telephone,
+            userType: editUser?.userType,
           }}
         >
           <div className="space-y-4">
@@ -172,6 +183,19 @@ const EditUserForm = () => {
             </Form.Item>
             <Form.Item label="Telephone" name="Telephone">
               <Input type="tel" name="Telephone" className="rounded border" />
+            </Form.Item>
+            <Form.Item label="userType" name="userType">
+              <div className="space-y-2">
+                <Select name="userType" defaultValue={editUser?.userType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="เลือกประเภทผู้ใช้" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="regular">ปกติ</SelectItem>
+                    <SelectItem value="transfer">เทียบโอน</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </Form.Item>
           </div>
 

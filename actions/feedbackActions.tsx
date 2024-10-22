@@ -87,6 +87,16 @@ export async function createFeedback(data: any) {
       throw new Error("User not authenticated");
     }
 
+    // Check if the user has already submitted feedback for this activity
+    const existingFeedback = await Feedback.findOne({
+      userId: session.user._id,
+      activityId: data.activityId,
+    });
+
+    if (existingFeedback) {
+      return { error: "คุณได้ส่งข้อเสนอแนะสำหรับกิจกรรมนี้แล้ว" };
+    }
+
     const newFeedback = new Feedback({
       ...data,
       userId: session.user._id,
@@ -94,15 +104,29 @@ export async function createFeedback(data: any) {
 
     const savedFeedback = await newFeedback.save();
 
+    // Convert the MongoDB document to a plain JavaScript object
+    const plainFeedback = JSON.parse(JSON.stringify(savedFeedback));
+
     revalidatePath("/feedback");
     return {
-      ...savedFeedback._doc,
-      _id: savedFeedback._id.toString(),
+      ...plainFeedback,
       msg: "เพิ่มข้อเสนอแนะสำเร็จ",
     };
   } catch (error) {
     console.error("Error creating feedback:", error);
     throw new Error("เกิดข้อผิดพลาดในการสร้างข้อเสนอแนะ");
+  }
+}
+
+export async function getUserFeedbackActivities(userId: string) {
+  try {
+    const feedbacks = await Feedback.find({ userId });
+    return feedbacks.map((feedback: any) => feedback.activityId.toString());
+  } catch (error) {
+    console.error("Error fetching user feedback activities:", error);
+    throw new Error(
+      "เกิดข้อผิดพลาดในการดึงข้อมูลกิจกรรมที่ผู้ใช้ให้ข้อเสนอแนะ"
+    );
   }
 }
 

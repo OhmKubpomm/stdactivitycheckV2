@@ -60,6 +60,7 @@ export async function updateUser({
   Address,
   Telephone,
   image,
+  userType,
   id,
 }) {
   try {
@@ -74,6 +75,7 @@ export async function updateUser({
         Date,
         Address,
         Telephone,
+        userType,
         image,
       },
       { new: true }

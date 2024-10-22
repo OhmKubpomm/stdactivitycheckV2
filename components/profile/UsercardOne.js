@@ -35,6 +35,7 @@ const UsercardOne = ({ User }) => {
                 <TableHeaderCell>วันเกิด</TableHeaderCell>
                 <TableHeaderCell>ที่อยู่</TableHeaderCell>
                 <TableHeaderCell>เบอร์โทร</TableHeaderCell>
+                <TableHeaderCell>ประเภทนักศึกษา</TableHeaderCell>
                 <TableHeaderCell>สิทธิ์การใช้งาน</TableHeaderCell>
                 <TableHeaderCell>ตั้งค่า</TableHeaderCell>
               </TableRow>
@@ -69,6 +70,7 @@ const UsercardOne = ({ User }) => {
                 <TableCell>{User?.Date}</TableCell>
                 <TableCell>{User?.Address}</TableCell>
                 <TableCell>{User?.Telephone}</TableCell>
+                <TableCell>{User?.userType}</TableCell>
                 <TableCell>{User?.role}</TableCell>
                 <TableCell className="table-cell">
                   <Link

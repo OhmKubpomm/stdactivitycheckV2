@@ -48,6 +48,7 @@ const formSchema = z.object({
 
 interface FeedbackFormProps {
   activities: DashboardActivityType[];
+  userFeedbackActivities: string[];
 }
 
 const emojis = [
@@ -58,7 +59,10 @@ const emojis = [
   { value: "5", label: "😄", description: "ดีมาก" },
 ];
 
-export function FeedbackForm({ activities }: FeedbackFormProps) {
+export function FeedbackForm({
+  activities,
+  userFeedbackActivities,
+}: FeedbackFormProps) {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const form = useForm<z.infer<typeof formSchema>>({
@@ -130,8 +134,14 @@ export function FeedbackForm({ activities }: FeedbackFormProps) {
                     className="mb-2 border-indigo-300 focus:border-indigo-500"
                   />
                   {filteredActivities.map((activity) => (
-                    <SelectItem key={activity.id} value={activity.id}>
+                    <SelectItem
+                      key={activity.id}
+                      value={activity.id}
+                      disabled={userFeedbackActivities.includes(activity.id)}
+                    >
                       {activity.name}
+                      {userFeedbackActivities.includes(activity.id) &&
+                        " (ส่งข้อเสนอแนะแล้ว)"}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -19,6 +19,7 @@ interface User {
   Address: string;
   Telephone: string;
   role: string;
+  userType: string;
 }
 
 interface UserlistProps {
@@ -42,6 +43,7 @@ const Userlist: React.FC<UserlistProps> = ({
     { key: "Date", label: "วันเกิด" },
     { key: "Address", label: "ที่อยู่" },
     { key: "Telephone", label: "เบอร์โทร" },
+    { key: "userType", label: "ประเภทนักศึกษา" },
     { key: "role", label: "สิทธิ์การใช้งาน" },
   ];
 
