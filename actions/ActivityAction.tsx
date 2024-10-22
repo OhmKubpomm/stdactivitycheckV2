@@ -324,7 +324,7 @@ export async function DeleteForm(id: number) {
     const deletedForm = await ActivityForm.findOneAndDelete({ _id: id });
 
     if (!deletedForm) throw new Error("ไม่พบฟอร์มที่ต้องการลบ");
-
+    revalidatePath("/");
     return { ...deletedForm._doc, _id: deletedForm._doc._id.toString() };
   } catch (error) {
     console.error("เกิดข้อผิดพลาดในการลบฟอร์ม:", error);
