@@ -1,5 +1,6 @@
 /* eslint-disable tailwindcss/no-custom-classname */
 import { GetFormStats, GetForms, CloneForm } from "@/actions/ActivityAction";
+
 import {
   Card,
   CardContent,
@@ -10,6 +11,8 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Key, ReactNode, Suspense } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import { Separator } from "@/components/ui/separator";
 import CreateFormBtn from "@/components/Activityform/CreateFormBtn";
@@ -30,9 +33,14 @@ import {
   ArrowRightCircle,
   Eye,
   Copy,
+  ChevronDown,
 } from "lucide-react";
 import DeleteBtn from "@/components/Activityform/DeleteBtn";
 connectdatabase();
+interface CloneFormButtonProps {
+  formId: string;
+  formName: string;
+}
 
 export default function Home() {
   return (
@@ -224,15 +232,49 @@ function FormCard({ form }: { form: typeof ActivityForm }) {
         )}
         <div className="flex w-full gap-2">
           <DeleteBtn formId={form.id} />
-          <form action={CloneForm}>
-            <input type="hidden" name="formId" value={form.id} />
-            <Button type="submit" variant="outline" className="w-full">
-              <Copy className="mr-2 size-4" />
-              คัดลอกแบบฟอร์มนี้
-            </Button>
-          </form>
+          <CloneFormButton formId={form.id} formName={form.ActivityFormname} />
         </div>
       </CardFooter>
     </Card>
+  );
+}
+
+function CloneFormButton({ formId, formName }: CloneFormButtonProps) {
+  return (
+    <form action={CloneForm} className="w-full">
+      <input type="hidden" name="formId" value={formId} />
+      <details className="group w-full">
+        <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg bg-gradient-to-r from-primary-500 to-yellow-500 px-4 py-2 text-white shadow-lg transition-all hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
+          <div className="flex items-center space-x-2">
+            <Copy className="size-5" />
+            <span className="font-medium">คัดลอกแบบฟอร์มนี้</span>
+          </div>
+          <ChevronDown className="size-5 transition-transform group-open:rotate-180" />
+        </summary>
+        <div className="mt-3 space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-lg">
+          <div className="space-y-2">
+            <Label
+              htmlFor={`newFormName-${formId}`}
+              className="text-sm font-medium text-gray-700"
+            >
+              ชื่อแบบฟอร์มใหม่
+            </Label>
+            <Input
+              id={`newFormName-${formId}`}
+              name="newFormName"
+              placeholder="ใส่ชื่อแบบฟอร์มใหม่"
+              defaultValue={`${formName} (สำเนา)`}
+              className="w-full"
+            />
+          </div>
+          <Button
+            type="submit"
+            className="w-full bg-gradient-to-r from-primary-500 to-yellow-500 text-white transition-all hover:from-green-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+          >
+            ยืนยันการคัดลอก
+          </Button>
+        </div>
+      </details>
+    </form>
   );
 }

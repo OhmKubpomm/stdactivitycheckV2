@@ -336,15 +336,20 @@ export async function CloneForm(formData: FormData) {
   try {
     const user = await checkAdminPermission();
 
-    const formId = formData.get("formId");
+    const formId = formData.get("formId") as string;
     if (!formId) throw new Error("ไม่พบ ID ของฟอร์ม");
+
+    const newFormName = formData.get("newFormName") as string;
+    const useOriginalName = formData.get("useOriginalName") === "true";
 
     const originalForm = await ActivityForm.findOne({ _id: formId });
     if (!originalForm) throw new Error("ไม่พบฟอร์มต้นฉบับ");
 
     const clonedForm = new ActivityForm({
       userId: user._id,
-      ActivityFormname: `${originalForm.ActivityFormname} (สำเนา)`,
+      ActivityFormname: useOriginalName
+        ? `${originalForm.ActivityFormname} (สำเนา)`
+        : newFormName || `${originalForm.ActivityFormname} (สำเนา)`,
       ActivityDescription: originalForm.ActivityDescription,
       ActivityContent: originalForm.ActivityContent,
       ActivityType: originalForm.ActivityType,
@@ -360,11 +365,15 @@ export async function CloneForm(formData: FormData) {
     revalidatePath("/");
 
     return {
-      ...clonedForm._doc,
-      _id: clonedForm._id.toString(),
+      success: true,
+      message: "แบบฟอร์มถูกคัดลอกเรียบร้อยแล้ว",
+      newFormId: clonedForm._id.toString(),
     };
   } catch (error) {
     console.error("เกิดข้อผิดพลาดในการโคลนฟอร์ม:", error);
-    throw new Error("ไม่สามารถโคลนฟอร์มได้");
+    return {
+      success: false,
+      message: "ไม่สามารถโคลนฟอร์มได้",
+    };
   }
 }

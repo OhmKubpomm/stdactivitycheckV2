@@ -52,12 +52,14 @@ export async function getallMap() {
   }
 }
 
-export async function updateMap({ MapAddress, id }) {
+export async function updateMap({ id, MapName, MapAddress, Maplocation }) {
   try {
     const map = await Map.findByIdAndUpdate(
       id,
       {
+        MapName,
         MapAddress,
+        Maplocation,
       },
       { new: true }
     );
