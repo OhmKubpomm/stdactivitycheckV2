@@ -188,8 +188,16 @@ const EditMaplayout = () => {
     try {
       // Manually prepare the data
       setEditMap((prevMap: any) => ({ ...prevMap, MapAddress: address }));
+      // Ensure all required properties are included
+      const updatedMapData = {
+        id: editMap._id,
+        MapName: editMap.MapName, // Assuming editMap has a MapName property
+        MapAddress: address,
+        Maplocation: editMap.Maplocation, // Assuming editMap has a Maplocation property
+      };
+
       // Assuming createLocation is a function that performs the API call
-      const res = await updateMap({ id: editMap._id, MapAddress: address });
+      const res = await updateMap(updatedMapData);
 
       if (res.error) {
         toast({
