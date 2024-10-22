@@ -248,7 +248,7 @@ const EditMaplayout = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Label htmlFor="name">ค้นหาตำแหน่ง</Label>
+              <Label htmlFor="name">ค้นหาตำแหน่ง1</Label>
 
               <div
                 style={{

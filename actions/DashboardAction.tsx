@@ -99,7 +99,6 @@ export async function getDashboardData(): Promise<DashboardDataType> {
       minute: "2-digit",
     });
   };
-
   const activityRequirements =
     user.userType === "regular"
       ? { mandatory: 2, mandatoryElective: 5, elective: 5 }
@@ -137,11 +136,9 @@ export async function getDashboardData(): Promise<DashboardDataType> {
           (map: MapType) => map.name === activity.ActivityFormname
         );
 
-        // Convert to Bangkok time
+        // ไม่ต้องเพิ่ม 7 ชั่วโมง แต่ใช้ locale string สำหรับการแปลงเวลา
         const startDate = new Date(activity.startTime);
-        startDate.setHours(startDate.getHours() + 7); // Add 7 hours for Bangkok time
         const endDate = new Date(activity.endTime);
-        endDate.setHours(endDate.getHours() + 7); // Add 7 hours for Bangkok time
 
         return {
           id: activity._id.toString(),
