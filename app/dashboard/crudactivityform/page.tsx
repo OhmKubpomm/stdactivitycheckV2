@@ -49,7 +49,9 @@ export default function Home() {
         <CardStatsWrapper />
       </Suspense>
       <Separator className="my-6" />
-      <h2 className="col-span-2 text-4xl font-bold">จัดการแบบฟอร์ม</h2>
+      <h2 className="col-span-2 text-4xl font-bold">
+        จัดการแบบความต้องการผู้เข้าร่วมกิจกรรม
+      </h2>
       <Separator className="my-6" />
       <div className="gric-cols-1 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <CreateFormBtn />
@@ -83,36 +85,36 @@ function StatsCards(props: StatsCardProps) {
       <StatsCard
         title="จำนวนการเข้าชมทั้งหมด"
         icon={<Users className="text-orange-600" />}
-        helperText={`จำนวนผู้เข้าชมทั้งหมดจากทุกแบบฟอร์ม`}
+        helperText={`จำนวนผู้เข้าชมทั้งหมดจากทุกแบบความต้องการผู้เข้าร่วมกิจกรรม`}
         value={data?.visits?.toLocaleString() || "ไม่มีข้อมูล"}
         loading={loading}
         className="shadow-md shadow-orange-600"
       />
 
       <StatsCard
-        title="จำนวนการส่งแบบฟอร์มทั้งหมด"
+        title="จำนวนการส่งแบบความต้องการผู้เข้าร่วมกิจกรรมทั้งหมด"
         icon={<CheckCircle className="text-yellow-600" />}
-        helperText={`จำนวนการส่งแบบฟอร์มสำเร็จทั้งหมดจากทุกแบบฟอร์ม`}
+        helperText={`จำนวนการส่งแบบความต้องการผู้เข้าร่วมกิจกรรมสำเร็จทั้งหมดจากทุกแบบความต้องการผู้เข้าร่วมกิจกรรม`}
         value={data?.submissions?.toLocaleString() || "ไม่มีข้อมูล"}
         loading={loading}
         className="shadow-md shadow-yellow-600"
       />
 
       <StatsCard
-        title="จำนวนผู้ใช้งานที่ทำแบบฟอร์มแล้ว"
+        title="จำนวนผู้ใช้งานที่ทำแบบความต้องการผู้เข้าร่วมกิจกรรมแล้ว"
         icon={<MousePointerSquareDashed className="text-green-600" />}
-        helperText={`มีผู้ทำแบบฟอร์มแล้วจำนวน ${data?.submissions} คน จากผู้เข้าชมทั้งหมด ${data?.visits} คน`}
+        helperText={`มีผู้ทำแบบความต้องการผู้เข้าร่วมกิจกรรมแล้วจำนวน ${data?.submissions} คน จากผู้เข้าชมทั้งหมด ${data?.visits} คน`}
         value={`${data?.submissions?.toLocaleString() || "ไม่มีข้อมูล"} คน`}
         loading={loading}
         className="shadow-md shadow-green-600"
       />
 
       <StatsCard
-        title="จำนวนผู้ใช้ที่ออกจากแบบฟอร์ม"
+        title="จำนวนผู้ใช้ที่ออกจากแบบความต้องการผู้เข้าร่วมกิจกรรม"
         icon={<LogOut className="text-red-600" />}
         helperText={`มีผู้ใช้จำนวน ${
           data?.visits - data?.submissions
-        } คน ที่ออกจากหน้าแบบฟอร์มโดยไม่ส่ง`}
+        } คน ที่ออกจากหน้าแบบความต้องการผู้เข้าร่วมกิจกรรมโดยไม่ส่ง`}
         value={`${
           (data?.visits - data?.submissions)?.toLocaleString() || "ไม่มีข้อมูล"
         } คน`}
@@ -215,7 +217,7 @@ function FormCard({ form }: { form: typeof ActivityForm }) {
             className="text-md w-full gap-4 bg-gradient-to-r from-primary-500 to-yellow-500 text-white"
           >
             <Link href={`/dashboard/crudactivityform/forms/${form.id}`}>
-              ดูแบบฟอร์ม <ArrowRightCircle />
+              ดูแบบความต้องการผู้เข้าร่วมกิจกรรม <ArrowRightCircle />
             </Link>
           </Button>
         )}
@@ -226,7 +228,7 @@ function FormCard({ form }: { form: typeof ActivityForm }) {
             className="text-md w-full gap-4  bg-gradient-to-r from-primary-500 to-yellow-500 text-white"
           >
             <Link href={`/dashboard/crudactivityform/builder/${form.id}`}>
-              แก้ไขแบบฟอร์มนี้ <PenLine />
+              แก้ไขแบบความต้องการผู้เข้าร่วมกิจกรรมนี้ <PenLine />
             </Link>
           </Button>
         )}
@@ -247,7 +249,7 @@ function CloneFormButton({ formId, formName }: CloneFormButtonProps) {
         <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg bg-gradient-to-r from-primary-500 to-yellow-500 px-4 py-2 text-white shadow-lg transition-all hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
           <div className="flex items-center space-x-2">
             <Copy className="size-5" />
-            <span className="font-medium">คัดลอกแบบฟอร์มนี้</span>
+            <span className="font-medium">คัดลอกแบบความต้องการกิจกรรมนี้</span>
           </div>
           <ChevronDown className="size-5 transition-transform group-open:rotate-180" />
         </summary>
@@ -257,12 +259,12 @@ function CloneFormButton({ formId, formName }: CloneFormButtonProps) {
               htmlFor={`newFormName-${formId}`}
               className="text-sm font-medium text-gray-700"
             >
-              ชื่อแบบฟอร์มใหม่
+              ชื่อแบบความต้องการผู้เข้าร่วมกิจกรรมใหม่
             </Label>
             <Input
               id={`newFormName-${formId}`}
               name="newFormName"
-              placeholder="ใส่ชื่อแบบฟอร์มใหม่"
+              placeholder="ใส่ชื่อแบบความต้องการผู้เข้าร่วมกิจกรรมใหม่"
               defaultValue={`${formName} (สำเนา)`}
               className="w-full"
             />

@@ -6,8 +6,8 @@ import connectdatabase from "@/utils/connectdatabase";
 import { revalidatePath } from "next/cache";
 import User from "@/models/Usermodel";
 import Formsubs from "@/models/FormSubmissions";
-import { Document, ObjectId } from "mongoose";
-
+import mongoose, { Document, ObjectId } from "mongoose";
+import { checkUserWithinRange } from "@/actions/mapActions";
 connectdatabase();
 
 // Interface สำหรับ Formsub
@@ -16,6 +16,14 @@ interface FormSubmission extends Document {
   formId: ObjectId;
   createdAt: Date;
   Formsubcontent: string;
+}
+
+interface Participation {
+  activityId: mongoose.Schema.Types.ObjectId; // ชนิดของ activityId
+  bookingStatus: string;
+  registrationStatus: string;
+  questionnaireStatus: string;
+  completionStatus: string;
 }
 
 // Interface สำหรับ Activity
@@ -89,8 +97,11 @@ export async function GetFormStats() {
       bounceRate,
     };
   } catch (error) {
-    console.error("เกิดข้อผิดพลาดในการดึงสถิติฟอร์ม:", error);
-    throw new Error("ไม่สามารถดึงสถิติฟอร์มได้");
+    console.error(
+      "เกิดข้อผิดพลาดในการดึงสถิติแบบความต้องการผู้เข้าร่วมกิจกรรม:",
+      error
+    );
+    throw new Error("ไม่สามารถดึงสถิติแบบความต้องการผู้เข้าร่วมกิจกรรมได้");
   }
 }
 
@@ -100,7 +111,7 @@ export async function CreateForm(data: formSchemaType) {
 
     const validation = formSchema.safeParse(data);
     if (!validation.success) {
-      throw new Error("ข้อมูลฟอร์มไม่ถูกต้อง");
+      throw new Error("ข้อมูลแบบความต้องการผู้เข้าร่วมกิจกรรมไม่ถูกต้อง");
     }
 
     const { ActivityFormname, ActivityDescription } = data;
@@ -120,8 +131,11 @@ export async function CreateForm(data: formSchemaType) {
       _id: newActivityForm._id.toString(),
     };
   } catch (error) {
-    console.error("เกิดข้อผิดพลาดในการสร้างฟอร์ม:", error);
-    throw new Error("ไม่สามารถสร้างฟอร์มได้");
+    console.error(
+      "เกิดข้อผิดพลาดในการสร้างแบบความต้องการผู้เข้าร่วมกิจกรรม:",
+      error
+    );
+    throw new Error("ไม่สามารถสร้างแบบความต้องการผู้เข้าร่วมกิจกรรมได้");
   }
 }
 
@@ -134,8 +148,11 @@ export async function GetForms() {
       .exec();
     return activityForms;
   } catch (error) {
-    console.error("เกิดข้อผิดพลาดในการดึงฟอร์มทั้งหมด:", error);
-    throw new Error("ไม่สามารถดึงฟอร์มทั้งหมดได้");
+    console.error(
+      "เกิดข้อผิดพลาดในการดึงแบบความต้องการผู้เข้าร่วมกิจกรรมทั้งหมด:",
+      error
+    );
+    throw new Error("ไม่สามารถดึงแบบความต้องการผู้เข้าร่วมกิจกรรมทั้งหมดได้");
   }
 }
 
@@ -144,12 +161,15 @@ export async function GetFormById(id: Object) {
     await checkAdminPermission();
 
     const form = await ActivityForm.findById(id);
-    if (!form) throw new Error("ไม่พบฟอร์มกิจกรรม");
+    if (!form) throw new Error("ไม่พบแบบความต้องการผู้เข้าร่วมกิจกรรมกิจกรรม");
 
     return { ...form._doc, _id: form._doc._id.toString() };
   } catch (error) {
-    console.error("เกิดข้อผิดพลาดในการดึงฟอร์มตาม ID:", error);
-    throw new Error("ไม่สามารถดึงฟอร์มตาม ID ได้");
+    console.error(
+      "เกิดข้อผิดพลาดในการดึงแบบความต้องการผู้เข้าร่วมกิจกรรมตาม ID:",
+      error
+    );
+    throw new Error("ไม่สามารถดึงแบบความต้องการผู้เข้าร่วมกิจกรรมตาม ID ได้");
   }
 }
 
@@ -165,12 +185,18 @@ export async function UpdateFormContent(id: number, jsonContent: string) {
       { new: true }
     );
 
-    if (!updatedForm) throw new Error("ไม่พบฟอร์มที่ต้องการอัปเดต");
+    if (!updatedForm)
+      throw new Error("ไม่พบแบบความต้องการผู้เข้าร่วมกิจกรรมที่ต้องการอัปเดต");
 
     return { ...updatedForm._doc, _id: updatedForm._doc._id.toString() };
   } catch (error) {
-    console.error("เกิดข้อผิดพลาดในการอัปเดตเนื้อหาฟอร์ม:", error);
-    throw new Error("ไม่สามารถอัปเดตเนื้อหาฟอร์มได้");
+    console.error(
+      "เกิดข้อผิดพลาดในการอัปเดตเนื้อหาแบบความต้องการผู้เข้าร่วมกิจกรรม:",
+      error
+    );
+    throw new Error(
+      "ไม่สามารถอัปเดตเนื้อหาแบบความต้องการผู้เข้าร่วมกิจกรรมได้"
+    );
   }
 }
 
@@ -178,6 +204,8 @@ export async function PublishForm(
   id: number,
   startTime: string,
   endTime: string,
+  regisStartTime: string,
+  regisEndTime: string,
   activityType: string,
   activityLocation: string,
   longitude: number,
@@ -187,10 +215,25 @@ export async function PublishForm(
     const session = await auth();
     if (!session) throw new Error("ไม่พบผู้ใช้งาน");
 
+    const regisEndDate = new Date(regisEndTime);
+    const activityEndDate = new Date(endTime);
+
+    // Calculate ActivityEndTime (not more than 2 days after regisEndTime)
+    const maxActivityEndTime = new Date(regisEndDate);
+    maxActivityEndTime.setDate(maxActivityEndTime.getDate() + 2);
+
+    const activityEndTime =
+      activityEndDate > maxActivityEndTime
+        ? maxActivityEndTime
+        : activityEndDate;
+
     const updateData = {
       published: true,
       startTime: new Date(startTime),
       endTime: new Date(endTime),
+      regisStartTime: new Date(regisStartTime),
+      regisEndTime: new Date(regisEndTime),
+      ActivityEndTime: activityEndTime,
       ActivityType: activityType,
       ActivityLocation: activityLocation,
     };
@@ -201,14 +244,21 @@ export async function PublishForm(
       { new: true }
     );
 
-    if (!updatedForm) throw new Error("ไม่พบฟอร์มที่ต้องการเผยแพร่");
+    if (!updatedForm)
+      throw new Error("ไม่พบแบบความต้องการผู้เข้าร่วมกิจกรรมที่ต้องการเผยแพร่");
 
     revalidatePath("/");
 
     return { success: true, data: updatedForm };
   } catch (error) {
-    console.error("เกิดข้อผิดพลาดในการเผยแพร่ฟอร์ม:", error);
-    return { success: false, error: "ไม่สามารถเผยแพร่ฟอร์มได้" };
+    console.error(
+      "เกิดข้อผิดพลาดในการเผยแพร่แบบความต้องการผู้เข้าร่วมกิจกรรม:",
+      error
+    );
+    return {
+      success: false,
+      error: "ไม่สามารถเผยแพร่แบบความต้องการผู้เข้าร่วมกิจกรรมได้",
+    };
   }
 }
 
@@ -221,18 +271,26 @@ export async function GetFormContentByUrl(formUrl: string) {
     );
 
     if (!form) {
-      throw new Error("ไม่พบฟอร์มที่ต้องการ");
+      throw new Error("ไม่พบแบบความต้องการผู้เข้าร่วมกิจกรรมที่ต้องการ");
     }
 
     return {
       ActivityContent: form.ActivityContent,
       startTime: form.startTime,
       endTime: form.endTime,
+      regisStartTime: form.regisStartTime,
+      regisEndTime: form.regisEndTime,
+      ActivityEndTime: form.ActivityEndTime,
       ActivityLocation: form.ActivityLocation,
     };
   } catch (error) {
-    console.error("เกิดข้อผิดพลาดในการดึงเนื้อหาฟอร์มตาม URL:", error);
-    throw new Error("ไม่สามารถดึงเนื้อหาฟอร์มตาม URL ได้");
+    console.error(
+      "เกิดข้อผิดพลาดในการดึงเนื้อหาแบบความต้องการผู้เข้าร่วมกิจกรรมตาม URL:",
+      error
+    );
+    throw new Error(
+      "ไม่สามารถดึงเนื้อหาแบบความต้องการผู้เข้าร่วมกิจกรรมตาม URL ได้"
+    );
   }
 }
 
@@ -250,7 +308,7 @@ export async function SubmitForm(formUrl: string, content: string) {
     });
 
     if (!form) {
-      throw new Error("ไม่พบฟอร์มที่ต้องการส่ง");
+      throw new Error("ไม่พบแบบความต้องการผู้เข้าร่วมกิจกรรมที่ต้องการส่ง");
     }
 
     if (isNaN(form.ActivitySubmissions)) {
@@ -268,8 +326,20 @@ export async function SubmitForm(formUrl: string, content: string) {
     await formSubmission.save();
     await form.save();
 
-    if (!user.activitiesParticipated.includes(form._id)) {
-      user.activitiesParticipated.push(form._id);
+    // ตรวจสอบว่าผู้ใช้เข้าร่วมกิจกรรมนี้หรือยัง โดยตรวจสอบว่ามี activityId หรือไม่ก่อนเรียก toString()
+    const hasParticipated = user.activitiesParticipated.some(
+      (participation: Participation) =>
+        participation.activityId?.toString() === form._id.toString()
+    );
+
+    if (!hasParticipated) {
+      user.activitiesParticipated.push({
+        activityId: form._id, // บันทึก activityId ตามโครงสร้างใหม่
+        bookingStatus: "booked",
+        registrationStatus: "pending",
+        questionnaireStatus: "pending",
+        completionStatus: "incomplete",
+      });
       await user.save();
     }
 
@@ -280,8 +350,11 @@ export async function SubmitForm(formUrl: string, content: string) {
       formId: formSubmission.formId.toString(),
     };
   } catch (error) {
-    console.error("เกิดข้อผิดพลาดในการส่งฟอร์ม:", error);
-    throw new Error("ไม่สามารถส่งฟอร์มได้");
+    console.error(
+      "เกิดข้อผิดพลาดในการส่งแบบความต้องการผู้เข้าร่วมกิจกรรม:",
+      error
+    );
+    throw new Error("ไม่สามารถส่งแบบความต้องการผู้เข้าร่วมกิจกรรมได้");
   }
 }
 
@@ -291,7 +364,7 @@ export async function GetFormWithSubmissions(id: number) {
 
     const form = await ActivityForm.findOne({ _id: id }).lean();
     if (!form) {
-      throw new Error("ไม่พบฟอร์มที่ต้องการ");
+      throw new Error("ไม่พบแบบความต้องการผู้เข้าร่วมกิจกรรมที่ต้องการ");
     }
 
     const submissions = (await Formsubs.find({
@@ -312,8 +385,13 @@ export async function GetFormWithSubmissions(id: number) {
 
     return { ...form };
   } catch (error) {
-    console.error("เกิดข้อผิดพลาดในการดึงฟอร์มพร้อมการส่ง:", error);
-    throw new Error("ไม่สามารถดึงฟอร์มพร้อมการส่งได้");
+    console.error(
+      "เกิดข้อผิดพลาดในการดึงแบบความต้องการผู้เข้าร่วมกิจกรรมพร้อมการส่ง:",
+      error
+    );
+    throw new Error(
+      "ไม่สามารถดึงแบบความต้องการผู้เข้าร่วมกิจกรรมพร้อมการส่งได้"
+    );
   }
 }
 
@@ -323,12 +401,16 @@ export async function DeleteForm(id: number) {
 
     const deletedForm = await ActivityForm.findOneAndDelete({ _id: id });
 
-    if (!deletedForm) throw new Error("ไม่พบฟอร์มที่ต้องการลบ");
+    if (!deletedForm)
+      throw new Error("ไม่พบแบบความต้องการผู้เข้าร่วมกิจกรรมที่ต้องการลบ");
     revalidatePath("/");
     return { ...deletedForm._doc, _id: deletedForm._doc._id.toString() };
   } catch (error) {
-    console.error("เกิดข้อผิดพลาดในการลบฟอร์ม:", error);
-    throw new Error("ไม่สามารถลบฟอร์มได้");
+    console.error(
+      "เกิดข้อผิดพลาดในการลบแบบความต้องการผู้เข้าร่วมกิจกรรม:",
+      error
+    );
+    throw new Error("ไม่สามารถลบแบบความต้องการผู้เข้าร่วมกิจกรรมได้");
   }
 }
 
@@ -337,13 +419,15 @@ export async function CloneForm(formData: FormData) {
     const user = await checkAdminPermission();
 
     const formId = formData.get("formId") as string;
-    if (!formId) throw new Error("ไม่พบ ID ของฟอร์ม");
+    if (!formId)
+      throw new Error("ไม่พบ ID ของแบบความต้องการผู้เข้าร่วมกิจกรรม");
 
     const newFormName = formData.get("newFormName") as string;
     const useOriginalName = formData.get("useOriginalName") === "true";
 
     const originalForm = await ActivityForm.findOne({ _id: formId });
-    if (!originalForm) throw new Error("ไม่พบฟอร์มต้นฉบับ");
+    if (!originalForm)
+      throw new Error("ไม่พบแบบความต้องการผู้เข้าร่วมกิจกรรมต้นฉบับ");
 
     const clonedForm = new ActivityForm({
       userId: user._id,
@@ -366,14 +450,70 @@ export async function CloneForm(formData: FormData) {
 
     return {
       success: true,
-      message: "แบบฟอร์มถูกคัดลอกเรียบร้อยแล้ว",
+      message: "แบบแบบความต้องการผู้เข้าร่วมกิจกรรมถูกคัดลอกเรียบร้อยแล้ว",
       newFormId: clonedForm._id.toString(),
     };
   } catch (error) {
-    console.error("เกิดข้อผิดพลาดในการโคลนฟอร์ม:", error);
+    console.error(
+      "เกิดข้อผิดพลาดในการโคลนแบบความต้องการผู้เข้าร่วมกิจกรรม:",
+      error
+    );
     return {
       success: false,
-      message: "ไม่สามารถโคลนฟอร์มได้",
+      message: "ไม่สามารถโคลนแบบความต้องการผู้เข้าร่วมกิจกรรมได้",
     };
   }
+}
+
+// เข้าร่วมกิจกรรมตามตำแหน่งผู้ใช้
+// เข้าร่วมกิจกรรมตามตำแหน่งผู้ใช้
+export async function joinActivity(
+  activityId: string,
+  latitude: number,
+  longitude: number
+) {
+  const session = await auth();
+  if (!session?.user?._id) throw new Error("User not authenticated");
+
+  const user = await User.findById(session.user._id);
+  const activity = await ActivityForm.findById(activityId);
+
+  if (!activity) throw new Error("Activity not found");
+
+  // ตรวจสอบว่าผู้ใช้สำรองที่นั่งแล้วหรือยัง
+  const participation = user.activitiesParticipated.find(
+    (participation: Participation) =>
+      participation.activityId?.toString() === activityId.toString()
+  );
+
+  if (!participation || participation.bookingStatus !== "booked") {
+    return { success: false, message: "คุณยังไม่ได้สำรองที่นั่ง" };
+  }
+
+  const now = new Date();
+  const regisStartTime = new Date(activity.regisStartTime);
+  const regisEndTime = new Date(activity.regisEndTime);
+
+  if (now < regisStartTime || now > regisEndTime) {
+    return { success: false, message: "หมดเวลาลงทะเบียน" };
+  }
+
+  // ใช้พารามิเตอร์ latitude และ longitude จากฝั่ง client ในการตรวจสอบระยะทาง
+  const userLocation = { lat: latitude, lng: longitude };
+
+  const { isWithinRange } = await checkUserWithinRange(
+    userLocation,
+    100, // ระยะทางที่กำหนด
+    activity.ActivityLocation
+  );
+
+  if (!isWithinRange) {
+    return { success: false, message: "คุณอยู่นอกระยะพื้นที่ที่กำหนด" };
+  }
+
+  // อัปเดตสถานะการเข้าร่วมกิจกรรมของผู้ใช้
+  participation.registrationStatus = "registered"; // เปลี่ยนสถานะเป็น "registered" เมื่อเข้าร่วมกิจกรรม
+
+  await user.save();
+  return { success: true };
 }

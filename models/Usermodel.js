@@ -43,8 +43,30 @@ const UserSchema = new mongoose.Schema(
     },
     activitiesParticipated: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "ActivityForms",
+        activityId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "ActivityForms",
+        },
+        bookingStatus: {
+          type: String,
+          enum: ["pending", "booked", "failed"],
+          default: "pending", // กำหนดสถานะเริ่มต้น
+        },
+        registrationStatus: {
+          type: String,
+          enum: ["pending", "registered", "failed"],
+          default: "pending",
+        },
+        questionnaireStatus: {
+          type: String,
+          enum: ["pending", "completed", "not_required"],
+          default: "pending",
+        },
+        completionStatus: {
+          type: String,
+          enum: ["incomplete", "completed"],
+          default: "incomplete",
+        },
       },
     ],
     isActive: {

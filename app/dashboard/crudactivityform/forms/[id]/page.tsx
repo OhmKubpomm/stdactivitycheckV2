@@ -57,7 +57,7 @@ async function FormDetailPage({
       <div className="container mx-auto py-8">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           <StatsCard
-            title="จำนวนการเข้าชมแบบฟอร์ม"
+            title="จำนวนการเข้าชมแบบความต้องการผู้เข้าร่วมกิจกรรม"
             icon={<LuView className="text-2xl text-blue-600" />}
             helperText={`ผู้เข้าชมทั้งหมด: ${ActivityVisits?.toLocaleString()} คน`}
             value={`${ActivityVisits?.toLocaleString() || "0"} คน`}
@@ -66,29 +66,29 @@ async function FormDetailPage({
           />
 
           <StatsCard
-            title="จำนวนการส่งแบบฟอร์ม"
+            title="จำนวนการส่งแบบความต้องการผู้เข้าร่วมกิจกรรม"
             icon={<FaWpforms className="text-2xl text-yellow-600" />}
-            helperText={`มี ${ActivitySubmissions?.toLocaleString()} คน จากผู้เข้าชมทั้งหมด ${ActivityVisits?.toLocaleString()} คน ที่ส่งแบบฟอร์ม`}
+            helperText={`มี ${ActivitySubmissions?.toLocaleString()} คน จากผู้เข้าชมทั้งหมด ${ActivityVisits?.toLocaleString()} คน ที่ส่งแบบความต้องการผู้เข้าร่วมกิจกรรม`}
             value={`${ActivitySubmissions?.toLocaleString() || "0"} คน`}
             loading={false}
             className="rounded-xl bg-white shadow-lg transition-shadow hover:shadow-xl"
           />
 
           <StatsCard
-            title="จำนวนผู้ที่ออกจากหน้าโดยไม่ส่งแบบฟอร์ม"
+            title="จำนวนผู้ที่ออกจากหน้าโดยไม่ส่งแบบความต้องการผู้เข้าร่วมกิจกรรม"
             icon={<LogOut className="text-2xl text-red-600" />}
             helperText={`มี ${
               ActivityVisits - ActivitySubmissions
-            } คน จากผู้เข้าชมทั้งหมด ${ActivityVisits} คน ออกจากหน้าโดยไม่ส่งแบบฟอร์ม`}
+            } คน จากผู้เข้าชมทั้งหมด ${ActivityVisits} คน ออกจากหน้าโดยไม่ส่งแบบความต้องการผู้เข้าร่วมกิจกรรม`}
             value={`${ActivityVisits - ActivitySubmissions} คน`}
             loading={false}
             className="rounded-xl bg-white shadow-lg transition-shadow hover:shadow-xl"
           />
 
           <StatsCard
-            title="จำนวนผู้ใช้งานที่ทำแบบฟอร์มแล้ว"
+            title="จำนวนผู้ใช้งานที่ทำแบบความต้องการผู้เข้าร่วมกิจกรรมแล้ว"
             icon={<HiCursorClick className="text-2xl text-green-600" />}
-            helperText={`มีผู้ทำแบบฟอร์มแล้ว ${ActivitySubmissions} คน จากผู้เข้าชมทั้งหมด ${ActivityVisits} คน`}
+            helperText={`มีผู้ทำแบบความต้องการผู้เข้าร่วมกิจกรรมแล้ว ${ActivitySubmissions} คน จากผู้เข้าชมทั้งหมด ${ActivityVisits} คน`}
             value={`ทำแล้ว ${ActivitySubmissions} ครั้ง`}
             loading={false}
             className="rounded-xl bg-white shadow-lg transition-shadow hover:shadow-xl"
@@ -114,7 +114,7 @@ async function SubmissionsTable({ id }: { id: number }) {
   const form = await GetFormWithSubmissions(id);
 
   if (!form) {
-    throw new Error("ไม่พบแบบฟอร์ม");
+    throw new Error("ไม่พบแบบความต้องการผู้เข้าร่วมกิจกรรม");
   }
   const formElements = JSON.parse(
     form.ActivityContent
@@ -163,9 +163,11 @@ async function SubmissionsTable({ id }: { id: number }) {
     return (
       <div className="rounded-lg bg-white p-8 text-center shadow">
         <h2 className="mb-2 text-2xl font-semibold text-gray-800">
-          ไม่พบการส่งแบบฟอร์ม
+          ไม่พบการส่งแบบความต้องการผู้เข้าร่วมกิจกรรม
         </h2>
-        <p className="text-gray-600">ยังไม่มีผู้ใช้ส่งแบบฟอร์มนี้</p>
+        <p className="text-gray-600">
+          ยังไม่มีผู้ใช้ส่งแบบความต้องการผู้เข้าร่วมกิจกรรมนี้
+        </p>
       </div>
     );
   }
@@ -173,8 +175,12 @@ async function SubmissionsTable({ id }: { id: number }) {
   return (
     <div className="overflow-hidden rounded-lg bg-white shadow">
       <div className="border-b border-gray-200 p-6">
-        <h2 className="text-2xl font-bold text-gray-800">การส่งแบบฟอร์ม</h2>
-        <p className="mt-1 text-gray-600">รายการการส่งแบบฟอร์มทั้งหมด</p>
+        <h2 className="text-2xl font-bold text-gray-800">
+          การส่งแบบความต้องการผู้เข้าร่วมกิจกรรม
+        </h2>
+        <p className="mt-1 text-gray-600">
+          รายการการส่งแบบความต้องการผู้เข้าร่วมกิจกรรมทั้งหมด
+        </p>
       </div>
       <div className="overflow-x-auto">
         <Table>

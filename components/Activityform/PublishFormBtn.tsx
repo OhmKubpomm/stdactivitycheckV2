@@ -30,6 +30,8 @@ function PublishFormBtn({ id }: { id: number }) {
   const [activityType, setActivityType] = useState<string>("");
   const [startDateTime, setStartDateTime] = useState<string>("");
   const [endDateTime, setEndDateTime] = useState<string>("");
+  const [regisStartDateTime, setRegisStartDateTime] = useState<string>("");
+  const [regisEndDateTime, setRegisEndDateTime] = useState<string>("");
   const [activityLocation, setActivityLocation] = useState<string>("");
   const [mapLocations, setMapLocations] = useState<
     { value: string; label: string }[]
@@ -71,6 +73,8 @@ function PublishFormBtn({ id }: { id: number }) {
       if (
         !startDateTime ||
         !endDateTime ||
+        !regisStartDateTime ||
+        !regisEndDateTime ||
         !activityType ||
         !activityLocation.trim()
       ) {
@@ -86,6 +90,8 @@ function PublishFormBtn({ id }: { id: number }) {
         id,
         new Date(startDateTime).toISOString(),
         new Date(endDateTime).toISOString(),
+        new Date(regisStartDateTime).toISOString(),
+        new Date(regisEndDateTime).toISOString(),
         activityType,
         activityLocation,
         0,
@@ -165,8 +171,11 @@ function PublishFormBtn({ id }: { id: number }) {
               noOptionsMessage={() => "ไม่พบสถานที่"}
             />
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="startDateTime">วันและเวลาเริ่มต้น</Label>
+            <Label htmlFor="startDateTime">
+              วันและเวลาเริ่มต้นสำรองที่นั่ง
+            </Label>
             <Input
               type="datetime-local"
               id="startDateTime"
@@ -175,12 +184,32 @@ function PublishFormBtn({ id }: { id: number }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="endDateTime">วันและเวลาสิ้นสุด</Label>
+            <Label htmlFor="endDateTime">วันและเวลาสิ้นสุดสำรองที่นั่ง</Label>
             <Input
               type="datetime-local"
               id="endDateTime"
               value={endDateTime}
               onChange={(e) => setEndDateTime(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="regisStartDateTime">
+              วันและเวลาเริ่มต้นลงทะเบียน
+            </Label>
+            <Input
+              type="datetime-local"
+              id="regisStartDateTime"
+              value={regisStartDateTime}
+              onChange={(e) => setRegisStartDateTime(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="regisEndDateTime">วันและเวลาสิ้นสุดลงทะเบียน</Label>
+            <Input
+              type="datetime-local"
+              id="regisEndDateTime"
+              value={regisEndDateTime}
+              onChange={(e) => setRegisEndDateTime(e.target.value)}
             />
           </div>
         </div>
@@ -192,6 +221,8 @@ function PublishFormBtn({ id }: { id: number }) {
               !activityType ||
               !startDateTime ||
               !endDateTime ||
+              !regisStartDateTime ||
+              !regisEndDateTime ||
               !activityLocation.trim()
             }
             onClick={(e) => {

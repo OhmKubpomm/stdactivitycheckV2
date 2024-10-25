@@ -43,13 +43,14 @@ function CreateFormBtn() {
       const formId = form._id;
       toast({
         title: "สำเร็จ",
-        description: "ฟอร์มถูกสร้างเรียบร้อยแล้ว",
+        description: "แบบความต้องการผู้เข้าร่วมกิจกรรมถูกสร้างเรียบร้อยแล้ว",
       });
       router.push(`/dashboard/crudactivityform/builder/${formId}`);
     } catch (error) {
       toast({
         title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถสร้างฟอร์มได้ในขณะนี้",
+        description:
+          "ไม่สามารถสร้างแบบความต้องการผู้เข้าร่วมกิจกรรมได้ในขณะนี้",
         variant: "destructive",
       });
     }
@@ -64,15 +65,15 @@ function CreateFormBtn() {
         >
           <FilePlus2 className="text-muted-foreground group-hover:text-primary size-8" />
           <p className="text-muted-foreground group-hover:text-primary text-xl font-bold">
-            สร้างฟอร์มใหม่
+            สร้างแบบความต้องการผู้เข้าร่วมกิจกรรมใหม่
           </p>
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>สร้างฟอร์ม</DialogTitle>
+          <DialogTitle>สร้างแบบความต้องการผู้เข้าร่วมกิจกรรม</DialogTitle>
           <DialogDescription>
-            สร้างฟอร์มใหม่เพื่อเริ่มรวบรวมข้อมูล
+            สร้างแบบความต้องการผู้เข้าร่วมกิจกรรมใหม่เพื่อเริ่มรวบรวมข้อมูล
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -82,7 +83,7 @@ function CreateFormBtn() {
               name="ActivityFormname"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>ชื่อฟอร์ม</FormLabel>
+                  <FormLabel>ชื่อแบบความต้องการผู้เข้าร่วมกิจกรรม</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>

@@ -19,11 +19,13 @@ interface ActivityType {
   ActivityFormname: string;
   startTime: Date;
   endTime: Date;
+  regisStartTime: Date;
+  regisEndTime: Date;
   ActivitySubmissions: number;
   ActivityDescription: string;
   ActivityContent: string;
   ActivityVisits: number;
-  ActivityType: "mandatory" | "mandatoryElective" | "elective";
+  ActivityType: string; // แก้ให้เป็น string แทน enum เพื่อรองรับภาษาไทย
   ActivityShareurl: string;
   ActivityLocation: string;
 }
@@ -46,12 +48,15 @@ export interface DashboardActivityType {
   description: string;
   content: string;
   visits: number;
-  type: "mandatory" | "mandatoryElective" | "elective";
+  type: string; // แก้ให้เป็น string เพื่อรองรับภาษาไทย
   shareUrl: string;
   location: string;
   time: string;
   coordinates: number[] | null;
-  status: "upcoming" | "ongoing" | "past";
+  startTime: string;
+  endTime: string;
+  regisStartTime: string;
+  regisEndTime: string;
 }
 
 export interface DashboardDataType {
@@ -74,16 +79,38 @@ export interface DashboardDataType {
   };
 }
 
+// ฟังก์ชัน mapping จากภาษาไทยเป็นภาษาอังกฤษ
+const mapActivityType = (activityType: string) => {
+  switch (activityType) {
+    case "กิจกรรมบังคับ":
+      return "mandatory";
+    case "กิจกรรมบังคับเลือก":
+      return "mandatoryElective";
+    case "กิจกรรมเลือกเข้าร่วม":
+      return "elective";
+
+    default:
+      return "unknown"; // ค่าไม่ตรง ให้แสดงเป็น unknown
+  }
+};
+
 export async function getDashboardData(): Promise<DashboardDataType> {
   const session = await auth();
   if (!session?.user?._id) throw new Error("User not authenticated");
 
-  const user = (await User.findById(session.user._id).populate(
-    "activitiesParticipated"
-  )) as UserType;
+  const user = (await User.findById(session.user._id).populate({
+    path: "activitiesParticipated.activityId", // ทำการ populate activityId
+    model: "ActivityForms", // ต้องตรงกับชื่อโมเดลที่ใช้ใน mongoose.model()
+  })) as UserType;
+  console.log(
+    "Populated Activities Participated:",
+    user.activitiesParticipated
+  );
+
   if (!user) throw new Error("User not found");
 
-  const currentDate = new Date();
+  console.log("User Activities Participated:", user.activitiesParticipated);
+
   const activities = (await ActivityForm.find({ published: true }).sort({
     startTime: 1,
   })) as ActivityType[];
@@ -99,10 +126,12 @@ export async function getDashboardData(): Promise<DashboardDataType> {
       minute: "2-digit",
     });
   };
+
   const activityRequirements =
     user.userType === "regular"
       ? { mandatory: 2, mandatoryElective: 5, elective: 5 }
       : { mandatory: 2, mandatoryElective: 2, elective: 2 };
+
   // นับจำนวนกิจกรรมที่ผู้ใช้เข้าร่วมแล้วตามประเภท
   const completedActivities = {
     mandatory: 0,
@@ -110,22 +139,28 @@ export async function getDashboardData(): Promise<DashboardDataType> {
     elective: 0,
   };
 
-  user.activitiesParticipated.forEach((activity: any) => {
-    if (activity.ActivityType === "กิจกรรมบังคับ") {
+  user.activitiesParticipated.forEach((participation: any) => {
+    const rawActivityType = participation.activityId?.ActivityType;
+    const activityType = mapActivityType(rawActivityType); // แปลงค่าภาษาไทยเป็นภาษาอังกฤษ
+    console.log("Raw Activity Type:", rawActivityType); // ตรวจสอบค่าที่ได้จากฐานข้อมูล
+    console.log("Mapped Activity Type:", activityType); // ตรวจสอบค่าแปลง
+    if (activityType === "mandatory") {
       completedActivities.mandatory++;
-    } else if (activity.ActivityType === "กิจกรรมบังคับเลือก") {
+    } else if (activityType === "mandatoryElective") {
       completedActivities.mandatoryElective++;
-    } else if (activity.ActivityType === "กิจกรรมเลือกเข้าร่วม") {
+    } else if (activityType === "elective") {
       completedActivities.elective++;
     }
   });
+
+  console.log("Completed Activities:", completedActivities);
 
   return {
     user: {
       name: user.name,
       email: user.email,
-      activitiesParticipated: user.activitiesParticipated.map((activity) =>
-        activity._id.toString()
+      activitiesParticipated: user.activitiesParticipated.map((participation) =>
+        participation.activityId ? participation.activityId._id.toString() : ""
       ),
       userType: user.userType,
       completedActivities,
@@ -136,9 +171,14 @@ export async function getDashboardData(): Promise<DashboardDataType> {
           (map: MapType) => map.name === activity.ActivityFormname
         );
 
-        // ไม่ต้องเพิ่ม 7 ชั่วโมง แต่ใช้ locale string สำหรับการแปลงเวลา
         const startDate = new Date(activity.startTime);
         const endDate = new Date(activity.endTime);
+        const regisStartDate = activity.regisStartTime
+          ? new Date(activity.regisStartTime)
+          : null;
+        const regisEndDate = activity.regisEndTime
+          ? new Date(activity.regisEndTime)
+          : null;
 
         return {
           id: activity._id.toString(),
@@ -149,21 +189,24 @@ export async function getDashboardData(): Promise<DashboardDataType> {
           description: activity.ActivityDescription,
           content: activity.ActivityContent,
           visits: activity.ActivityVisits,
-          type: activity.ActivityType,
+          type: mapActivityType(activity.ActivityType), // แปลง ActivityType ก่อนส่งไปยัง frontend
           shareUrl: activity.ActivityShareurl,
           location: activity.ActivityLocation,
-          time: `${formatThaiTime(startDate)} - ${formatThaiTime(endDate)}`,
+          time: `เวลาเริ่มต้น${formatThaiTime(
+            startDate
+          )} - เวลาสิ้นสุด${formatThaiTime(endDate)}`,
           coordinates: activityMap ? activityMap.Maplocation.coordinates : null,
-          status:
-            startDate > currentDate
-              ? "upcoming"
-              : endDate < currentDate
-              ? "past"
-              : "ongoing",
+          startTime: startDate.toISOString(),
+          endTime: endDate.toISOString(),
+          regisStartTime: regisStartDate
+            ? regisStartDate.toISOString()
+            : "ไม่ระบุเวลา",
+          regisEndTime: regisEndDate
+            ? regisEndDate.toISOString()
+            : "ไม่ระบุเวลา",
         };
       })
     ),
-
     activityRequirements,
   };
 }

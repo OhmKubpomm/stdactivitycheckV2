@@ -1,4 +1,3 @@
-/* eslint-disable tailwindcss/no-custom-classname */
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
@@ -47,6 +46,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { DataTable } from "@/components/globals/DataTable";
+import RegisSubmit from "@/components/Activityform/RegisSubmit";
 
 const isValidDate = (date: string | Date | null | undefined): boolean => {
   return date ? !isNaN(new Date(date).getTime()) : false;
@@ -54,18 +54,33 @@ const isValidDate = (date: string | Date | null | undefined): boolean => {
 
 interface StatCardProps {
   title: string;
-  value: number | string;
+  value: string;
   icon: React.ElementType;
   color: string;
+  onClick: () => void;
 }
+const renderActivityType = (type: string) => {
+  switch (type) {
+    case "mandatory":
+      return "กิจกรรมบังคับ";
+    case "mandatoryElective":
+      return "กิจกรรมบังคับเลือก";
+    case "elective":
+      return "กิจกรรมเลือกเข้าร่วม";
+  }
+};
 
 const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
   icon: Icon,
   color,
+  onClick,
 }) => (
-  <Card className="border-none bg-white shadow-lg transition-all duration-300 hover:shadow-xl">
+  <Card
+    className="cursor-pointer border-none bg-white shadow-lg transition-all duration-300 hover:shadow-xl"
+    onClick={onClick}
+  >
     <CardContent className="flex items-center justify-between p-6">
       <div>
         <p className="text-sm text-gray-600">{title}</p>
@@ -80,7 +95,6 @@ const StatCard: React.FC<StatCardProps> = ({
 
 const ActivityCard = ({ activity }: { activity: DashboardActivityType }) => {
   const [showQR, setShowQR] = useState(false);
-  const shareLink = `${window.location.origin}/submit/${activity.shareUrl}`;
 
   return (
     <motion.div
@@ -121,11 +135,7 @@ const ActivityCard = ({ activity }: { activity: DashboardActivityType }) => {
                 : "bg-green-500"
             } text-white`}
           >
-            {activity.type === "mandatory"
-              ? "กิจกรรมบังคับ"
-              : activity.type === "mandatoryElective"
-              ? "กิจกรรมบังคับเลือก"
-              : "กิจกรรมเลือกเข้าร่วม"}
+            {renderActivityType(activity.type)}
           </Badge>
         </CardContent>
         <AnimatePresence>
@@ -148,34 +158,12 @@ const ActivityCard = ({ activity }: { activity: DashboardActivityType }) => {
                   <DialogTitle className="mb-4 text-xl font-bold text-gray-800">
                     เข้าร่วมกิจกรรม: {activity.name}
                   </DialogTitle>
-                  <div className="flex w-full flex-col items-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
-                    <div className="flex flex-col items-center">
-                      <QRCode
-                        value={shareLink}
-                        size={150}
-                        className="rounded-lg"
-                      />
-                      <DialogDescription className="mt-2 text-center text-sm text-gray-600">
-                        แสกนเพื่อเข้าร่วมกิจกรรมนี้
-                      </DialogDescription>
-                    </div>
-                    <div className="flex flex-col items-center space-y-2">
-                      <Button
-                        className="w-full bg-blue-600 text-white hover:bg-blue-700"
-                        onClick={() => window.open(shareLink, "_blank")}
-                      >
-                        <LinkIcon className="mr-2 size-4" />
-                        เปิดลิงก์เข้าร่วม
-                      </Button>
-                      <Button
-                        className="w-full"
-                        variant="outline"
-                        onClick={() => navigator.clipboard.writeText(shareLink)}
-                      >
-                        คัดลอกลิงก์
-                      </Button>
-                    </div>
-                  </div>
+                  <RegisSubmit
+                    activityId={activity.id}
+                    regisStartTime={activity.regisStartTime}
+                    regisEndTime={activity.regisEndTime}
+                    activityLocation={activity.location} // เพิ่ม location
+                  />
                 </DialogContent>
               </Dialog>
             </motion.div>
@@ -196,12 +184,14 @@ export default function UserDashboard() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [isLoading, setIsLoading] = useState(true);
   const [showAllCompleted, setShowAllCompleted] = useState(false);
-  const [showAllRemaining, setShowAllRemaining] = useState(false);
+  const [showActivityDialog, setShowActivityDialog] = useState(false);
+  const [selectedActivityType, setSelectedActivityType] = useState<
+    "mandatory" | "mandatoryElective" | "elective" | null
+  >(null);
 
   useEffect(() => {
     async function fetchData() {
       const data = await getDashboardData();
-
       setDashboardData(data);
       setIsLoading(false);
     }
@@ -285,16 +275,6 @@ export default function UserDashboard() {
       </div>
     );
   };
-  const renderActivityType = (type: string) => {
-    switch (type) {
-      case "mandatory":
-        return "กิจกรรมบังคับ";
-      case "mandatoryElective":
-        return "กิจกรรมบังคับเลือก";
-      case "elective":
-        return "กิจกรรมเลือกเข้าร่วม";
-    }
-  };
 
   if (isLoading) {
     return (
@@ -313,22 +293,41 @@ export default function UserDashboard() {
 
   const { user, activities, activityRequirements } = dashboardData;
 
-  const ongoingActivities = activities.filter(
-    (activity) => activity.status === "ongoing"
+  const reservedActivities = activities.filter(
+    (activity) =>
+      user.activitiesParticipated.includes(activity.id) &&
+      new Date() < new Date(activity.endTime)
   );
 
-  const upcomingActivities = activities
-    .filter((activity) => activity.status === "upcoming")
-    .slice(0, 3);
-
-  const remainingActivities = activities.filter(
-    (activity) => !user.activitiesParticipated.includes(activity.id)
+  const upcomingActivities = activities.filter(
+    (activity) =>
+      new Date() >= new Date(activity.regisStartTime) &&
+      new Date() <= new Date(activity.regisEndTime)
   );
 
   const columns = [
     { key: "name", label: "ชื่อกิจกรรม" },
-    { key: "type", label: "ประเภท" },
+    {
+      key: "type",
+      label: "ประเภท",
+      render: (row: DashboardActivityType) => {
+        return renderActivityType(row.type); // เรียกฟังก์ชันแปลงประเภท
+      },
+    },
   ];
+
+  const handleStatCardClick = (
+    type: "mandatory" | "mandatoryElective" | "elective"
+  ) => {
+    setSelectedActivityType(type);
+    setShowActivityDialog(true);
+  };
+  const transformedActivities = activities
+    .filter((activity) => user.activitiesParticipated.includes(activity.id))
+    .map((activity) => ({
+      ...activity,
+      type: renderActivityType(activity.type), // แปลงประเภทเป็นภาษาไทยก่อนส่งไปยัง DataTable
+    }));
 
   return (
     <TooltipProvider>
@@ -353,18 +352,21 @@ export default function UserDashboard() {
               value={`${user.completedActivities.mandatory} / ${activityRequirements.mandatory}`}
               icon={Activity}
               color="500"
+              onClick={() => handleStatCardClick("mandatory")}
             />
             <StatCard
               title="กิจกรรมบังคับเลือก"
               value={`${user.completedActivities.mandatoryElective} / ${activityRequirements.mandatoryElective}`}
               icon={Award}
               color="600"
+              onClick={() => handleStatCardClick("mandatoryElective")}
             />
             <StatCard
               title="กิจกรรมเลือกเข้าร่วม"
               value={`${user.completedActivities.elective} / ${activityRequirements.elective}`}
               icon={Star}
               color="600"
+              onClick={() => handleStatCardClick("elective")}
             />
           </motion.div>
 
@@ -377,95 +379,43 @@ export default function UserDashboard() {
               <Card className="border-none bg-white shadow-lg lg:col-span-1">
                 <CardHeader>
                   <CardTitle className="text-xl text-gray-800 sm:text-2xl">
-                    กิจกรรมที่กำลังดำเนินการ
+                    กิจกรรมที่สำรองที่นั่งไว้
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[300px] pr-4 sm:h-[400px]">
                     <AnimatePresence>
-                      {ongoingActivities.map((activity) =>
-                        user.activitiesParticipated.includes(
-                          activity.id
-                        ) ? null : (
-                          <motion.div
-                            key={activity.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.3 }}
-                            className="mb-4 rounded-lg bg-gray-50 p-4 transition-all duration-300 hover:bg-gray-100 hover:shadow-md"
-                          >
-                            <h3 className="mb-2 text-lg font-semibold text-gray-800">
-                              {activity.name}
-                            </h3>
-                            <p className="text-sm text-gray-600">
-                              {isValidDate(activity.date)
-                                ? format(parseISO(activity.date), "dd/MM/yyyy")
-                                : "ไม่ระบุวันที่"}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              {activity.time}
-                            </p>
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button className="mt-2 bg-gray-600 text-white hover:bg-gray-700">
-                                  <QrCode className="mr-2 size-4" />
-                                  เข้าร่วมกิจกรรม
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="flex flex-col items-center rounded-lg bg-white p-6 shadow-md sm:max-w-md">
-                                <DialogTitle className="mb-4 text-xl font-bold text-gray-800">
-                                  เข้าร่วมกิจกรรม: {activity.name}
-                                </DialogTitle>
-                                <div className="flex w-full flex-col items-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
-                                  <div className="flex flex-col items-center">
-                                    <QRCode
-                                      value={`${window.location.origin}/submit/${activity.shareUrl}`}
-                                      size={150}
-                                      className="rounded-lg"
-                                    />
-                                    <DialogDescription className="mt-2 text-center text-sm text-gray-600">
-                                      แสกนเพื่อเข้าร่วมกิจกรรมนี้
-                                    </DialogDescription>
-                                  </div>
-                                  <div className="flex flex-col items-center space-y-2">
-                                    <Button
-                                      className="w-full bg-blue-600 text-white hover:bg-blue-700"
-                                      onClick={() =>
-                                        window.open(
-                                          `${window.location.origin}/submit/${activity.shareUrl}`,
-                                          "_blank"
-                                        )
-                                      }
-                                    >
-                                      <LinkIcon className="mr-2 size-4" />
-                                      เปิดลิงก์เข้าร่วม
-                                    </Button>
-                                    <Button
-                                      className="w-full"
-                                      variant="outline"
-                                      onClick={() =>
-                                        navigator.clipboard.writeText(
-                                          `${window.location.origin}/submit/${activity.shareUrl}`
-                                        )
-                                      }
-                                    >
-                                      คัดลอกลิงก์
-                                    </Button>
-                                  </div>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-                          </motion.div>
-                        )
-                      )}
+                      {reservedActivities.map((activity) => (
+                        <motion.div
+                          key={activity.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3 }}
+                          className="mb-4 rounded-lg bg-gray-50 p-4 transition-all duration-300 hover:bg-gray-100 hover:shadow-md"
+                        >
+                          <h3 className="mb-2 text-lg font-semibold text-gray-800">
+                            {activity.name}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {isValidDate(activity.date)
+                              ? format(parseISO(activity.date), "dd/MM/yyyy")
+                              : "ไม่ระบุวันที่"}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {activity.time}
+                          </p>
+                          <Button className="mt-2 bg-gray-600 text-white hover:bg-gray-700">
+                            สำรองที่นั่งแล้ว
+                          </Button>
+                        </motion.div>
+                      ))}
                     </AnimatePresence>
                   </ScrollArea>
                 </CardContent>
               </Card>
             </motion.div>
 
-            {/* Calendar and Selected Activity */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -545,7 +495,6 @@ export default function UserDashboard() {
                                   : "bg-green-500"
                               } text-white`}
                             >
-                              {selectedActivity.type}
                               {renderActivityType(selectedActivity.type)}
                             </Badge>
                             {!user.activitiesParticipated.includes(
@@ -637,7 +586,7 @@ export default function UserDashboard() {
             <Card className="border-none bg-white shadow-lg">
               <CardHeader>
                 <CardTitle className="text-xl text-gray-800 sm:text-2xl">
-                  กิจกรรมที่กำลังจะมาถึง
+                  กิจกรรมที่อยู่ในช่วงเวลาของการลงทะเบียน
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -682,9 +631,7 @@ export default function UserDashboard() {
                     </DialogDescription>
                     <DataTable
                       columns={columns}
-                      data={activities.filter((activity) =>
-                        user.activitiesParticipated.includes(activity.id)
-                      )}
+                      data={transformedActivities} // ใช้ข้อมูลที่แปลงประเภทแล้ว
                       showActions={false}
                       itemsPerPage={10}
                       totalCount={user.activitiesParticipated.length}
@@ -728,16 +675,21 @@ export default function UserDashboard() {
                               variant={
                                 activity.type === "mandatory"
                                   ? "destructive"
-                                  : "secondary"
+                                  : activity.type === "mandatoryElective"
+                                  ? "secondary"
+                                  : "default"
                               }
                               className={`${
                                 activity.type === "mandatory"
                                   ? "bg-red-500"
+                                  : activity.type === "mandatoryElective"
+                                  ? "bg-yellow-500"
                                   : "bg-green-500"
                               } text-white`}
                             >
-                              {activity.type}
+                              {renderActivityType(activity.type)}
                             </Badge>
+
                             <CheckCircle className="size-5 text-green-500" />
                           </div>
                         </motion.div>
@@ -747,94 +699,67 @@ export default function UserDashboard() {
               </CardContent>
             </Card>
           </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 1.2 }}
-          >
-            <Card className="border-none bg-white shadow-lg">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-xl text-gray-800 sm:text-2xl">
-                  กิจกรรมที่ยังไม่ได้ทำ
-                </CardTitle>
-                <Dialog
-                  open={showAllRemaining}
-                  onOpenChange={setShowAllRemaining}
-                >
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-600 hover:bg-gray-200 hover:text-gray-800"
-                    >
-                      ดูทั้งหมด <ChevronRight className="ml-2 size-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="w-full max-w-lg sm:max-w-2xl lg:max-w-4xl">
-                    <DialogTitle>กิจกรรมที่ยังไม่ได้ทำ</DialogTitle>
-                    <DialogDescription>
-                      รายการกิจกรรมทั้งหมดที่คุณยังไม่ได้ทำ
-                    </DialogDescription>
-                    <DataTable
-                      columns={columns}
-                      data={remainingActivities}
-                      showActions={false}
-                      itemsPerPage={10}
-                      totalCount={remainingActivities.length}
-                      totalPage={Math.ceil(remainingActivities.length / 10)}
-                    />
-                  </DialogContent>
-                </Dialog>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <AnimatePresence>
-                    {remainingActivities.slice(0, 3).map((activity) => (
-                      <motion.div
-                        key={activity.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ duration: 0.3 }}
-                        className="flex flex-col justify-between rounded-lg bg-gray-50 p-4 transition-all duration-300 hover:bg-gray-100 hover:shadow-md sm:flex-row sm:items-center"
-                      >
-                        <div>
-                          <h3 className="font-semibold text-gray-800">
-                            {activity.name}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            {isValidDate(activity.date)
-                              ? format(parseISO(activity.date), "dd/MM/yyyy")
-                              : "ไม่ระบุวันที่"}{" "}
-                            | {activity.time}
-                          </p>
-                        </div>
-                        <div className="mt-2 flex items-center space-x-2 sm:mt-0">
-                          <Badge
-                            variant={
-                              activity.type === "mandatory"
-                                ? "destructive"
-                                : "secondary"
-                            }
-                            className={`${
-                              activity.type === "mandatory"
-                                ? "bg-red-500"
-                                : "bg-green-500"
-                            } text-white`}
-                          >
-                            {activity.type}
-                          </Badge>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
         </div>
       </div>
+
+      <Dialog open={showActivityDialog} onOpenChange={setShowActivityDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogTitle>
+            {selectedActivityType === "mandatory"
+              ? "กิจกรรมบังคับ"
+              : selectedActivityType === "mandatoryElective"
+              ? "กิจกรรมบังคับเลือก"
+              : "กิจกรรมเลือกเข้าร่วม"}
+          </DialogTitle>
+          <div className="grid gap-4 py-4">
+            {activities
+              .filter((activity) => activity.type === selectedActivityType)
+              .map((activity) => (
+                <div
+                  key={activity.id}
+                  className="grid grid-cols-4 items-center gap-4"
+                >
+                  <div className="col-span-3">
+                    <p className="font-medium">{activity.name}</p>
+                    <p className="text-sm text-gray-500">{activity.time}</p>
+                  </div>
+                  {!user.activitiesParticipated.includes(activity.id) && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="col-span-1">สำรองที่นั่ง</Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px]">
+                        <DialogTitle>สำรองที่นั่ง: {activity.name}</DialogTitle>
+                        <div className="grid gap-4 py-4">
+                          <QRCode
+                            value={`${window.location.origin}/submit/${activity.shareUrl}`}
+                            size={200}
+                            className="mx-auto"
+                          />
+                          <Button
+                            onClick={() =>
+                              window.open(
+                                `${window.location.origin}/submit/${activity.shareUrl}`,
+                                "_blank"
+                              )
+                            }
+                          >
+                            เปิดลิงก์สำรองที่นั่ง
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                  {user.activitiesParticipated.includes(activity.id) && (
+                    <div className="col-span-1 flex items-center justify-center">
+                      <CheckCircle className="size-5 text-green-500" />
+                    </div>
+                  )}
+                </div>
+              ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </TooltipProvider>
   );
 }

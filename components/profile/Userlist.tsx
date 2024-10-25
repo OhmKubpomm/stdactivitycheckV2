@@ -12,7 +12,6 @@ interface User {
   name: string;
   image?: string;
   email: string;
-  password: string;
   Firstname: string;
   Lastname: string;
   Date: string;
@@ -24,20 +23,15 @@ interface User {
 
 interface UserlistProps {
   allUser: User[];
-  totalCount: number;
+  count: number;
   totalPage: number;
 }
 
-const Userlist: React.FC<UserlistProps> = ({
-  allUser,
-  totalCount,
-  totalPage,
-}) => {
+const Userlist: React.FC<UserlistProps> = ({ allUser, count, totalPage }) => {
   const columns = [
     { key: "name", label: "ชื่อผู้ใช้งาน" },
     { key: "image", label: "รูปภาพ" },
     { key: "email", label: "อีเมล" },
-    { key: "password", label: "รหัสผ่าน" },
     { key: "Firstname", label: "ชื่อ" },
     { key: "Lastname", label: "นามสกุล" },
     { key: "Date", label: "วันเกิด" },
@@ -61,8 +55,8 @@ const Userlist: React.FC<UserlistProps> = ({
         <DataTable
           columns={columns}
           data={allUser}
-          itemsPerPage={5}
-          totalCount={totalCount}
+          itemsPerPage={10}
+          totalCount={count}
           totalPage={totalPage}
           showActions={true}
         />

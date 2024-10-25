@@ -39,7 +39,7 @@ function FormLinkShare({ shareUrl }: { shareUrl: string }) {
         }}
       >
         <ImShare className="mr-2 size-4" />
-        แชร์ฟอร์มนี้
+        คัดลอกลิงก์
       </Button>
       <Dialog>
         <DialogTrigger asChild>
@@ -49,7 +49,9 @@ function FormLinkShare({ shareUrl }: { shareUrl: string }) {
         </DialogTrigger>
         <DialogContent className="flex flex-col items-center rounded-lg bg-gray-100 p-6 shadow-md">
           <QRCode value={shareLink} size={200} className="rounded-lg" />
-          <p className="mt-4 text-gray-700">แสกนเพื่อเข้าถึงฟอร์มนี้</p>
+          <p className="mt-4 text-gray-700">
+            แสกนเพื่อเข้าถึงแบบความต้องการผู้เข้าร่วมกิจกรรมนี้
+          </p>
         </DialogContent>
       </Dialog>
     </div>

@@ -15,16 +15,16 @@ function PreviewDialogBtn() {
       <DialogTrigger asChild>
         <Button variant={"outline"} className="gap-2">
           <ScanEye className="size-6" />
-          ตัวอย่างแบบฟอร์ม
+          ตัวอย่างแบบความต้องการผู้เข้าร่วมกิจกรรม
         </Button>
       </DialogTrigger>
       <DialogContent className="flex h-screen max-h-screen w-screen max-w-full grow flex-col gap-0 p-0">
         <div className="border-b px-4 py-2">
           <p className="text-muted-foreground text-lg font-bold">
-            แสดงตัวอย่างแบบฟอร์ม
+            แสดงตัวอย่างแบบความต้องการผู้เข้าร่วมกิจกรรม
           </p>
           <p className="text-muted-foreground text-sm">
-            นี่คือลักษณะของแบบฟอร์มของคุณสำหรับหน้าผู้ใช้
+            นี่คือลักษณะของแบบความต้องการผู้เข้าร่วมกิจกรรมของคุณสำหรับหน้าผู้ใช้
           </p>
         </div>
         <div className="bg-accent flex grow flex-col items-center justify-center overflow-y-auto bg-[url(/paper.svg)] p-4 dark:bg-[url(/paper-dark.svg)]">

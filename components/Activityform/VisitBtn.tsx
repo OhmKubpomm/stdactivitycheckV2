@@ -22,7 +22,7 @@ function VisitBtn({ shareUrl }: { shareUrl: string }) {
         window.open(shareLink, "_blank");
       }}
     >
-      ดูแบบฟอร์ม
+      ดูแบบความต้องการผู้เข้าร่วมกิจกรรม
     </Button>
   );
 }

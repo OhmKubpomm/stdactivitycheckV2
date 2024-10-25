@@ -25,27 +25,31 @@ export async function createUser(data) {
     return { error: error.message };
   }
 }
-export async function getallUser(searchParams) {
-  const search = searchParams.search || "";
-  const limit = searchParams.limit * 1 || 12; // เปลี่ยนเป็น 12 หรือค่าที่มากกว่า
-  const page = searchParams.page * 1 || 1;
-  const skip = searchParams.skip * 1 || limit * (page - 1);
-
+export async function getallUser(searchParams = {}) {
   try {
-    const allUser = await User.find({ name: { $regex: search } })
-      .limit(limit)
-      .skip(skip);
+    const allUser = await User.find().lean();
 
-    const count = await User.find({ name: { $regex: search } }).count();
-    const totalPage = Math.ceil(count / limit);
-
-    const newData = allUser.map((User) => ({
-      ...User._doc,
-      _id: User._doc._id.toString(),
+    const newData = allUser.map((user) => ({
+      _id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      Firstname: user.Firstname,
+      Lastname: user.Lastname,
+      Date: user.Date,
+      Address: user.Address,
+      Telephone: user.Telephone,
+      image: user.image,
+      userType: user.userType,
+      role: user.role,
     }));
 
-    return { allUser: newData, count, totalPage };
+    return {
+      allUser: newData,
+      count: newData.length,
+      totalPage: Math.ceil(newData.length / 10), // Assuming 10 items per page
+    };
   } catch (error) {
+    console.error("Error in getallUser:", error);
     return { error: error.message };
   }
 }

@@ -14,7 +14,7 @@ function SaveFormBtn({ id }: { id: number }) {
     if (!elements || elements.length === 0) {
       toast({
         title: "ผิดพลาด",
-        description: "ไม่พบข้อมูลฟอร์มที่จะบันทึก",
+        description: "ไม่พบข้อมูลแบบความต้องการผู้เข้าร่วมกิจกรรมที่จะบันทึก",
         variant: "destructive",
       });
       return;
@@ -26,7 +26,7 @@ function SaveFormBtn({ id }: { id: number }) {
       await UpdateFormContent(id, jsonElements);
       toast({
         title: "สำเร็จ",
-        description: "ฟอร์มได้รับการบันทึกแล้ว",
+        description: "แบบความต้องการผู้เข้าร่วมกิจกรรมได้รับการบันทึกแล้ว",
       });
     } catch (error) {
       console.error("Error saving form:", error);
@@ -35,7 +35,7 @@ function SaveFormBtn({ id }: { id: number }) {
         description:
           error instanceof Error
             ? error.message
-            : "มีบางอย่างผิดปกติในการบันทึกฟอร์ม",
+            : "มีบางอย่างผิดปกติในการบันทึกแบบความต้องการผู้เข้าร่วมกิจกรรม",
         variant: "destructive",
       });
     }
@@ -44,7 +44,7 @@ function SaveFormBtn({ id }: { id: number }) {
   return (
     <Button
       variant={"outline"}
-      className="gap-2"
+      className="gap-2 bg-indigo-600 text-white hover:bg-indigo-700"
       disabled={isPending}
       onClick={() => {
         startTransition(() => {

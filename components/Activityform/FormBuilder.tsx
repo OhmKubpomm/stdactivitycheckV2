@@ -79,9 +79,11 @@ function FormBuilder({ form }: { form: typeof ActivityForm }) {
         <div className="flex size-full flex-col items-center justify-center">
           <div className="max-w-md">
             <h1 className="text-primary mb-10 border-b pb-2 text-center text-4xl font-bold">
-              🎊🎊 ฟอร์มได้เผยแพร่แล้ว 🎊🎊
+              🎊🎊 แบบความต้องการผู้เข้าร่วมกิจกรรมได้เผยแพร่แล้ว 🎊🎊
             </h1>
-            <h2 className="text-2xl">แชร์ฟอร์มนี้</h2>
+            <h2 className="text-2xl">
+              แชร์แบบความต้องการผู้เข้าร่วมกิจกรรมนี้
+            </h2>
             <h3 className="text-muted-foreground border-b pb-10 text-xl">
               ใครที่มีลิงก์นี้สามารถดูและกรอกข้อมูลได้เลย
             </h3>
@@ -112,7 +114,7 @@ function FormBuilder({ form }: { form: typeof ActivityForm }) {
                   href={`/dashboard/crudactivityform/forms/${form._id}`}
                   className="gap-2"
                 >
-                  รายละเอียดฟอร์ม
+                  รายละเอียดแบบความต้องการผู้เข้าร่วมกิจกรรม
                   <ArrowRightCircle />
                 </Link>
               </Button>
@@ -128,7 +130,9 @@ function FormBuilder({ form }: { form: typeof ActivityForm }) {
       <main className="flex w-full flex-col">
         <nav className="flex items-center justify-between gap-3 border-b-2 p-4">
           <h2 className="truncate font-medium">
-            <span className="text-muted-foreground mr-2">ชื่อฟอร์ม:</span>
+            <span className="text-muted-foreground mr-2">
+              ชื่อแบบความต้องการผู้เข้าร่วมกิจกรรม:
+            </span>
             {form.ActivityFormname}
           </h2>
           <div className="flex items-center gap-2">

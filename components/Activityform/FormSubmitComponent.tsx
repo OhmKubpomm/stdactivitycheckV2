@@ -105,7 +105,7 @@ function FormSubmitComponent({
             toast({
               title: "คุณอยู่ไกลเกินไป!",
               description:
-                "คุณไม่สามารถเข้าถึงฟอร์มนี้ได้เนื่องจากคุณอยู่ไกลเกินไป",
+                "คุณไม่สามารถเข้าถึงแบบความต้องการผู้เข้าร่วมกิจกรรมนี้ได้เนื่องจากคุณอยู่ไกลเกินไป",
               variant: "destructive",
             });
           }
@@ -146,8 +146,9 @@ function FormSubmitComponent({
   const submitForm = async () => {
     if (isExpired) {
       toast({
-        title: "ฟอร์มหมดเวลาแล้ว",
-        description: "ไม่สามารถส่งแบบฟอร์มได้ เนื่องจากฟอร์มนี้หมดเวลาแล้ว",
+        title: "แบบความต้องการผู้เข้าร่วมกิจกรรมหมดเวลาแล้ว",
+        description:
+          "ไม่สามารถส่งแบบความต้องการผู้เข้าร่วมกิจกรรมได้ เนื่องจากแบบความต้องการผู้เข้าร่วมกิจกรรมนี้หมดเวลาแล้ว",
         variant: "destructive",
       });
       return;
@@ -155,8 +156,9 @@ function FormSubmitComponent({
 
     if (isNotStarted) {
       toast({
-        title: "ฟอร์มยังไม่เปิดให้ทำ",
-        description: "กรุณารอจนกว่าจะถึงเวลาเริ่มต้นของฟอร์ม",
+        title: "แบบความต้องการผู้เข้าร่วมกิจกรรมยังไม่เปิดให้ทำ",
+        description:
+          "กรุณารอจนกว่าจะถึงเวลาเริ่มต้นของแบบความต้องการผู้เข้าร่วมกิจกรรม",
         variant: "destructive",
       });
       return;
@@ -168,7 +170,8 @@ function FormSubmitComponent({
       setRenderKey(new Date().getTime());
       toast({
         title: "ข้อผิดพลาด",
-        description: "โปรดตรวจสอบแบบฟอร์มเพื่อแก้ไขข้อผิดพลาด",
+        description:
+          "โปรดตรวจสอบแบบความต้องการผู้เข้าร่วมกิจกรรมเพื่อแก้ไขข้อผิดพลาด",
         variant: "destructive",
       });
       return;
@@ -179,16 +182,17 @@ function FormSubmitComponent({
       await SubmitForm(formUrl, jsonContent);
       setSubmitted(true);
       toast({
-        title: "ส่งแบบฟอร์มสำเร็จ",
-        description: "ขอบคุณสำหรับการส่งแบบฟอร์ม",
+        title: "ส่งแบบแบบความต้องการผู้เข้าร่วมกิจกรรมสำเร็จ",
+        description: "ขอบคุณสำหรับการส่งแบบความต้องการผู้เข้าร่วมกิจกรรม",
         variant: "default",
       });
     } catch (error) {
       if (error instanceof Error) {
         if (error.message.includes("Form submission period has ended")) {
           toast({
-            title: "ฟอร์มหมดเวลาแล้ว",
-            description: "ไม่สามารถส่งแบบฟอร์มได้ เนื่องจากฟอร์มนี้หมดเวลาแล้ว",
+            title: "แบบความต้องการผู้เข้าร่วมกิจกรรมหมดเวลาแล้ว",
+            description:
+              "ไม่สามารถส่งแบบความต้องการผู้เข้าร่วมกิจกรรมได้ เนื่องจากแบบความต้องการผู้เข้าร่วมกิจกรรมนี้หมดเวลาแล้ว",
             variant: "destructive",
           });
           setIsExpired(true);
@@ -214,9 +218,12 @@ function FormSubmitComponent({
       <div className="flex size-full items-center justify-center p-8">
         <div className="flex w-full max-w-[620px] grow flex-col gap-4 overflow-y-auto rounded border bg-background p-8 shadow-xl shadow-blue-700">
           <h1 className="text-2xl font-bold text-red-500">
-            คุณไม่สามารถเข้าถึงฟอร์มนี้ได้
+            คุณไม่สามารถเข้าถึงแบบความต้องการผู้เข้าร่วมกิจกรรมนี้ได้
           </h1>
-          <p>คุณไม่ได้อยู่ในพื้นที่ที่กำหนด จึงไม่สามารถส่งแบบฟอร์มนี้ได้</p>
+          <p>
+            คุณไม่ได้อยู่ในพื้นที่ที่กำหนด
+            จึงไม่สามารถส่งแบบความต้องการผู้เข้าร่วมกิจกรรมนี้ได้
+          </p>
         </div>
       </div>
     );
@@ -226,8 +233,13 @@ function FormSubmitComponent({
     return (
       <div className="flex size-full items-center justify-center p-8">
         <div className="flex w-full max-w-[620px] grow flex-col gap-4 overflow-y-auto rounded border bg-background p-8 shadow-xl shadow-blue-700">
-          <h1 className="text-2xl font-bold">ส่งแบบฟอร์มแล้ว</h1>
-          <p>ขอบคุณที่ส่งแบบฟอร์ม คุณสามารถปิดหน้านี้ได้เลย</p>
+          <h1 className="text-2xl font-bold">
+            ส่งแบบความต้องการผู้เข้าร่วมกิจกรรมแล้ว
+          </h1>
+          <p>
+            ขอบคุณที่ส่งแบบความต้องการผู้เข้าร่วมกิจกรรม
+            คุณสามารถปิดหน้านี้ได้เลย
+          </p>
         </div>
       </div>
     );
@@ -238,9 +250,11 @@ function FormSubmitComponent({
       <div className="flex size-full items-center justify-center p-8">
         <div className="flex w-full max-w-[620px] grow flex-col gap-4 overflow-y-auto rounded border bg-background p-8 shadow-xl shadow-blue-700">
           <h1 className="text-2xl font-bold text-red-500">
-            ฟอร์มนี้หมดเวลาแล้ว
+            แบบความต้องการผู้เข้าร่วมกิจกรรมนี้หมดเวลาแล้ว
           </h1>
-          <p>คุณไม่สามารถส่งแบบฟอร์มนี้ได้เนื่องจากฟอร์มหมดเวลาแล้ว</p>
+          <p>
+            คุณไม่สามารถส่งแบบแบบความต้องการผู้เข้าร่วมกิจกรรมนี้ได้เนื่องจากแบบความต้องการผู้เข้าร่วมกิจกรรมหมดเวลาแล้ว
+          </p>
           {endTime && (
             <p>
               หมดเวลาเมื่อ:{" "}
@@ -259,9 +273,11 @@ function FormSubmitComponent({
       <div className="flex size-full items-center justify-center p-8">
         <div className="flex w-full max-w-[620px] grow flex-col gap-4 overflow-y-auto rounded border bg-background p-8 shadow-xl shadow-blue-700">
           <h1 className="text-2xl font-bold text-yellow-500">
-            ฟอร์มนี้ยังไม่เปิดให้ทำ
+            แบบความต้องการผู้เข้าร่วมกิจกรรมนี้ยังไม่เปิดให้ทำ
           </h1>
-          <p>กรุณารอจนกว่าจะถึงเวลาเริ่มต้นของฟอร์ม</p>
+          <p>
+            กรุณารอจนกว่าจะถึงเวลาเริ่มต้นของแบบความต้องการผู้เข้าร่วมกิจกรรม
+          </p>
           {startTime && (
             <p>
               เริ่มเวลา:{" "}
@@ -316,7 +332,7 @@ function FormSubmitComponent({
           {!pending && (
             <>
               <HiCursorClick className="mr-2" />
-              ส่ง
+              ส่งสำรองที่นั่ง
             </>
           )}
           {pending && <ImSpinner2 className="animate-spin" />}

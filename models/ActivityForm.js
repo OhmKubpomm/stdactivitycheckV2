@@ -47,6 +47,15 @@ const ActivityFormSchema = new mongoose.Schema(
     endTime: {
       type: Date,
     },
+    regisStartTime: {
+      type: Date,
+    },
+    regisEndTime: {
+      type: Date,
+    },
+    ActivityEndTime: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );
