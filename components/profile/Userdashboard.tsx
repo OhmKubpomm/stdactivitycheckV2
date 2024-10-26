@@ -27,6 +27,7 @@ import {
   QrCode,
   CheckCircle,
   Link as LinkIcon,
+  AlertCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -47,6 +48,7 @@ import {
 } from "@/components/ui/dialog";
 import { DataTable } from "@/components/globals/DataTable";
 import RegisSubmit from "@/components/Activityform/RegisSubmit";
+import Link from "next/link";
 
 const isValidDate = (date: string | Date | null | undefined): boolean => {
   return date ? !isNaN(new Date(date).getTime()) : false;
@@ -59,6 +61,7 @@ interface StatCardProps {
   color: string;
   onClick: () => void;
 }
+
 const renderActivityType = (type: string) => {
   switch (type) {
     case "mandatory":
@@ -67,6 +70,8 @@ const renderActivityType = (type: string) => {
       return "กิจกรรมบังคับเลือก";
     case "elective":
       return "กิจกรรมเลือกเข้าร่วม";
+    default:
+      return "ไม่ระบุประเภท";
   }
 };
 
@@ -162,7 +167,7 @@ const ActivityCard = ({ activity }: { activity: DashboardActivityType }) => {
                     activityId={activity.id}
                     regisStartTime={activity.regisStartTime}
                     regisEndTime={activity.regisEndTime}
-                    activityLocation={activity.location} // เพิ่ม location
+                    activityLocation={activity.location}
                   />
                 </DialogContent>
               </Dialog>
@@ -293,10 +298,12 @@ export default function UserDashboard() {
 
   const { user, activities, activityRequirements } = dashboardData;
 
-  const reservedActivities = activities.filter(
-    (activity) =>
-      user.activitiesParticipated.includes(activity.id) &&
-      new Date() < new Date(activity.endTime)
+  const reservedActivities = activities.filter((activity) =>
+    user.activitiesParticipated.some(
+      (participation) =>
+        participation.activityId === activity.id &&
+        new Date() < new Date(activity.endTime)
+    )
   );
 
   const upcomingActivities = activities.filter(
@@ -305,13 +312,48 @@ export default function UserDashboard() {
       new Date() <= new Date(activity.regisEndTime)
   );
 
+  const pendingQuestionnaireActivities = activities.filter((activity) =>
+    user.activitiesParticipated.some(
+      (participation) =>
+        participation.activityId === activity.id &&
+        participation.questionnaireStatus === "pending"
+    )
+  );
+
   const columns = [
     { key: "name", label: "ชื่อกิจกรรม" },
     {
       key: "type",
       label: "ประเภท",
       render: (row: DashboardActivityType) => {
-        return renderActivityType(row.type); // เรียกฟังก์ชันแปลงประเภท
+        return renderActivityType(row.type);
+      },
+    },
+    {
+      key: "status",
+      label: "สถานะ",
+      render: (row: DashboardActivityType) => {
+        const participation = user.activitiesParticipated.find(
+          (p) => p.activityId === row.id
+        );
+        if (participation) {
+          return (
+            <div className="flex items-center">
+              <Badge
+                variant={
+                  participation.completionStatus === "completed"
+                    ? "default"
+                    : "secondary"
+                }
+              >
+                {participation.completionStatus === "completed"
+                  ? "เสร็จสมบูรณ์"
+                  : "ไม่สมบูรณ์"}
+              </Badge>
+            </div>
+          );
+        }
+        return <Badge variant="outline">ไม่ได้เข้าร่วม</Badge>;
       },
     },
   ];
@@ -322,11 +364,14 @@ export default function UserDashboard() {
     setSelectedActivityType(type);
     setShowActivityDialog(true);
   };
+
   const transformedActivities = activities
-    .filter((activity) => user.activitiesParticipated.includes(activity.id))
+    .filter((activity) =>
+      user.activitiesParticipated.some((p) => p.activityId === activity.id)
+    )
     .map((activity) => ({
       ...activity,
-      type: renderActivityType(activity.type), // แปลงประเภทเป็นภาษาไทยก่อนส่งไปยัง DataTable
+      type: renderActivityType(activity.type),
     }));
 
   return (
@@ -497,8 +542,8 @@ export default function UserDashboard() {
                             >
                               {renderActivityType(selectedActivity.type)}
                             </Badge>
-                            {!user.activitiesParticipated.includes(
-                              selectedActivity.id
+                            {!user.activitiesParticipated.some(
+                              (p) => p.activityId === selectedActivity.id
                             ) && (
                               <Dialog>
                                 <DialogTrigger asChild>
@@ -551,8 +596,8 @@ export default function UserDashboard() {
                                 </DialogContent>
                               </Dialog>
                             )}
-                            {user.activitiesParticipated.includes(
-                              selectedActivity.id
+                            {user.activitiesParticipated.some(
+                              (p) => p.activityId === selectedActivity.id
                             ) && (
                               <div className="flex items-center text-green-500">
                                 <CheckCircle className="mr-2 size-5" />
@@ -607,6 +652,56 @@ export default function UserDashboard() {
             transition={{ duration: 0.5, delay: 1 }}
           >
             <Card className="border-none bg-white shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-xl text-gray-800 sm:text-2xl">
+                  กิจกรรมที่ยังไม่ได้กรอกแบบสอบถาม
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[200px] pr-4">
+                  <AnimatePresence>
+                    {pendingQuestionnaireActivities.map((activity) => (
+                      <motion.div
+                        key={activity.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                        className="mb-4 flex items-center justify-between rounded-lg bg-gray-50 p-4 transition-all duration-300 hover:bg-gray-100 hover:shadow-md"
+                      >
+                        <div>
+                          <h3 className="font-semibold text-gray-800">
+                            {activity.name}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {isValidDate(activity.date)
+                              ? format(parseISO(activity.date), "dd/MM/yyyy")
+                              : "ไม่ระบุวันที่"}
+                          </p>
+                        </div>
+                        <Link href={`/`} target="_blank">
+                          <Button
+                            variant="outline"
+                            className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+                          >
+                            <AlertCircle className="mr-2 size-4" />
+                            กรอกแบบสอบถาม
+                          </Button>
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 1.2 }}
+          >
+            <Card className="border-none bg-white shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-xl text-gray-800 sm:text-2xl">
                   กิจกรรมที่ผู้ใช้ทำทั้งหมด
@@ -631,7 +726,7 @@ export default function UserDashboard() {
                     </DialogDescription>
                     <DataTable
                       columns={columns}
-                      data={transformedActivities} // ใช้ข้อมูลที่แปลงประเภทแล้ว
+                      data={transformedActivities}
                       showActions={false}
                       itemsPerPage={10}
                       totalCount={user.activitiesParticipated.length}
@@ -645,55 +740,49 @@ export default function UserDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   <AnimatePresence>
-                    {activities
-                      .filter((activity) =>
-                        user.activitiesParticipated.includes(activity.id)
-                      )
-                      .slice(0, 3)
-                      .map((activity) => (
-                        <motion.div
-                          key={activity.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: 20 }}
-                          transition={{ duration: 0.3 }}
-                          className="flex flex-col justify-between rounded-lg bg-gray-50 p-4 transition-all duration-300 hover:bg-gray-100 hover:shadow-md sm:flex-row sm:items-center"
-                        >
-                          <div>
-                            <h3 className="font-semibold text-gray-800">
-                              {activity.name}
-                            </h3>
-                            <p className="text-sm text-gray-600">
-                              {isValidDate(activity.date)
-                                ? format(parseISO(activity.date), "dd/MM/yyyy")
-                                : "ไม่ระบุวันที่"}{" "}
-                              | {activity.time}
-                            </p>
-                          </div>
-                          <div className="mt-2 flex items-center space-x-2 sm:mt-0">
-                            <Badge
-                              variant={
-                                activity.type === "mandatory"
-                                  ? "destructive"
-                                  : activity.type === "mandatoryElective"
-                                  ? "secondary"
-                                  : "default"
-                              }
-                              className={`${
-                                activity.type === "mandatory"
-                                  ? "bg-red-500"
-                                  : activity.type === "mandatoryElective"
-                                  ? "bg-yellow-500"
-                                  : "bg-green-500"
-                              } text-white`}
-                            >
-                              {renderActivityType(activity.type)}
-                            </Badge>
-
-                            <CheckCircle className="size-5 text-green-500" />
-                          </div>
-                        </motion.div>
-                      ))}
+                    {transformedActivities.slice(0, 3).map((activity) => (
+                      <motion.div
+                        key={activity.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ duration: 0.3 }}
+                        className="flex flex-col justify-between rounded-lg bg-gray-50 p-4 transition-all duration-300 hover:bg-gray-100 hover:shadow-md sm:flex-row sm:items-center"
+                      >
+                        <div>
+                          <h3 className="font-semibold text-gray-800">
+                            {activity.name}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {isValidDate(activity.date)
+                              ? format(parseISO(activity.date), "dd/MM/yyyy")
+                              : "ไม่ระบุวันที่"}{" "}
+                            | {activity.time}
+                          </p>
+                        </div>
+                        <div className="mt-2 flex items-center space-x-2 sm:mt-0">
+                          <Badge
+                            variant={
+                              activity.type === "กิจกรรมบังคับ"
+                                ? "destructive"
+                                : activity.type === "กิจกรรมบังคับเลือก"
+                                ? "secondary"
+                                : "default"
+                            }
+                            className={`${
+                              activity.type === "กิจกรรมบังคับ"
+                                ? "bg-red-500"
+                                : activity.type === "กิจกรรมบังคับเลือก"
+                                ? "bg-yellow-500"
+                                : "bg-green-500"
+                            } text-white`}
+                          >
+                            {activity.type}
+                          </Badge>
+                          <CheckCircle className="size-5 text-green-500" />
+                        </div>
+                      </motion.div>
+                    ))}
                   </AnimatePresence>
                 </div>
               </CardContent>
@@ -723,7 +812,9 @@ export default function UserDashboard() {
                     <p className="font-medium">{activity.name}</p>
                     <p className="text-sm text-gray-500">{activity.time}</p>
                   </div>
-                  {!user.activitiesParticipated.includes(activity.id) && (
+                  {!user.activitiesParticipated.some(
+                    (p) => p.activityId === activity.id
+                  ) && (
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button className="col-span-1">สำรองที่นั่ง</Button>
@@ -750,7 +841,9 @@ export default function UserDashboard() {
                       </DialogContent>
                     </Dialog>
                   )}
-                  {user.activitiesParticipated.includes(activity.id) && (
+                  {user.activitiesParticipated.some(
+                    (p) => p.activityId === activity.id
+                  ) && (
                     <div className="col-span-1 flex items-center justify-center">
                       <CheckCircle className="size-5 text-green-500" />
                     </div>

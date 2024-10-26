@@ -25,7 +25,7 @@ interface ActivityType {
   ActivityDescription: string;
   ActivityContent: string;
   ActivityVisits: number;
-  ActivityType: string; // แก้ให้เป็น string แทน enum เพื่อรองรับภาษาไทย
+  ActivityType: string;
   ActivityShareurl: string;
   ActivityLocation: string;
 }
@@ -48,7 +48,7 @@ export interface DashboardActivityType {
   description: string;
   content: string;
   visits: number;
-  type: string; // แก้ให้เป็น string เพื่อรองรับภาษาไทย
+  type: string;
   shareUrl: string;
   location: string;
   time: string;
@@ -57,13 +57,24 @@ export interface DashboardActivityType {
   endTime: string;
   regisStartTime: string;
   regisEndTime: string;
+  activityEndTime: string;
+  bookingStatus: "booked" | "pending" | "failed";
+  registrationStatus: "pending" | "failed" | "registered";
+  questionnaireStatus: "pending" | "completed" | "not_required";
+  completionStatus: "completed" | "incomplete";
 }
 
 export interface DashboardDataType {
   user: {
     name: string;
     email: string;
-    activitiesParticipated: string[];
+    activitiesParticipated: {
+      activityId: string;
+      bookingStatus: "pending" | "booked" | "failed";
+      registrationStatus: "pending" | "registered" | "failed";
+      questionnaireStatus: "pending" | "completed" | "not_required";
+      completionStatus: "incomplete" | "completed";
+    }[];
     userType: "regular" | "transfer";
     completedActivities: {
       mandatory: number;
@@ -79,7 +90,6 @@ export interface DashboardDataType {
   };
 }
 
-// ฟังก์ชัน mapping จากภาษาไทยเป็นภาษาอังกฤษ
 const mapActivityType = (activityType: string) => {
   switch (activityType) {
     case "กิจกรรมบังคับ":
@@ -88,9 +98,8 @@ const mapActivityType = (activityType: string) => {
       return "mandatoryElective";
     case "กิจกรรมเลือกเข้าร่วม":
       return "elective";
-
     default:
-      return "unknown"; // ค่าไม่ตรง ให้แสดงเป็น unknown
+      return "unknown";
   }
 };
 
@@ -99,23 +108,16 @@ export async function getDashboardData(): Promise<DashboardDataType> {
   if (!session?.user?._id) throw new Error("User not authenticated");
 
   const user = (await User.findById(session.user._id).populate({
-    path: "activitiesParticipated.activityId", // ทำการ populate activityId
-    model: "ActivityForms", // ต้องตรงกับชื่อโมเดลที่ใช้ใน mongoose.model()
+    path: "activitiesParticipated.activityId",
+    model: "ActivityForms",
   })) as UserType;
-  console.log(
-    "Populated Activities Participated:",
-    user.activitiesParticipated
-  );
 
   if (!user) throw new Error("User not found");
-
-  console.log("User Activities Participated:", user.activitiesParticipated);
 
   const activities = (await ActivityForm.find({ published: true }).sort({
     startTime: 1,
   })) as ActivityType[];
 
-  // Fetch all maps
   const maps = (await Map.find()) as MapType[];
 
   const formatThaiTime = (date: Date | null | undefined) => {
@@ -132,7 +134,6 @@ export async function getDashboardData(): Promise<DashboardDataType> {
       ? { mandatory: 2, mandatoryElective: 5, elective: 5 }
       : { mandatory: 2, mandatoryElective: 2, elective: 2 };
 
-  // นับจำนวนกิจกรรมที่ผู้ใช้เข้าร่วมแล้วตามประเภท
   const completedActivities = {
     mandatory: 0,
     mandatoryElective: 0,
@@ -141,9 +142,8 @@ export async function getDashboardData(): Promise<DashboardDataType> {
 
   user.activitiesParticipated.forEach((participation: any) => {
     const rawActivityType = participation.activityId?.ActivityType;
-    const activityType = mapActivityType(rawActivityType); // แปลงค่าภาษาไทยเป็นภาษาอังกฤษ
-    console.log("Raw Activity Type:", rawActivityType); // ตรวจสอบค่าที่ได้จากฐานข้อมูล
-    console.log("Mapped Activity Type:", activityType); // ตรวจสอบค่าแปลง
+    const activityType = mapActivityType(rawActivityType);
+
     if (activityType === "mandatory") {
       completedActivities.mandatory++;
     } else if (activityType === "mandatoryElective") {
@@ -153,14 +153,18 @@ export async function getDashboardData(): Promise<DashboardDataType> {
     }
   });
 
-  console.log("Completed Activities:", completedActivities);
-
   return {
     user: {
       name: user.name,
       email: user.email,
-      activitiesParticipated: user.activitiesParticipated.map((participation) =>
-        participation.activityId ? participation.activityId._id.toString() : ""
+      activitiesParticipated: user.activitiesParticipated.map(
+        (participation) => ({
+          activityId: participation.activityId?._id.toString() || "",
+          bookingStatus: participation.bookingStatus || "pending",
+          registrationStatus: participation.registrationStatus || "pending",
+          questionnaireStatus: participation.questionnaireStatus || "pending",
+          completionStatus: participation.completionStatus || "incomplete",
+        })
       ),
       userType: user.userType,
       completedActivities,
@@ -170,7 +174,10 @@ export async function getDashboardData(): Promise<DashboardDataType> {
         const activityMap = maps.find(
           (map: MapType) => map.name === activity.ActivityFormname
         );
-
+        const activityEndTime = activity.regisEndTime
+          ? new Date(activity.regisEndTime)
+          : new Date();
+        activityEndTime.setDate(activityEndTime.getDate() + 2);
         const startDate = new Date(activity.startTime);
         const endDate = new Date(activity.endTime);
         const regisStartDate = activity.regisStartTime
@@ -179,7 +186,9 @@ export async function getDashboardData(): Promise<DashboardDataType> {
         const regisEndDate = activity.regisEndTime
           ? new Date(activity.regisEndTime)
           : null;
-
+        const userParticipation = user.activitiesParticipated.find(
+          (p) => p.activityId?._id.toString() === activity._id.toString()
+        );
         return {
           id: activity._id.toString(),
           name: activity.ActivityFormname,
@@ -189,7 +198,7 @@ export async function getDashboardData(): Promise<DashboardDataType> {
           description: activity.ActivityDescription,
           content: activity.ActivityContent,
           visits: activity.ActivityVisits,
-          type: mapActivityType(activity.ActivityType), // แปลง ActivityType ก่อนส่งไปยัง frontend
+          type: mapActivityType(activity.ActivityType),
           shareUrl: activity.ActivityShareurl,
           location: activity.ActivityLocation,
           time: `เวลาเริ่มต้น${formatThaiTime(
@@ -204,6 +213,13 @@ export async function getDashboardData(): Promise<DashboardDataType> {
           regisEndTime: regisEndDate
             ? regisEndDate.toISOString()
             : "ไม่ระบุเวลา",
+          activityEndTime: activityEndTime.toISOString(),
+          bookingStatus: userParticipation?.bookingStatus || "pending",
+          registrationStatus:
+            userParticipation?.registrationStatus || "pending",
+          questionnaireStatus:
+            userParticipation?.questionnaireStatus || "pending",
+          completionStatus: userParticipation?.completionStatus || "incomplete",
         };
       })
     ),

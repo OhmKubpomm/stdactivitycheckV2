@@ -87,22 +87,58 @@ export async function createFeedback(data: any) {
       throw new Error("User not authenticated");
     }
 
-    // Check if the user has already submitted feedback for this activity
-    const existingFeedback = await Feedback.findOne({
-      userId: session.user._id,
-      activityId: data.activityId,
-    });
-
-    if (existingFeedback) {
-      return { error: "คุณได้ส่งข้อเสนอแนะสำหรับกิจกรรมนี้แล้ว" };
+    // Validate input data
+    if (!data.activityId) {
+      throw new Error("Activity ID is required");
     }
 
+    // Find the user and populate activitiesParticipated
+    const user = await User.findById(session.user._id).populate(
+      "activitiesParticipated.activityId"
+    );
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Find the activity participation
+    const activityParticipation = user.activitiesParticipated.find(
+      (participation: any) =>
+        participation.activityId &&
+        participation.activityId._id.toString() === data.activityId
+    );
+
+    if (!activityParticipation) {
+      return { error: "คุณไม่ได้ลงทะเบียนเข้าร่วมกิจกรรมนี้" };
+    }
+
+    if (
+      activityParticipation.bookingStatus !== "booked" ||
+      activityParticipation.registrationStatus !== "registered"
+    ) {
+      return { error: "คุณยังไม่ได้ลงทะเบียนหรือจองกิจกรรมนี้สำเร็จ" };
+    }
+
+    if (activityParticipation.questionnaireStatus === "completed") {
+      return { error: "คุณได้ทำแบบสอบถามสำหรับกิจกรรมนี้แล้ว" };
+    }
+
+    // Check if the activity exists
+    const activity = await ActivityForm.findById(data.activityId);
+    if (!activity) {
+      throw new Error("Activity not found");
+    }
+
+    // Create new feedback
     const newFeedback = new Feedback({
       ...data,
       userId: session.user._id,
     });
 
     const savedFeedback = await newFeedback.save();
+
+    // Update user's questionnaireStatus
+    activityParticipation.questionnaireStatus = "completed";
+    await user.save();
 
     // Convert the MongoDB document to a plain JavaScript object
     const plainFeedback = JSON.parse(JSON.stringify(savedFeedback));
@@ -114,7 +150,9 @@ export async function createFeedback(data: any) {
     };
   } catch (error) {
     console.error("Error creating feedback:", error);
-    throw new Error("เกิดข้อผิดพลาดในการสร้างข้อเสนอแนะ");
+    throw new Error(
+      `เกิดข้อผิดพลาดในการสร้างข้อเสนอแนะ: ${(error as Error).message}`
+    );
   }
 }
 

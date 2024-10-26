@@ -216,16 +216,10 @@ export async function PublishForm(
     if (!session) throw new Error("ไม่พบผู้ใช้งาน");
 
     const regisEndDate = new Date(regisEndTime);
-    const activityEndDate = new Date(endTime);
 
-    // Calculate ActivityEndTime (not more than 2 days after regisEndTime)
-    const maxActivityEndTime = new Date(regisEndDate);
-    maxActivityEndTime.setDate(maxActivityEndTime.getDate() + 2);
-
-    const activityEndTime =
-      activityEndDate > maxActivityEndTime
-        ? maxActivityEndTime
-        : activityEndDate;
+    // คำนวณ ActivityEndTime (2 วันถัดจาก regisEndTime)
+    const activityEndTime = new Date(regisEndDate);
+    activityEndTime.setDate(activityEndTime.getDate() + 2);
 
     const updateData = {
       published: true,
@@ -465,7 +459,6 @@ export async function CloneForm(formData: FormData) {
   }
 }
 
-// เข้าร่วมกิจกรรมตามตำแหน่งผู้ใช้
 // เข้าร่วมกิจกรรมตามตำแหน่งผู้ใช้
 export async function joinActivity(
   activityId: string,
