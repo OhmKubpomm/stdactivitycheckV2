@@ -138,6 +138,7 @@ export async function createFeedback(data: any) {
 
     // Update user's questionnaireStatus
     activityParticipation.questionnaireStatus = "completed";
+    activityParticipation.completionStatus = "completed";
     await user.save();
 
     // Convert the MongoDB document to a plain JavaScript object
