@@ -58,7 +58,7 @@ export const TextAreaFormElement: FormElement = {
   }),
   designerBtnElement: {
     icon: BsTextareaResize,
-    label: "กล่องพื้นที่ข้อความ",
+    label: "ข้อความขนาดใหญ่",
   },
   designerComponent: DesignerComponent,
   formComponent: FormComponent,

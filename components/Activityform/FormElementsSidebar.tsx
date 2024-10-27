@@ -15,7 +15,7 @@ function FormElementsSidebar() {
         </p>
         <SidebarBtnElement formElement={FormElements.TitleField} />
         <SidebarBtnElement formElement={FormElements.SubTitleField} />
-        <SidebarBtnElement formElement={FormElements.ParagraphField} />
+
         <SidebarBtnElement formElement={FormElements.SeparatorField} />
         <SidebarBtnElement formElement={FormElements.SpacerField} />
 
@@ -23,8 +23,9 @@ function FormElementsSidebar() {
           องค์ประกอบสำหรับแบบฟอร์ม
         </p>
         <SidebarBtnElement formElement={FormElements.TextField} />
-        <SidebarBtnElement formElement={FormElements.NumberField} />
         <SidebarBtnElement formElement={FormElements.TextAreaField} />
+        <SidebarBtnElement formElement={FormElements.NumberField} />
+
         <SidebarBtnElement formElement={FormElements.DateField} />
         <SidebarBtnElement formElement={FormElements.SelectField} />
         <SidebarBtnElement formElement={FormElements.CheckboxField} />

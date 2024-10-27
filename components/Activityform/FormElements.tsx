@@ -3,7 +3,7 @@
 import { CheckboxFieldFormElement } from "@/components/fields/CheckboxField";
 import { DateFieldFormElement } from "@/components/fields/DateField";
 import { NumberFieldFormElement } from "@/components/fields/NumberField";
-import { ParagprahFieldFormElement } from "@/components/fields/ParagraphField";
+
 import { SelectFieldFormElement } from "@/components/fields/SelectField";
 import { SeparatorFieldFormElement } from "@/components/fields/SeparatorField";
 import { SpacerFieldFormElement } from "@/components/fields/SpacerField";
@@ -17,7 +17,6 @@ export type ElementsType =
   | "TextField"
   | "TitleField"
   | "SubTitleField"
-  | "ParagraphField"
   | "SeparatorField"
   | "SpacerField"
   | "NumberField"
@@ -67,7 +66,7 @@ export const FormElements: FormElementsType = {
   TextField: TextFieldFormElement,
   TitleField: TitleFieldFormElement,
   SubTitleField: SubTitleFieldFormElement,
-  ParagraphField: ParagprahFieldFormElement,
+
   SeparatorField: SeparatorFieldFormElement,
   SpacerField: SpacerFieldFormElement,
   NumberField: NumberFieldFormElement,

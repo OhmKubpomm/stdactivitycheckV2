@@ -159,7 +159,7 @@ const RegisSubmit: React.FC<RegisSubmitProps> = ({
   }, [activityId, isExpired, isNotStarted, activityLocation]);
 
   return (
-    <div className="flex flex-col items-center justify-center p-8">
+    <div className="flex flex-col items-center justify-center bg-background p-8">
       <div className="mb-4 text-lg font-bold">{timeLeft}</div>
       <Button
         onClick={handleJoinActivity}

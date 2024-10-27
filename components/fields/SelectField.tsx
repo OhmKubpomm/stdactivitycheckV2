@@ -37,15 +37,14 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { AiOutlineClose, AiOutlinePlus } from "react-icons/ai";
-import { toast } from "@/components/ui/use-toast";
 
 const type: ElementsType = "SelectField";
 
 const extraAttributes = {
-  label: "กล่องข้อความ",
-  helperText: "คำอธิบาย",
+  label: "",
+  helperText: "",
   required: false,
-  placeHolder: "วางข้อความลงที่นี่...",
+  placeHolder: "",
   options: [],
 };
 
@@ -66,7 +65,7 @@ export const SelectFieldFormElement: FormElement = {
   }),
   designerBtnElement: {
     icon: RxDropdownMenu,
-    label: "ฟิลด์แบบเลือก",
+    label: "ตัวเลือกแบบเลื่อนลง",
   },
   designerComponent: DesignerComponent,
   formComponent: FormComponent,
@@ -97,7 +96,7 @@ function DesignerComponent({
   const element = elementInstance as CustomInstance;
   const { label, required, placeHolder, helperText } = element.extraAttributes;
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="flex w-full flex-col gap-2 bg-background p-0">
       <Label>
         {label}
         {required && "*"}
@@ -135,7 +134,7 @@ function FormComponent({
   const { label, required, placeHolder, helperText, options } =
     element.extraAttributes;
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="flex w-full flex-col gap-2 bg-background p-0">
       <Label className={cn(error && "text-red-500")}>
         {label}
         {required && "*"}
@@ -182,10 +181,11 @@ function PropertiesComponent({
   elementInstance: FormElementInstance;
 }) {
   const element = elementInstance as CustomInstance;
-  const { updateElement, setSelectedElement } = useDesigner();
+  const { updateElement } = useDesigner();
+
   const form = useForm<propertiesFormSchemaType>({
     resolver: zodResolver(propertiesSchema),
-    mode: "onSubmit",
+    mode: "onChange",
     defaultValues: {
       label: element.extraAttributes.label,
       helperText: element.extraAttributes.helperText,
@@ -211,18 +211,14 @@ function PropertiesComponent({
         options,
       },
     });
-
-    toast({
-      title: "Success",
-      description: "Properties saved successfully",
-    });
-
-    setSelectedElement(null);
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(applyChanges)} className="space-y-3">
+      <form
+        onChange={form.handleSubmit(applyChanges)}
+        className="space-y-3 bg-background p-0"
+      >
         <FormField
           control={form.control}
           name="label"
@@ -232,8 +228,10 @@ function PropertiesComponent({
               <FormControl>
                 <Input
                   {...field}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") e.currentTarget.blur();
+                  onBlur={field.onBlur}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    form.handleSubmit(applyChanges)();
                   }}
                 />
               </FormControl>
@@ -253,8 +251,10 @@ function PropertiesComponent({
               <FormControl>
                 <Input
                   {...field}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") e.currentTarget.blur();
+                  onBlur={field.onBlur}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    form.handleSubmit(applyChanges)();
                   }}
                 />
               </FormControl>
@@ -272,8 +272,10 @@ function PropertiesComponent({
               <FormControl>
                 <Input
                   {...field}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") e.currentTarget.blur();
+                  onBlur={field.onBlur}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    form.handleSubmit(applyChanges)();
                   }}
                 />
               </FormControl>
@@ -297,11 +299,10 @@ function PropertiesComponent({
                   variant={"outline"}
                   className="gap-2"
                   onClick={(e) => {
-                    e.preventDefault(); // avoid submit
-                    form.setValue(
-                      "options",
-                      field.value.concat("ตัวเลือกใหม่")
-                    );
+                    e.preventDefault();
+                    const newOptions = [...field.value, ""];
+                    field.onChange(newOptions);
+                    form.handleSubmit(applyChanges)();
                   }}
                 >
                   <AiOutlinePlus />
@@ -309,7 +310,7 @@ function PropertiesComponent({
                 </Button>
               </div>
               <div className="flex flex-col gap-2">
-                {form.watch("options").map((option, index) => (
+                {field.value.map((option, index) => (
                   <div
                     key={index}
                     className="flex items-center justify-between gap-1"
@@ -318,8 +319,10 @@ function PropertiesComponent({
                       placeholder=""
                       value={option}
                       onChange={(e) => {
-                        field.value[index] = e.target.value;
-                        field.onChange(field.value);
+                        const newOptions = [...field.value];
+                        newOptions[index] = e.target.value;
+                        field.onChange(newOptions);
+                        form.handleSubmit(applyChanges)();
                       }}
                     />
                     <Button
@@ -330,6 +333,7 @@ function PropertiesComponent({
                         const newOptions = [...field.value];
                         newOptions.splice(index, 1);
                         field.onChange(newOptions);
+                        form.handleSubmit(applyChanges)();
                       }}
                     >
                       <AiOutlineClose />
@@ -337,7 +341,6 @@ function PropertiesComponent({
                   </div>
                 ))}
               </div>
-
               <FormDescription>
                 เพิ่มตัวเลือก <br />
                 ตัวเลือกที่เพิ่มมาจะแสดงในกล่องข้อความ
@@ -361,19 +364,17 @@ function PropertiesComponent({
               </div>
               <FormControl>
                 <Switch
-                  className="bg-primary-500"
                   checked={field.value}
-                  onCheckedChange={field.onChange}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked);
+                    form.handleSubmit(applyChanges)();
+                  }}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Separator />
-        <Button className="w-full bg-primary-500 text-white" type="submit">
-          Save
-        </Button>
       </form>
     </Form>
   );

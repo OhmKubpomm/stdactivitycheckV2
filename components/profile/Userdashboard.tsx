@@ -98,7 +98,13 @@ const StatCard: React.FC<StatCardProps> = ({
   </Card>
 );
 
-const ActivityCard = ({ activity }: { activity: DashboardActivityType }) => {
+const ActivityCard = ({
+  activity,
+  user,
+}: {
+  activity: DashboardActivityType;
+  user: DashboardDataType["user"];
+}) => {
   const [showQR, setShowQR] = useState(false);
 
   return (
@@ -118,12 +124,14 @@ const ActivityCard = ({ activity }: { activity: DashboardActivityType }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="mb-2 text-sm text-gray-600">
-            {isValidDate(activity.date)
-              ? format(parseISO(activity.date), "dd/MM/yyyy")
-              : "ไม่ระบุวันที่"}
+          <p className="mt-2 text-sm text-gray-600">
+            วันที่เริ่มลงทะเบียน:{" "}
+            {format(parseISO(activity.regisStartTime), "dd/MM/yyyy HH:mm")}
           </p>
-          <p className="mb-2 text-sm text-gray-600">{activity.time}</p>
+          <p className="text-sm text-gray-600">
+            วันที่สิ้นสุดการลงทะเบียน:{" "}
+            {format(parseISO(activity.regisEndTime), "dd/MM/yyyy HH:mm")}
+          </p>
           <Badge
             variant={
               activity.type === "mandatory"
@@ -144,7 +152,7 @@ const ActivityCard = ({ activity }: { activity: DashboardActivityType }) => {
           </Badge>
         </CardContent>
         <AnimatePresence>
-          {showQR && (
+          {showQR && activity.registrationStatus === "pending" && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -172,6 +180,11 @@ const ActivityCard = ({ activity }: { activity: DashboardActivityType }) => {
                 </DialogContent>
               </Dialog>
             </motion.div>
+          )}
+          {showQR && activity.registrationStatus === "registered" && (
+            <div className="absolute bottom-2 right-2 rounded-md bg-green-100 p-2 text-green-800">
+              คุณได้ลงทะเบียนเข้าร่วมกิจกรรมนี้แล้ว
+            </div>
           )}
         </AnimatePresence>
       </Card>
@@ -306,11 +319,12 @@ export default function UserDashboard() {
     )
   );
 
-  const upcomingActivities = activities.filter(
-    (activity) =>
-      new Date() >= new Date(activity.regisStartTime) &&
-      new Date() <= new Date(activity.regisEndTime)
-  );
+  const upcomingActivities = activities.filter((activity) => {
+    const now = Date.now();
+    const regisStart = new Date(activity.regisStartTime).getTime();
+    const regisEnd = new Date(activity.regisEndTime).getTime();
+    return now >= regisStart && now <= regisEnd;
+  });
 
   const pendingQuestionnaireActivities = activities.filter((activity) =>
     user.activitiesParticipated.some(
@@ -327,33 +341,6 @@ export default function UserDashboard() {
       label: "ประเภท",
       render: (row: DashboardActivityType) => {
         return renderActivityType(row.type);
-      },
-    },
-    {
-      key: "status",
-      label: "สถานะ",
-      render: (row: DashboardActivityType) => {
-        const participation = user.activitiesParticipated.find(
-          (p) => p.activityId === row.id
-        );
-        if (participation) {
-          return (
-            <div className="flex items-center">
-              <Badge
-                variant={
-                  participation.completionStatus === "completed"
-                    ? "default"
-                    : "secondary"
-                }
-              >
-                {participation.completionStatus === "completed"
-                  ? "เสร็จสมบูรณ์"
-                  : "ไม่สมบูรณ์"}
-              </Badge>
-            </div>
-          );
-        }
-        return <Badge variant="outline">ไม่ได้เข้าร่วม</Badge>;
       },
     },
   ];
@@ -447,12 +434,43 @@ export default function UserDashboard() {
                               ? format(parseISO(activity.date), "dd/MM/yyyy")
                               : "ไม่ระบุวันที่"}
                           </p>
+
+                          <p className="text-sm text-gray-600">
+                            {format(parseISO(activity.endTime), "dd/MM/yyyy")}
+                          </p>
                           <p className="text-sm text-gray-600">
                             {activity.time}
                           </p>
-                          <Button className="mt-2 bg-gray-600 text-white hover:bg-gray-700">
-                            สำรองที่นั่งแล้ว
-                          </Button>
+                          <p className="mt-2 text-sm text-gray-600">
+                            สถานะ:{" "}
+                            {activity.bookingStatus === "booked"
+                              ? "จองแล้ว"
+                              : activity.bookingStatus === "pending"
+                              ? "รอดำเนินการ"
+                              : "ไม่สำเร็จ"}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            การลงทะเบียน:{" "}
+                            {activity.registrationStatus === "registered"
+                              ? "ลงทะเบียนแล้ว"
+                              : activity.registrationStatus === "pending"
+                              ? "รอดำเนินการ"
+                              : "ไม่สำเร็จ"}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            แบบสอบถาม:{" "}
+                            {activity.questionnaireStatus === "completed"
+                              ? "เสร็จสิ้น"
+                              : activity.questionnaireStatus === "pending"
+                              ? "รอดำเนินการ"
+                              : "ไม่จำเป็น"}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            สถานะการเข้าร่วม:{" "}
+                            {activity.completionStatus === "completed"
+                              ? "เสร็จสมบูรณ์"
+                              : "ไม่สมบูรณ์"}
+                          </p>
                         </motion.div>
                       ))}
                     </AnimatePresence>
@@ -519,6 +537,15 @@ export default function UserDashboard() {
                                   "dd/MM/yyyy"
                                 )}
                               </span>
+                              <div className="flex items-center text-gray-600">
+                                -
+                              </div>
+                              <span>
+                                {format(
+                                  parseISO(selectedActivity.endTime),
+                                  "dd/MM/yyyy"
+                                )}
+                              </span>
                             </div>
                             <div className="flex items-center text-gray-600">
                               <Clock className="mr-2 size-5 text-gray-500" />
@@ -528,6 +555,7 @@ export default function UserDashboard() {
                               <MapPin className="mr-2 size-5 text-gray-500" />
                               <span>{selectedActivity.location}</span>
                             </div>
+
                             <Badge
                               variant={
                                 selectedActivity.type === "mandatory"
@@ -549,12 +577,12 @@ export default function UserDashboard() {
                                 <DialogTrigger asChild>
                                   <Button className="mt-2 bg-gray-600 text-white hover:bg-gray-700">
                                     <QrCode className="mr-2 size-4" />
-                                    เข้าร่วมกิจกรรม
+                                    สำรองที่นั่ง
                                   </Button>
                                 </DialogTrigger>
                                 <DialogContent className="flex flex-col items-center rounded-lg bg-white p-6 shadow-md sm:max-w-md">
                                   <DialogTitle className="mb-4 text-xl font-bold text-gray-800">
-                                    เข้าร่วมกิจกรรม: {selectedActivity.name}
+                                    สำรองที่นั่ง: {selectedActivity.name}
                                   </DialogTitle>
                                   <div className="flex w-full flex-col items-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
                                     <div className="flex flex-col items-center">
@@ -564,7 +592,7 @@ export default function UserDashboard() {
                                         className="rounded-lg"
                                       />
                                       <DialogDescription className="mt-2 text-center text-sm text-gray-600">
-                                        แสกนเพื่อเข้าร่วมกิจกรรมนี้
+                                        แสกนเพื่อสำรองที่นั่ง
                                       </DialogDescription>
                                     </div>
                                     <div className="flex flex-col items-center space-y-2">
@@ -601,7 +629,7 @@ export default function UserDashboard() {
                             ) && (
                               <div className="flex items-center text-green-500">
                                 <CheckCircle className="mr-2 size-5" />
-                                <span>คุณได้เข้าร่วมกิจกรรมนี้แล้ว</span>
+                                <span>คุณได้สำรองที่นั่งกิจกรรมนี้แล้ว</span>
                               </div>
                             )}
                           </motion.div>
@@ -638,7 +666,11 @@ export default function UserDashboard() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
                   <AnimatePresence>
                     {upcomingActivities.map((activity) => (
-                      <ActivityCard key={activity.id} activity={activity} />
+                      <ActivityCard
+                        key={activity.id}
+                        activity={activity}
+                        user={user}
+                      />
                     ))}
                   </AnimatePresence>
                 </div>
@@ -679,7 +711,7 @@ export default function UserDashboard() {
                               : "ไม่ระบุวันที่"}
                           </p>
                         </div>
-                        <Link href={`/`} target="_blank">
+                        <Link href={`/dashboard/crudfeedback/AddFeedback`}>
                           <Button
                             variant="outline"
                             className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200"

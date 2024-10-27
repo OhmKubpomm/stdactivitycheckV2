@@ -201,9 +201,7 @@ export async function getDashboardData(): Promise<DashboardDataType> {
           type: mapActivityType(activity.ActivityType),
           shareUrl: activity.ActivityShareurl,
           location: activity.ActivityLocation,
-          time: `เวลาเริ่มต้น${formatThaiTime(
-            startDate
-          )} - เวลาสิ้นสุด${formatThaiTime(endDate)}`,
+          time: `${formatThaiTime(startDate)} - ${formatThaiTime(endDate)}`,
           coordinates: activityMap ? activityMap.Maplocation.coordinates : null,
           startTime: startDate.toISOString(),
           endTime: endDate.toISOString(),

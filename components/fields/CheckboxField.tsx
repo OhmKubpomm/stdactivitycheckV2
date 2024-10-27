@@ -54,7 +54,7 @@ export const CheckboxFieldFormElement: FormElement = {
   }),
   designerBtnElement: {
     icon: BadgeCheck,
-    label: "ฟิลด์ปุ่มกด",
+    label: "ช่องทำเครื่องหมาย",
   },
   designerComponent: DesignerComponent,
   formComponent: FormComponent,

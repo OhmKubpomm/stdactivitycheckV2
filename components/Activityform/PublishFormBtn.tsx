@@ -156,7 +156,7 @@ function PublishFormBtn({ id }: { id: number }) {
               </div>
             </RadioGroup>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 bg-background p-0">
             <Label>สถานที่จัดกิจกรรม</Label>
             <Select
               options={mapLocations}
