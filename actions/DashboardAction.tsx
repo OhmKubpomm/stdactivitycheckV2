@@ -21,6 +21,7 @@ interface ActivityType {
   endTime: Date;
   regisStartTime: Date;
   regisEndTime: Date;
+  ActivityEndTime: Date;
   ActivitySubmissions: number;
   ActivityDescription: string;
   ActivityContent: string;
@@ -57,11 +58,12 @@ export interface DashboardActivityType {
   endTime: string;
   regisStartTime: string;
   regisEndTime: string;
-  activityEndTime: string;
+  activityEndTime: string | null;
   bookingStatus: "booked" | "pending" | "failed";
   registrationStatus: "pending" | "failed" | "registered";
   questionnaireStatus: "pending" | "completed" | "not_required";
   completionStatus: "completed" | "incomplete";
+  canSubmitQuestionnaire: boolean;
 }
 
 export interface DashboardDataType {
@@ -141,15 +143,17 @@ export async function getDashboardData(): Promise<DashboardDataType> {
   };
 
   user.activitiesParticipated.forEach((participation: any) => {
-    const rawActivityType = participation.activityId?.ActivityType;
-    const activityType = mapActivityType(rawActivityType);
+    if (participation.completionStatus === "completed") {
+      const rawActivityType = participation.activityId?.ActivityType;
+      const activityType = mapActivityType(rawActivityType);
 
-    if (activityType === "mandatory") {
-      completedActivities.mandatory++;
-    } else if (activityType === "mandatoryElective") {
-      completedActivities.mandatoryElective++;
-    } else if (activityType === "elective") {
-      completedActivities.elective++;
+      if (activityType === "mandatory") {
+        completedActivities.mandatory++;
+      } else if (activityType === "mandatoryElective") {
+        completedActivities.mandatoryElective++;
+      } else if (activityType === "elective") {
+        completedActivities.elective++;
+      }
     }
   });
 
@@ -174,10 +178,13 @@ export async function getDashboardData(): Promise<DashboardDataType> {
         const activityMap = maps.find(
           (map: MapType) => map.name === activity.ActivityFormname
         );
-        const activityEndTime = activity.regisEndTime
-          ? new Date(activity.regisEndTime)
-          : new Date();
-        activityEndTime.setDate(activityEndTime.getDate() + 2);
+
+        const activityEndTime = new Date(activity.ActivityEndTime);
+        const now = new Date();
+        const oneDayAfterEnd = new Date(
+          activityEndTime.getTime() + 24 * 60 * 60 * 1000
+        );
+
         const startDate = new Date(activity.startTime);
         const endDate = new Date(activity.endTime);
         const regisStartDate = activity.regisStartTime
@@ -189,6 +196,17 @@ export async function getDashboardData(): Promise<DashboardDataType> {
         const userParticipation = user.activitiesParticipated.find(
           (p) => p.activityId?._id.toString() === activity._id.toString()
         );
+
+        let questionnaireStatus =
+          userParticipation?.questionnaireStatus || "pending";
+        let completionStatus =
+          userParticipation?.completionStatus || "incomplete";
+
+        if (now > oneDayAfterEnd) {
+          questionnaireStatus = "not_required";
+          completionStatus = "incomplete";
+        }
+
         return {
           id: activity._id.toString(),
           name: activity.ActivityFormname,
@@ -211,13 +229,24 @@ export async function getDashboardData(): Promise<DashboardDataType> {
           regisEndTime: regisEndDate
             ? regisEndDate.toISOString()
             : "ไม่ระบุเวลา",
-          activityEndTime: activityEndTime.toISOString(),
+          activityEndTime:
+            activity.ActivityEndTime instanceof Date &&
+            !isNaN(activity.ActivityEndTime.getTime())
+              ? activity.ActivityEndTime.toISOString()
+              : null,
           bookingStatus: userParticipation?.bookingStatus || "pending",
           registrationStatus:
             userParticipation?.registrationStatus || "pending",
-          questionnaireStatus:
-            userParticipation?.questionnaireStatus || "pending",
-          completionStatus: userParticipation?.completionStatus || "incomplete",
+          questionnaireStatus,
+          completionStatus,
+          canSubmitQuestionnaire:
+            activity.ActivityEndTime instanceof Date &&
+            !isNaN(activity.ActivityEndTime.getTime())
+              ? now <=
+                new Date(
+                  activity.ActivityEndTime.getTime() + 24 * 60 * 60 * 1000
+                )
+              : false,
         };
       })
     ),

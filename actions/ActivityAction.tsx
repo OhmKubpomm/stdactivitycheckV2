@@ -206,7 +206,9 @@ export async function PublishForm(
   endTime: string,
   regisStartTime: string,
   regisEndTime: string,
+  ActivityEndTime: string,
   activityType: string,
+
   activityLocation: string,
   longitude: number,
   latitude: number
@@ -215,19 +217,13 @@ export async function PublishForm(
     const session = await auth();
     if (!session) throw new Error("ไม่พบผู้ใช้งาน");
 
-    const regisEndDate = new Date(regisEndTime);
-
-    // คำนวณ ActivityEndTime (2 วันถัดจาก regisEndTime)
-    const activityEndTime = new Date(regisEndDate);
-    activityEndTime.setDate(activityEndTime.getDate() + 2);
-
     const updateData = {
       published: true,
       startTime: new Date(startTime),
       endTime: new Date(endTime),
       regisStartTime: new Date(regisStartTime),
       regisEndTime: new Date(regisEndTime),
-      ActivityEndTime: activityEndTime,
+      ActivityEndTime: new Date(ActivityEndTime),
       ActivityType: activityType,
       ActivityLocation: activityLocation,
     };

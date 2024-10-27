@@ -32,6 +32,7 @@ function PublishFormBtn({ id }: { id: number }) {
   const [endDateTime, setEndDateTime] = useState<string>("");
   const [regisStartDateTime, setRegisStartDateTime] = useState<string>("");
   const [regisEndDateTime, setRegisEndDateTime] = useState<string>("");
+  const [ActivityEndTime, setActivityEndTime] = useState<string>("");
   const [activityLocation, setActivityLocation] = useState<string>("");
   const [mapLocations, setMapLocations] = useState<
     { value: string; label: string }[]
@@ -75,6 +76,7 @@ function PublishFormBtn({ id }: { id: number }) {
         !endDateTime ||
         !regisStartDateTime ||
         !regisEndDateTime ||
+        !ActivityEndTime ||
         !activityType ||
         !activityLocation.trim()
       ) {
@@ -92,6 +94,7 @@ function PublishFormBtn({ id }: { id: number }) {
         new Date(endDateTime).toISOString(),
         new Date(regisStartDateTime).toISOString(),
         new Date(regisEndDateTime).toISOString(),
+        new Date(ActivityEndTime).toISOString(),
         activityType,
         activityLocation,
         0,
@@ -212,6 +215,15 @@ function PublishFormBtn({ id }: { id: number }) {
               onChange={(e) => setRegisEndDateTime(e.target.value)}
             />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="ActivityEndTime">วันทำแบบสอบถาม</Label>
+            <Input
+              type="datetime-local"
+              id="ActivityEndTime"
+              value={ActivityEndTime}
+              onChange={(e) => setActivityEndTime(e.target.value)}
+            />
+          </div>
         </div>
         <AlertDialogFooter>
           <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
@@ -223,6 +235,7 @@ function PublishFormBtn({ id }: { id: number }) {
               !endDateTime ||
               !regisStartDateTime ||
               !regisEndDateTime ||
+              !ActivityEndTime ||
               !activityLocation.trim()
             }
             onClick={(e) => {

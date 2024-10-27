@@ -10,6 +10,7 @@ import {
   addMonths,
   subMonths,
   parseISO,
+  isAfter,
 } from "date-fns";
 import { th } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +29,8 @@ import {
   CheckCircle,
   Link as LinkIcon,
   AlertCircle,
+  XCircle,
+  Clock as ClockIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -49,18 +52,11 @@ import {
 import { DataTable } from "@/components/globals/DataTable";
 import RegisSubmit from "@/components/Activityform/RegisSubmit";
 import Link from "next/link";
+import { useInView } from "react-intersection-observer";
 
 const isValidDate = (date: string | Date | null | undefined): boolean => {
   return date ? !isNaN(new Date(date).getTime()) : false;
 };
-
-interface StatCardProps {
-  title: string;
-  value: string;
-  icon: React.ElementType;
-  color: string;
-  onClick: () => void;
-}
 
 const renderActivityType = (type: string) => {
   switch (type) {
@@ -74,6 +70,14 @@ const renderActivityType = (type: string) => {
       return "ไม่ระบุประเภท";
   }
 };
+
+interface StatCardProps {
+  title: string;
+  value: string;
+  icon: React.ElementType;
+  color: string;
+  onClick: () => void;
+}
 
 const StatCard: React.FC<StatCardProps> = ({
   title,
@@ -106,11 +110,16 @@ const ActivityCard = ({
   user: DashboardDataType["user"];
 }) => {
   const [showQR, setShowQR] = useState(false);
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    rootMargin: "200px 0px",
+  });
 
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
       className="relative"
@@ -167,7 +176,7 @@ const ActivityCard = ({
                     เข้าร่วมกิจกรรม
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="flex flex-col items-center rounded-lg bg-white p-6 shadow-md sm:max-w-md">
+                <DialogContent className="flex flex-col items-center rounded-lg bg-white p-6  shadow-md sm:max-w-md">
                   <DialogTitle className="mb-4 text-xl font-bold text-gray-800">
                     เข้าร่วมกิจกรรม: {activity.name}
                   </DialogTitle>
@@ -294,6 +303,48 @@ export default function UserDashboard() {
     );
   };
 
+  const renderQuestionnaireStatus = (activity: DashboardActivityType) => {
+    const now = new Date();
+    if (!activity.activityEndTime) {
+      return (
+        <Badge variant="secondary" className="bg-gray-500 text-white">
+          ไม่สามารถกรอกแบบสอบถาม
+        </Badge>
+      );
+    }
+
+    const activityEndTime = parseISO(activity.activityEndTime);
+    const oneDayAfterEnd = addDays(activityEndTime, 1);
+
+    if (isAfter(now, oneDayAfterEnd)) {
+      return (
+        <Badge variant="secondary" className="bg-gray-500 text-white">
+          <XCircle className="mr-2 size-4" />
+          หมดเวลากรอกแบบสอบถาม
+        </Badge>
+      );
+    } else if (activity.questionnaireStatus === "completed") {
+      return (
+        <Badge variant="secondary" className="bg-green-500 text-white">
+          <CheckCircle className="mr-2 size-4" />
+          กรอกแบบสอบถามแล้ว
+        </Badge>
+      );
+    } else {
+      return (
+        <Link href={`/dashboard/crudfeedback/AddFeedback/`}>
+          <Button
+            variant="outline"
+            className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+          >
+            <AlertCircle className="mr-2 size-4" />
+            กรอกแบบสอบถาม
+          </Button>
+        </Link>
+      );
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800">
@@ -325,14 +376,6 @@ export default function UserDashboard() {
     const regisEnd = new Date(activity.regisEndTime).getTime();
     return now >= regisStart && now <= regisEnd;
   });
-
-  const pendingQuestionnaireActivities = activities.filter((activity) =>
-    user.activitiesParticipated.some(
-      (participation) =>
-        participation.activityId === activity.id &&
-        participation.questionnaireStatus === "pending"
-    )
-  );
 
   const columns = [
     { key: "name", label: "ชื่อกิจกรรม" },
@@ -434,7 +477,6 @@ export default function UserDashboard() {
                               ? format(parseISO(activity.date), "dd/MM/yyyy")
                               : "ไม่ระบุวันที่"}
                           </p>
-
                           <p className="text-sm text-gray-600">
                             {format(parseISO(activity.endTime), "dd/MM/yyyy")}
                           </p>
@@ -690,38 +732,51 @@ export default function UserDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[200px] pr-4">
+                <ScrollArea className="h-[400px] pr-4">
                   <AnimatePresence>
-                    {pendingQuestionnaireActivities.map((activity) => (
-                      <motion.div
-                        key={activity.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                        className="mb-4 flex items-center justify-between rounded-lg bg-gray-50 p-4 transition-all duration-300 hover:bg-gray-100 hover:shadow-md"
-                      >
-                        <div>
-                          <h3 className="font-semibold text-gray-800">
-                            {activity.name}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            {isValidDate(activity.date)
-                              ? format(parseISO(activity.date), "dd/MM/yyyy")
-                              : "ไม่ระบุวันที่"}
-                          </p>
-                        </div>
-                        <Link href={`/dashboard/crudfeedback/AddFeedback`}>
-                          <Button
-                            variant="outline"
-                            className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
-                          >
-                            <AlertCircle className="mr-2 size-4" />
-                            กรอกแบบสอบถาม
-                          </Button>
-                        </Link>
-                      </motion.div>
-                    ))}
+                    {activities
+                      .filter((activity) => activity.activityEndTime) // แสดงเฉพาะกิจกรรมที่มี activityEndTime
+                      .map((activity) => (
+                        <motion.div
+                          key={activity.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3 }}
+                          className="mb-4 flex items-center justify-between rounded-lg bg-gray-50 p-4 transition-all duration-300 hover:bg-gray-100 hover:shadow-md"
+                        >
+                          <div>
+                            <h3 className="font-semibold text-gray-800">
+                              {activity.name}
+                            </h3>
+
+                            {activity.activityEndTime && (
+                              <>
+                                <p className="text-sm text-gray-600">
+                                  <ClockIcon className="mr-1 inline-block size-4" />
+                                  สิ้นสุดกิจกรรม:{" "}
+                                  {format(
+                                    parseISO(activity.activityEndTime),
+                                    "dd/MM/yyyy HH:mm"
+                                  )}
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  <AlertCircle className="mr-1 inline-block size-4" />
+                                  หมดเวลากรอกแบบสอบถาม:{" "}
+                                  {format(
+                                    addDays(
+                                      parseISO(activity.activityEndTime),
+                                      1
+                                    ),
+                                    "dd/MM/yyyy HH:mm"
+                                  )}
+                                </p>
+                              </>
+                            )}
+                          </div>
+                          {renderQuestionnaireStatus(activity)}
+                        </motion.div>
+                      ))}
                   </AnimatePresence>
                 </ScrollArea>
               </CardContent>

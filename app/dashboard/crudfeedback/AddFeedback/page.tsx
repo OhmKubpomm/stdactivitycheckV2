@@ -21,7 +21,8 @@ export default async function AddFeedbackPage() {
         (participation) =>
           participation.activityId === activity.id &&
           participation.registrationStatus === "registered" &&
-          participation.questionnaireStatus !== "completed"
+          participation.questionnaireStatus !== "completed" &&
+          activity.activityEndTime
       )
   );
 

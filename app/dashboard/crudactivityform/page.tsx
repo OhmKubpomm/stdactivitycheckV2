@@ -28,12 +28,11 @@ import {
   CheckCircle,
   MousePointerSquareDashed,
   LogOut,
-  Book,
   PenLine,
   ArrowRightCircle,
-  Eye,
   Copy,
   ChevronDown,
+  Sofa,
 } from "lucide-react";
 import DeleteBtn from "@/components/Activityform/DeleteBtn";
 connectdatabase();
@@ -199,9 +198,7 @@ function FormCard({ form }: { form: typeof ActivityForm }) {
           })}
           {form.published && (
             <span className="flex items-center gap-2">
-              <Eye className="text-muted-foreground" />
-              <span>{form.ActivityVisits?.toLocaleString() ?? "0"}</span>
-              <Book className="text-muted-foreground" />
+              <Sofa className="text-muted-foreground" />
               <span>{form.ActivitySubmissions?.toLocaleString() ?? "0"}</span>
             </span>
           )}
