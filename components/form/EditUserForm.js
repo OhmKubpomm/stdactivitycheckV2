@@ -19,6 +19,7 @@ import {
 
 import { UploadOutlined } from "@ant-design/icons";
 import Image from "next/image";
+
 const EditUserForm = () => {
   /* โค้ดเกี่ยวกับการอัพโหลดรูปภาพ */
   const [files, setFiles] = useState([]);
@@ -38,7 +39,7 @@ const EditUserForm = () => {
   }
 
   async function handleuploadCloud() {
-    if (!files.length) return alert("Please select files");
+    if (!files.length) return alert("กรุณาเลือกไฟล์");
     const formData = new FormData();
 
     files.forEach((file) => {
@@ -53,8 +54,8 @@ const EditUserForm = () => {
         message.error(res.error);
       }
     } catch (error) {
-      console.error("Error uploading files:", error);
-      message.error("Failed to upload photo. Please try again.");
+      console.error("เกิดข้อผิดพลาดในการอัพโหลดไฟล์:", error);
+      message.error("การอัพโหลดรูปภาพล้มเหลว กรุณาลองใหม่");
     }
   }
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -120,7 +121,7 @@ const EditUserForm = () => {
   return (
     <>
       <Card className="gap-4 rounded-lg p-6 shadow-md ">
-        <Title className="mb-4 text-2xl font-semibold">แก้ไขข้อมูล User</Title>
+        <Title className="mb-4 text-2xl font-semibold">แก้ไขข้อมูลผู้ใช้</Title>
         <Form
           onFinish={handleAction}
           ref={formRef}
@@ -138,13 +139,13 @@ const EditUserForm = () => {
           }}
         >
           <div className="space-y-4">
-            <Form.Item label="Username" name="name">
+            <Form.Item label="ชื่อผู้ใช้" name="name">
               <Input type="text" name="name" className="rounded border " />
             </Form.Item>
-            <Form.Item label="Email" name="email">
+            <Form.Item label="อีเมล" name="email">
               <Input type="email" name="email" className="rounded border" />
             </Form.Item>
-            <Form.Item label="Password" name="password">
+            <Form.Item label="รหัสผ่าน" name="password">
               <Input.Password
                 type="password"
                 name="password"
@@ -154,14 +155,14 @@ const EditUserForm = () => {
           </div>
 
           <div className="flex space-x-4">
-            <Form.Item label="Firstname" name="Firstname">
+            <Form.Item label="ชื่อจริง" name="Firstname">
               <Input
                 type="text"
                 name="Firstname"
                 className="w-full rounded border"
               />
             </Form.Item>
-            <Form.Item label="Lastname" name="Lastname">
+            <Form.Item label="นามสกุล" name="Lastname">
               <Input
                 type="text"
                 name="Lastname"
@@ -171,20 +172,20 @@ const EditUserForm = () => {
           </div>
 
           <div className="space-y-4">
-            <Form.Item label="Date" name="Date">
+            <Form.Item label="วันที่" name="Date">
               <Input type="date" name="Date" className="rounded border" />
             </Form.Item>
-            <Form.Item label="Address" name="Address">
+            <Form.Item label="ที่อยู่" name="Address">
               <Input.TextArea
                 type="textarea"
                 name="Address"
                 className="rounded border"
               />
             </Form.Item>
-            <Form.Item label="Telephone" name="Telephone">
+            <Form.Item label="เบอร์โทรศัพท์" name="Telephone">
               <Input type="tel" name="Telephone" className="rounded border" />
             </Form.Item>
-            <Form.Item label="userType" name="userType">
+            <Form.Item label="ประเภทผู้ใช้" name="userType">
               <div className="space-y-2">
                 <Select name="userType" defaultValue={editUser?.userType}>
                   <SelectTrigger>
@@ -208,7 +209,7 @@ const EditUserForm = () => {
           </div>
         </Form>
 
-        <Form.Item label="Image" className="mb-4">
+        <Form.Item label="รูปภาพ" className="mb-4">
           {editUser?.image && (
             <div className="mb-4">
               <Image
@@ -233,9 +234,10 @@ const EditUserForm = () => {
             </div>
           )}
         </Form.Item>
-        {/* Display existing image from database */}
+
+        {/* อัพโหลดรูปภาพ */}
         <Form onFinish={handleuploadCloud} ref={formRef}>
-          <Form.Item label="upload" className="mb-4">
+          <Form.Item label="อัพโหลดรูปภาพ" className="mb-4">
             <Upload
               listType="picture-card"
               className="image-upload-grid"
@@ -284,7 +286,7 @@ const EditUserForm = () => {
             />
           </Form.Item>
         </Form>
-        {/* End Display existing image from database */}
+        {/* ปิดอัพโหลดรูปภาพ */}
 
         <ButtonLoad
           onClick={() => router.back()}

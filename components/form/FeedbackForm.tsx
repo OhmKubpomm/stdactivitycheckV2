@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,7 +15,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { createFeedback } from "@/actions/feedbackActions";
+import {
+  createFeedback,
+  checkFeedbackEligibility,
+} from "@/actions/feedbackActions";
 import { DashboardActivityType } from "@/actions/DashboardAction";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
@@ -65,6 +68,7 @@ export function FeedbackForm({
 }: FeedbackFormProps) {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
+  const [isEligible, setIsEligible] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -82,7 +86,37 @@ export function FeedbackForm({
     [activities, searchTerm]
   );
 
+  useEffect(() => {
+    const checkEligibility = async () => {
+      const activityId = form.getValues("activityId");
+      if (activityId) {
+        const result = await checkFeedbackEligibility(activityId);
+        setIsEligible(result.eligible);
+        if (!result.eligible) {
+          toast({
+            title: "ไม่สามารถส่งข้อเสนอแนะได้",
+            description: result.error,
+            variant: "destructive",
+            className: "bg-red-100 border-red-400 text-red-800",
+          });
+        }
+      }
+    };
+
+    checkEligibility();
+  }, [form, toast]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!isEligible) {
+      toast({
+        title: "ไม่สามารถส่งข้อเสนอแนะได้",
+        description: "คุณไม่มีสิทธิ์ส่งข้อเสนอแนะสำหรับกิจกรรมนี้",
+        variant: "destructive",
+        className: "bg-red-100 border-red-400 text-red-800",
+      });
+      return;
+    }
+
     try {
       const result = await createFeedback(values);
       if (result.error) {
@@ -221,7 +255,13 @@ export function FeedbackForm({
           >
             <Button
               type="submit"
-              className="w-full rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-3 font-bold text-white shadow-lg transition duration-200 ease-in-out hover:scale-105 hover:from-red-600 hover:to-orange-700"
+              className={cn(
+                "w-full rounded-lg px-6 py-3 font-bold text-white shadow-lg transition duration-200 ease-in-out",
+                isEligible
+                  ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:scale-105 hover:from-red-600 hover:to-orange-700"
+                  : "bg-gray-400 cursor-not-allowed"
+              )}
+              disabled={!isEligible}
             >
               ส่งข้อเสนอแนะ
             </Button>

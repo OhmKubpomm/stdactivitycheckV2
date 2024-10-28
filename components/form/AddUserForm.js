@@ -32,7 +32,7 @@ const AddUserForm = () => {
   }
 
   async function handleuploadCloud() {
-    if (!files.length) return alert("Please select files");
+    if (!files.length) return alert("กรุณาเลือกไฟล์");
     const formData3 = new FormData();
 
     files.forEach((file) => {
@@ -62,7 +62,7 @@ const AddUserForm = () => {
   const formRef = useRef();
 
   async function handleAction(formData) {
-    // Upload image to cloud first if there are any files
+    // อัพโหลดรูปภาพไปที่คลาวด์หากมีไฟล์อยู่
     let imageUrls;
     if (files.length) {
       const formData2 = new FormData();
@@ -73,11 +73,10 @@ const AddUserForm = () => {
       if (resUpload?.error) {
         return message.error(resUpload?.error);
       }
-      imageUrls = resUpload.image[0]?.image; // Assuming resUpload.image contains the image URL
+      imageUrls = resUpload.image[0]?.image; // สมมติว่า resUpload.image มี URL ของรูปภาพ
     }
 
-    // Then create the user
-
+    // สร้างผู้ใช้
     const {
       name,
       email,
@@ -112,7 +111,7 @@ const AddUserForm = () => {
     formRef.current?.resetFields();
     messageApi.open({
       type: "success",
-      content: "reset success",
+      content: "รีเซ็ตสำเร็จ",
     });
   };
   return (
@@ -128,16 +127,16 @@ const AddUserForm = () => {
           transition={{ duration: 0.5 }}
         >
           <div className="flex flex-row justify-between ">
-            <Title className="text-4xl">Add User</Title>
+            <Title className="text-4xl">เพิ่มผู้ใช้</Title>
           </div>
 
-          <Form.Item label="Username" name="name">
+          <Form.Item label="ชื่อผู้ใช้" name="name">
             <Input type="text" name="name" className="  rounded  border" />
           </Form.Item>
-          <Form.Item label="Email" name="email">
+          <Form.Item label="อีเมล" name="email">
             <Input type="email" name="email" className="rounded border" />
           </Form.Item>
-          <Form.Item label="Password" name="password">
+          <Form.Item label="รหัสผ่าน" name="password">
             <Input.Password
               type="password"
               name="password"
@@ -146,14 +145,14 @@ const AddUserForm = () => {
           </Form.Item>
 
           <div className="flex space-x-4">
-            <Form.Item label="Firstname" name="Firstname">
+            <Form.Item label="ชื่อจริง" name="Firstname">
               <Input
                 type="text"
                 name="Firstname"
                 className="w-full rounded border"
               />
             </Form.Item>
-            <Form.Item label="Lastname" name="Lastname">
+            <Form.Item label="นามสกุล" name="Lastname">
               <Input
                 type="text"
                 name="Lastname"
@@ -162,23 +161,23 @@ const AddUserForm = () => {
             </Form.Item>
           </div>
 
-          <Form.Item label="Date" name="Date">
+          <Form.Item label="วันที่" name="Date">
             <Input type="date" name="Date" className="rounded border" />
           </Form.Item>
-          <Form.Item label="Address" name="Address">
+          <Form.Item label="ที่อยู่" name="Address">
             <Input.TextArea
               type="textarea"
               name="Address"
               className="rounded border"
             />
           </Form.Item>
-          <Form.Item label="Telephone" name="Telephone">
+          <Form.Item label="เบอร์โทรศัพท์" name="Telephone">
             <Input type="tel" name="Telephone" className="rounded border" />
           </Form.Item>
 
-          {/* Display existing image from database */}
+          {/* แสดงภาพที่อัพโหลด */}
 
-          <Form.Item label="upload" className="mb-4">
+          <Form.Item label="อัพโหลด" className="mb-4">
             <Upload
               listType="picture-card"
               className="image-upload-grid"
@@ -197,7 +196,7 @@ const AddUserForm = () => {
                 return false;
               }}
             >
-              {files.length >= 8 ? null : <div>Upload</div>}
+              {files.length >= 8 ? null : <div>อัพโหลด</div>}
             </Upload>
 
             {/* Preview Modal */}
@@ -219,7 +218,7 @@ const AddUserForm = () => {
             </Modal>
           </Form.Item>
 
-          {/* End Display existing image from database */}
+          {/* ปิดแสดงภาพที่อัพโหลด */}
 
           <div className="flex space-x-4">
             <ButtonLoad

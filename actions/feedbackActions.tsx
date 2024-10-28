@@ -157,6 +157,55 @@ export async function createFeedback(data: any) {
   }
 }
 
+export async function checkFeedbackEligibility(activityId: string) {
+  try {
+    const session = await auth();
+    if (!session || !session.user || !session.user._id) {
+      return { eligible: false, error: "User not authenticated" };
+    }
+
+    const user = await User.findById(session.user._id);
+    if (!user) {
+      return { eligible: false, error: "User not found" };
+    }
+
+    const activityParticipation = user.activitiesParticipated.find(
+      (participation: any) =>
+        participation.activityId &&
+        participation.activityId.toString() === activityId
+    );
+
+    if (!activityParticipation) {
+      return { eligible: false, error: "คุณไม่ได้ลงทะเบียนเข้าร่วมกิจกรรมนี้" };
+    }
+
+    if (
+      activityParticipation.bookingStatus !== "booked" ||
+      activityParticipation.registrationStatus !== "registered"
+    ) {
+      return {
+        eligible: false,
+        error: "คุณยังไม่ได้ลงทะเบียนหรือจองกิจกรรมนี้สำเร็จ",
+      };
+    }
+
+    if (activityParticipation.questionnaireStatus === "completed") {
+      return {
+        eligible: false,
+        error: "คุณได้ทำแบบสอบถามสำหรับกิจกรรมนี้แล้ว",
+      };
+    }
+
+    return { eligible: true };
+  } catch (error) {
+    console.error("Error checking feedback eligibility:", error);
+    return {
+      eligible: false,
+      error: "เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์การให้ข้อเสนอแนะ",
+    };
+  }
+}
+
 export async function getUserFeedbackActivities(userId: string) {
   try {
     const feedbacks = await Feedback.find({ userId });
