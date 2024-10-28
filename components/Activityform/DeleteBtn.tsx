@@ -34,8 +34,8 @@ const DeleteBtn = ({ formId }: { formId: number }) => {
             color: "white",
             boxShadow: "0 0 10px rgba(0,0,0,0.2)",
           },
-          title: "ลบตำแหน่งแผนที่สำเร็จ",
-          description: "ตำแหน่งแผนที่ถูกลบออกจากระบบของคุณแล้ว",
+          title: "ลบสำเร็จ",
+          description: "แบบความต้องการผู้เข้าร่วมกิจกรรมถูกลบออกจากระบบของคุณแล้ว",
         });
       }
     } catch (error) {
@@ -56,10 +56,10 @@ const DeleteBtn = ({ formId }: { formId: number }) => {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            คุณแน่ใจหรือไม่ว่าต้องการลบตำแหน่งแผนที่
+            คุณแน่ใจหรือไม่ว่าต้องการลบแบบความต้องการผู้เข้าร่วมกิจกรรม
           </AlertDialogTitle>
           <AlertDialogDescription>
-            การดำเนินการนี้จะลบตำแหน่งแผนที่ลงในบัญชีของคุณจากเซิร์ฟเวอร์ของเรา
+            การดำเนินการนี้จะลบแบบความต้องการผู้เข้าร่วมกิจกรรมลงในบัญชีของคุณจากเซิร์ฟเวอร์ของเรา
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
