@@ -189,13 +189,6 @@ export async function checkFeedbackEligibility(activityId: string) {
       };
     }
 
-    if (activityParticipation.questionnaireStatus === "completed") {
-      return {
-        eligible: false,
-        error: "คุณได้ทำแบบสอบถามสำหรับกิจกรรมนี้แล้ว",
-      };
-    }
-
     return { eligible: true };
   } catch (error) {
     console.error("Error checking feedback eligibility:", error);
