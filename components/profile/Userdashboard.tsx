@@ -728,14 +728,32 @@ export default function UserDashboard() {
             <Card className="border-none bg-white shadow-lg">
               <CardHeader>
                 <CardTitle className="text-xl text-gray-800 sm:text-2xl">
-                  กิจกรรมที่ยังไม่ได้กรอกแบบสอบถาม
+                  กิจกรรมที่ยังไม่กรอกแบบสอบถาม
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[400px] pr-4">
                   <AnimatePresence>
                     {activities
-                      .filter((activity) => activity.activityEndTime) // แสดงเฉพาะกิจกรรมที่มี activityEndTime
+                      .filter((activity) => {
+                        // ต้องมี activityEndTime
+                        if (!activity.activityEndTime) return false;
+
+                        const now = new Date();
+                        const activityEndTime = parseISO(
+                          activity.activityEndTime
+                        );
+                        const oneDayAfterEnd = addDays(activityEndTime, 1);
+
+                        // แสดงเฉพาะกิจกรรมที่:
+                        // 1. กรอกแบบสอบถามแล้ว หรือ
+                        // 2. ยังไม่ได้กรอกและยังอยู่ในช่วงเวลาที่กรอกได้
+                        return (
+                          activity.questionnaireStatus === "completed" ||
+                          (activity.questionnaireStatus === "pending" &&
+                            now <= oneDayAfterEnd)
+                        );
+                      })
                       .map((activity) => (
                         <motion.div
                           key={activity.id}
